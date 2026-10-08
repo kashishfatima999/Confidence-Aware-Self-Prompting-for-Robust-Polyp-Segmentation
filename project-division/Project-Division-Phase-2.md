@@ -47,8 +47,8 @@ These were checked directly in `sajjad-sh33/YOLO_SAM2` (`Test.py`, `Creat_YAML.p
 | 11 | Paper reports Kvasir-SEG mIoU 0.764 / mDice 0.866 and CVC-ClinicDB mIoU 0.909 / mDice 0.951, each with an 80/20 split **of the same dataset**. | The paper's CVC-ClinicDB number is in-domain (trained on ClinicDB). Ours is cross-dataset (trained on Kvasir only), so it will be lower and is not directly comparable. |
 | 12 | `Test.py` as published has indentation errors and missing imports (`argparse`, `matplotlib`). | It will not run as-is. Member 3 documents this; the rewrite is Phase 3 work. |
 
-Local machine check (Member 1's laptop): no Python on PATH, no NVIDIA GPU, 13 GB free disk, repo sits inside OneDrive.
-**Consequence:** light preprocessing can run locally after installing Python, but YOLO training and SAM 2 must run on Google Colab or Kaggle Notebooks (free GPU).
+Local machine check (Member 1's laptop, updated 2026-10-08): Windows 11, no NVIDIA GPU. The repo was moved out of OneDrive to `D:\github-drive\` (35 GB free; C: is nearly full, so nothing is installed there). Python 3.12.10 is installed and `.venv/` lives inside the project folder.
+**Consequence:** preprocessing runs locally on CPU (done for Kvasir-SEG), but YOLO training and SAM 2 must run on Google Colab or Kaggle Notebooks (free GPU).
 
 ---
 
@@ -61,6 +61,8 @@ Local machine check (Member 1's laptop): no Python on PATH, no NVIDIA GPU, 13 GB
 | D3 | Where compute runs | Colab or Kaggle Notebooks with GPU | No local GPU. |
 | D4 | Where data lives | `data/` folder that is git-ignored; a shared Google Drive folder for the team | Datasets and weights must not be pushed to GitHub (size, and CVC-ClinicDB is research-use only). |
 | D5 | "Image shifts" in our title | Small corruption set (blur, brightness, noise) made from the Kvasir test split | The approved title promises image shifts, but the proposal body only describes the dataset shift. This is the cheapest way to cover it. Confirm with the instructor if unsure. |
+
+**Status (2026-10-08):** D1 is accepted by Member 1 and implemented (`splits/` is committed). D2–D5 are still to be confirmed by Members 2 and 3. Every decision, with the alternatives considered and the evidence, is recorded in `docs/decision_log.md` (entries DL-01 to DL-21); any later change must be added there in the same commit.
 
 ---
 
@@ -77,6 +79,7 @@ Confidence-Aware-Self-Prompting-for-Robust-Polyp-Segmentation/
 │   └── Project-Division-Phase-2.md
 ├── docs/
 │   ├── data_report.md             # Member 2 (stats) + all members add their section
+│   ├── decision_log.md            # every decision + change log; all members add entries
 │   └── setup_guide.md             # Member 3
 ├── data/                          # NOT in git
 │   ├── raw/
@@ -183,6 +186,7 @@ Dependencies:
 - Use the split files in `splits/` everywhere. Nobody creates their own split.
 - Cite every external source: baseline repo, both datasets, SAM 2, Ultralytics.
 - Write down every problem you hit. The final report needs a "challenges faced" section.
+- Record every decision and judgment call in `docs/decision_log.md` (date, alternatives, reason, evidence) in the same commit as the change.
 
 **Don't**
 - Don't push datasets, weights, or the baseline repo's code to GitHub.
@@ -190,3 +194,4 @@ Dependencies:
 - Don't use the baseline's shipped Kvasir weights for any reported result.
 - Don't apply corruptions to training data; they are for testing only.
 - Don't look at test-split results when choosing thresholds later; use the val split.
+- Don't commit without a matching change-log line in `docs/decision_log.md`.
