@@ -102,6 +102,7 @@ Confidence-Aware-Self-Prompting-for-Robust-Polyp-Segmentation/
 │       ├── prepare_clinicdb.py    # Member 2
 │       ├── make_corruptions.py    # Member 3
 │       └── common.py              # shared helpers (binarize mask, mask→boxes, YOLO label writer)
+├── tests/                         # unit + synthetic pipeline tests, run by CI (.github/workflows/ci.yml)
 ├── notebooks/
 │   ├── 02_dataset_statistics.ipynb# Member 2
 │   └── 03_environment_smoke_test.ipynb  # Member 3
