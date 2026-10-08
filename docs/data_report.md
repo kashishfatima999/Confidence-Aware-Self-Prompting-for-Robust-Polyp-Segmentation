@@ -2,7 +2,7 @@
 
 **Project:** Confidence-Aware Self-Prompting for Robust Polyp Segmentation Under Image and Domain Shifts
 
-This report records where each dataset came from, how it was checked and cleaned, and the exact numbers produced. Every number in section 1 comes from `data/processed/kvasir/reports/verification.json` and `box_comparison.csv`, written by `src/data/prepare_kvasir.py` on 2026-10-07.
+This report records where each dataset came from, how it was checked and cleaned, and the exact numbers produced. The reasoning behind each choice (alternatives considered, evidence) is in `docs/decision_log.md`; the `DL-` numbers below refer to it. Every number in section 1 comes from `data/processed/kvasir/reports/verification.json` and `box_comparison.csv`, written by `src/data/prepare_kvasir.py` on 2026-10-07.
 
 ---
 
@@ -25,7 +25,7 @@ This report records where each dataset came from, how it was checked and cleaned
 
 The zip contains `Kvasir-SEG/images/` (1,000 JPG), `Kvasir-SEG/masks/` (1,000 JPG) and `Kvasir-SEG/kavsir_bboxes.json` (the file name is misspelled in the original download). The raw folder is never modified; all outputs go to `data/processed/kvasir/`.
 
-### 1.2 Verification of the raw download
+### 1.2 Verification of the raw download (DL-11, DL-14)
 
 | Check | Result |
 |---|---|
@@ -44,7 +44,7 @@ The zip contains `Kvasir-SEG/images/` (1,000 JPG), `Kvasir-SEG/masks/` (1,000 JP
 
 The four most common resolutions are 622×530 (78 images), 626×547 (66), 626×546 (61) and 622×529 (56). The images are not resized during preprocessing; YOLO and SAM 2 resize on load.
 
-### 1.3 Cleaning
+### 1.3 Cleaning (DL-04, DL-05, DL-06, DL-07, DL-09)
 
 **Masks.** The raw masks are RGB JPG files, so they are not strictly binary: in every one of the 1,000 masks, JPEG compression leaves pixels that are close to, but not exactly, 0 or 255 (0.73% of all mask pixels; for example 250 instead of 255). The baseline code reads masks as `mask / 255` without thresholding, so such a pixel becomes a value like 0.98 that is neither polyp nor background. No mask pixel lies between 11 and 244, so thresholding is unambiguous. We convert each mask to greyscale, threshold at 127 (value > 127 = polyp) and save it as a single-channel PNG with values 0 and 255 only.
 
@@ -57,7 +57,7 @@ The four most common resolutions are 622×530 (78 images), 626×547 (66), 626×5
 
 Box convention in our code: `(xmin, ymin, xmax, ymax)` in pixels, with `xmax`/`ymax` exclusive.
 
-### 1.4 Official boxes compared with mask-derived boxes
+### 1.4 Official boxes compared with mask-derived boxes (DL-06, DL-08)
 
 For each image we compare the overall extent of the official boxes with the overall extent of the mask-derived boxes (IoU of the two extents), and the number of boxes. An image "agrees" when the extent IoU is at least 0.9 and the box counts are equal.
 
@@ -100,7 +100,7 @@ On the 982 agreeing images the official box is typically 1 px larger on the left
 
 The full per-image comparison is in `data/processed/kvasir/reports/box_comparison.csv`.
 
-### 1.5 Split
+### 1.5 Split (DL-02)
 
 The paper's split cannot be reproduced: the baseline's `Creat_YAML.py` takes the first 800 files of an unsorted `glob` with no seed. We use our own fixed split.
 
