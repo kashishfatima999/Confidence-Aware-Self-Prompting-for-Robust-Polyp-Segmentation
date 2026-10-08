@@ -1,0 +1,7 @@
+# Data preparation (src/data/). Runs on CPU, no GPU needed.
+# Versions are the ones prepare_kvasir.py was run and checked with (Python 3.12).
+numpy==2.5.3
+Pillow==12.3.0
+opencv-python-headless==5.0.0.93
+
+# Model packages (ultralytics, torch, SAM 2) are added by Member 3 for Colab/Kaggle.
