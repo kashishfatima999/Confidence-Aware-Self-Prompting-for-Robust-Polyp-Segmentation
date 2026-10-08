@@ -1,0 +1,16 @@
+# Datasets, weights and the baseline clone are never pushed (size + licences).
+# The leading slash means "only at the repo root", so src/data/ is still tracked.
+/data/
+/weights/
+/external/
+
+# Python environment and caches
+/.venv/
+__pycache__/
+*.pyc
+
+# Training / inference outputs (Ultralytics writes to runs/)
+/runs/
+
+# Notebook checkpoints
+.ipynb_checkpoints/
