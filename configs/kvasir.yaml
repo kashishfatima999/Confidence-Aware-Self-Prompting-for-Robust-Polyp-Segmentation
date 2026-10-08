@@ -1,0 +1,17 @@
+# YOLO dataset config for Kvasir-SEG (700 train / 100 val / 200 test, seed 42).
+# The folders are produced by: python src/data/prepare_kvasir.py
+#
+# IMPORTANT: set `path` to the absolute location of data/processed/kvasir on the
+# machine you train on (e.g. /content/drive/MyDrive/.../data/processed/kvasir on Colab).
+# Ultralytics can resolve a relative `path` against its own datasets folder instead of
+# this repo, and then fails with "images not found".
+path: data/processed/kvasir
+
+# Image folders, relative to `path`. Ultralytics finds the labels by replacing
+# "images" with "labels" in these paths.
+train: images/train
+val: images/val
+test: images/test
+
+names:
+  0: polyp
