@@ -43,18 +43,20 @@ def parse_args():
     parser.add_argument("--val", type=int, default=100)
     parser.add_argument("--test", type=int, default=200)
     parser.add_argument("--seed", type=int, default=42)
+    parser.add_argument("--expected-images", type=int, default=EXPECTED_IMAGES,
+                        help="number of images the raw folder must contain (tests use small synthetic sets)")
     return parser.parse_args()
 
 
-def verify_raw(raw):
+def verify_raw(raw, expected_images=EXPECTED_IMAGES):
     """Check the raw download is complete and consistent. Returns (ids, official boxes, summary)."""
     images = {p.stem: p for p in sorted((raw / "images").glob("*.jpg"))}
     masks = {p.stem: p for p in sorted((raw / "masks").glob("*.jpg"))}
     official = json.loads((raw / "kavsir_bboxes.json").read_text())
 
     problems = []
-    if len(images) != EXPECTED_IMAGES:
-        problems.append(f"expected {EXPECTED_IMAGES} images, found {len(images)}")
+    if len(images) != expected_images:
+        problems.append(f"expected {expected_images} images, found {len(images)}")
     for name, other in (("mask", masks), ("box entry", official)):
         missing = sorted(set(images) - set(other))
         extra = sorted(set(other) - set(images))
@@ -135,7 +137,7 @@ def load_or_create_splits(ids, splits_dir, sizes, seed):
 
 def main():
     args = parse_args()
-    ids, official, summary = verify_raw(args.raw)
+    ids, official, summary = verify_raw(args.raw, args.expected_images)
     splits, created = load_or_create_splits(
         ids, args.splits_dir, {"train": args.train, "val": args.val, "test": args.test}, args.seed
     )
