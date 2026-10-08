@@ -205,6 +205,25 @@ Status meanings: *proposed* = suggested, not yet agreed by the group; *accepted*
 - **Status:** accepted
 - **Affects:** all commits
 
+### DL-22 — Automated tests and continuous integration
+- **Date:** 2026-10-08   **Owner:** Member 1
+- **Decision:** A `tests/` folder with three test modules, run by GitHub Actions on every push and pull request (`.github/workflows/ci.yml`). The tests use Python's built-in `unittest`, need no extra package and no dataset: the helper tests use tiny synthetic masks, the pipeline test builds a 6-image synthetic Kvasir-style dataset in a temporary folder and runs `prepare_kvasir.py` on it end to end, and the split tests check the committed `splits/` files (sizes, no overlap, sorted, reproducible from seed 42). CI also compiles every Python file and fails if the tests modify `splits/`.
+- **Alternatives considered:**
+  1. No CI, run tests by hand. Rejected: three people edit the same helpers; a broken `mask_to_boxes` would silently corrupt every label.
+  2. `pytest` instead of `unittest`. Rejected for now to keep the dependency list at three packages; the tests are written as `unittest` classes, which `pytest` can also run if the group later prefers it.
+  3. Run the real Kvasir-SEG pipeline in CI. Rejected: the dataset is research-use only and 46 MB; it must not be uploaded to GitHub or re-downloaded on every push.
+- **Reason / evidence:** 25 tests pass locally in under 3 s. To make the pipeline testable on small data, `--expected-images` became a command-line option of `prepare_kvasir.py` (default stays 1000).
+- **Status:** implemented
+- **Affects:** `tests/`, `.github/workflows/ci.yml`, `src/data/prepare_kvasir.py`
+
+### DL-23 — README as the entry point for readers and graders
+- **Date:** 2026-10-08   **Owner:** Member 1
+- **Decision:** `README.md` states the idea and hypothesis, the baseline vs proposed pipeline, the datasets and their terms, the repository layout, the exact commands to reproduce the Kvasir-SEG preparation, the reproducibility rules, the phase status and the references. It links to the data report and this log instead of repeating their numbers.
+- **Alternatives considered:** Keep the one-line README and rely on the PDFs. Rejected: the proposal PDF does not describe the repository or how to run anything.
+- **Reason / evidence:** The rubric scores "Data Preprocessing / Setup" (15%) and "Documentation" (10%); the README is the first thing an evaluator opens.
+- **Status:** implemented
+- **Affects:** `README.md`
+
 ---
 
 ## Change log
@@ -229,3 +248,7 @@ Dated record of what changed and why. One line per change; the `DL-` number link
 | 2026-10-08 | Member 1 committed the ten Phase 2 files on `project-divison` (one file per commit, `e546895`..`339130a`). | DL-21 |
 | 2026-10-08 | Split D1 accepted by Member 1. | DL-02 |
 | 2026-10-08 | This decision log created; division file updated (machine facts, decision status, link to this log). | DL-21 |
+| 2026-10-08 | Git housekeeping: 1,157 orphaned blobs (157 MB) and 12 half-written objects (239 MB) left in `.git/` by the 2026-10-06 attempt to stage `.venv/` were removed with `git prune` and `git gc`; `.git/` went from 399 MB to 2 MB; `git fsck` clean before and after; no commit changed. | DL-12 |
+| 2026-10-08 | `prepare_kvasir.py`: `--expected-images` option added (default 1000) so the script can run on synthetic data in tests. | DL-22 |
+| 2026-10-08 | `tests/` added (25 tests) and `.github/workflows/ci.yml` created. | DL-22 |
+| 2026-10-08 | `README.md` rewritten. | DL-23 |
