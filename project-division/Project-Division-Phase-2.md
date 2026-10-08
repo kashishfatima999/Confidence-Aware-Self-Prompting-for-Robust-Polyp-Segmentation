@@ -70,12 +70,12 @@ Local machine check (Member 1's laptop): no Python on PATH, no NVIDIA GPU, 13 GB
 Confidence-Aware-Self-Prompting-for-Robust-Polyp-Segmentation/
 ├── README.md
 ├── requirements.txt
-├── .gitignore                     # ignores data/, external/, weights/, runs/
+├── .gitignore                     # ignores data/, .venv/, external/, weights/, runs/
+├── F26-13(Project Proposal).pdf
+├── Project Deliverables and guidelines.pdf
 ├── project-division/
 │   └── Project-Division-Phase-2.md
 ├── docs/
-│   ├── F26-13(Project Proposal).pdf
-│   ├── Project Deliverables and guidelines.pdf
 │   ├── data_report.md             # Member 2 (stats) + all members add their section
 │   └── setup_guide.md             # Member 3
 ├── data/                          # NOT in git
@@ -83,7 +83,7 @@ Confidence-Aware-Self-Prompting-for-Robust-Polyp-Segmentation/
 │   │   ├── kvasir-seg/            # untouched download
 │   │   └── cvc-clinicdb/          # untouched download
 │   └── processed/
-│       ├── kvasir/                # images/, masks/, labels/ per split
+│       ├── kvasir/                # images/, masks/, labels/ per split + reports/
 │       ├── cvc-clinicdb/          # images/, masks/, labels/ (test only)
 │       └── kvasir-corrupted/      # image-shift test set
 ├── splits/                        # IN git — small text files
@@ -100,7 +100,6 @@ Confidence-Aware-Self-Prompting-for-Robust-Polyp-Segmentation/
 │       ├── make_corruptions.py    # Member 3
 │       └── common.py              # shared helpers (binarize mask, mask→boxes, YOLO label writer)
 ├── notebooks/
-│   ├── 01_kvasir_checks.ipynb     # Member 1
 │   ├── 02_dataset_statistics.ipynb# Member 2
 │   └── 03_environment_smoke_test.ipynb  # Member 3
 ├── external/                      # NOT in git — clone of the baseline repo
@@ -115,9 +114,9 @@ Confidence-Aware-Self-Prompting-for-Robust-Polyp-Segmentation/
 
 | # | Task | Output |
 |---|---|---|
-| 1.1 | Create the folder structure in section 4, `.gitignore`, `requirements.txt`; move the two PDFs into `docs/`. | Repo skeleton on the `project-divison` branch |
+| 1.1 | Create `.gitignore` and `requirements.txt`; folders in section 4 are created as their first file is added. The two PDFs stay in the repo root. | Repo skeleton on the `project-divison` branch |
 | 1.2 | Download Kvasir-SEG from Simula (`https://datasets.simula.no/downloads/kvasir-seg.zip`, 46 MB) into `data/raw/kvasir-seg/`. Record source, date, file size. | Raw dataset + entry in data report |
-| 1.3 | Verify: 1,000 images, 1,000 masks, names match one-to-one, image and mask sizes match, no unreadable files, no empty masks, bounding-box file covers all images. | Verification table in `01_kvasir_checks.ipynb` |
+| 1.3 | Verify: 1,000 images, 1,000 masks, names match one-to-one, image and mask sizes match, no unreadable files, no empty masks, bounding-box file covers all images. | Verification report written by `src/data/prepare_kvasir.py` to `data/processed/kvasir/reports/` (`verification.json` + `box_comparison.csv`); replaces the planned notebook |
 | 1.4 | Clean: binarize masks (threshold 127) and save as PNG; check each box against its mask (box derived from mask vs box in the provided file) and list mismatches. | `data/processed/kvasir/masks/` + mismatch list |
 | 1.5 | Create the seeded 700/100/200 split and save the three text files in `splits/`. | `splits/kvasir_*.txt` (committed) |
 | 1.6 | Convert to YOLO format: one `.txt` label per image (`0 x_center y_center width height`, normalised), copy images into split folders (copy, never move), write `configs/kvasir.yaml`. | `data/processed/kvasir/` + `configs/kvasir.yaml` |
