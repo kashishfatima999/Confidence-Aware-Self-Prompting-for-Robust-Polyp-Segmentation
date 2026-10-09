@@ -4,4 +4,5 @@ numpy==2.5.3
 Pillow==12.3.0
 opencv-python-headless==5.0.0.93
 
-# Model packages (ultralytics, torch, SAM 2) are added by Member 3 for Colab/Kaggle.
+# Model packages (torch, ultralytics, SAM 2) are NOT listed here: they need a GPU and are
+# installed on Colab only. See requirements-colab.txt and docs/setup_guide.md (DL-26).
