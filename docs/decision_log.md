@@ -192,17 +192,20 @@ Status meanings: *proposed* = suggested, not yet agreed by the group; *accepted*
 - **Decision:** Blur, brightness/contrast change and Gaussian noise at three strengths are applied to the 200 test images only, giving the "image shifts" promised in the title.
 - **Alternatives considered:** Drop image shifts and cover only the dataset shift (CVC-ClinicDB).
 - **Reason / evidence:** The approved title promises both kinds of shift. Corruptions never touch training data, so they measure robustness, not learned invariance. To be confirmed with the instructor if in doubt.
-- **Status:** proposed
+- **Parameters (2026-10-09):** blur sigma 1 / 2 / 4 px; brightness/contrast ×0.8 −20, ×0.6 −40, ×0.4 −60 (contrast around the image mean, then a darker shift); Gaussian noise std 10 / 20 / 40 on the 0–255 scale. Output saved as PNG; noise seeded per image so reruns are identical. Masks and labels copied unchanged. Strength 3 was chosen so the polyp is still clearly visible (`docs/figures/corruption_examples.png`).
+- **Status:** implemented (`src/data/make_corruptions.py`, `tests/test_make_corruptions.py`); still to be confirmed by the group, and with the instructor if in doubt
 - **Affects:** `src/data/make_corruptions.py`, `data/processed/kvasir-corrupted/`
 
 ## Part D — Working process
 
-### DL-21 — Git workflow
-- **Date:** 2026-10-08   **Owner:** Member 1
-- **Decision:** All members work on the `project-divison` branch during Phase 2 and push it so the skeleton, helpers and split files are shared; one pull request merges it into `main` at the end of the phase. Every commit is made by a group member by hand, with a short message naming what changed and why. Every change to data, code or decisions gets an entry in this log in the same commit.
-- **Alternatives considered:** One branch per member. Rejected for Phase 2 because Members 2 and 3 depend on Member 1's files immediately; separate branches can be used in Phase 3 for the method and the baseline.
-- **Reason / evidence:** The division plan's dependency list: Members 2 and 3 need tasks 1.1 and 1.7 before they can start.
-- **Status:** accepted
+### DL-21 — Git workflow: one branch per member, merged into main
+- **Date:** 2026-10-08, revised 2026-10-09   **Owner:** group (originally Member 1; revision written by Member 3)
+- **Decision:** Each member works on their own branch created from `main` (for example `member3-zahra`) and opens a pull request into `main` when their part is ready. Another member reads the pull request before it is merged. Before starting new work, a member pulls the latest `main` into their branch so shared files (`src/data/common.py`, `splits/`, `requirements.txt`, this log) stay in step. Every commit is made by a group member by hand, with a short message naming what changed and why. Every change to data, code or decisions gets an entry in this log in the same commit.
+- **Alternatives considered:**
+  1. One shared `project-divison` branch for all of Phase 2, merged into `main` once at the end (the original version of this entry). Replaced: in practice members merged their own work into `main` as it was finished (for example `prepare_clinicdb.py` is on `main` but not on `project-divison`), so the shared branch fell out of date and caused confusion about where the latest code is.
+  2. Everyone commits directly to `main`. Rejected: nobody reviews a change before it reaches the code the others depend on.
+- **Reason / evidence:** Each member owns separate files (Member 1: `prepare_kvasir.py`, `common.py`; Member 2: `prepare_clinicdb.py`, statistics notebook; Member 3: `make_corruptions.py`, smoke-test notebook, `setup_guide.md`), so separate branches rarely conflict. Pull requests give a review step and a record of who added what.
+- **Status:** accepted (revised 2026-10-09). `project-divison` is no longer used for new work.
 - **Affects:** all commits
 
 ### DL-22 — Automated tests and continuous integration
@@ -248,6 +251,14 @@ Status meanings: *proposed* = suggested, not yet agreed by the group; *accepted*
 * **Affects:** `notebooks/02_dataset_statistics.ipynb`, `notebooks/dataset_statistics.csv`, `notebooks/dataset_comparison.csv`, the dataset-statistics plots, `docs/data_report.md` §3
 
 
+### DL-26 — Colab environment: Kvasir-SEG from the author's Kaggle copy; model packages in a separate requirements file
+- **Date:** 2026-10-09   **Owner:** Member 3
+- **Decision:** (1) On Colab, Kvasir-SEG is downloaded from Kaggle `debeshjha1/kvasirseg` (uploaded by the dataset's author). That copy has one box CSV per image instead of `kavsir_bboxes.json`, so the notebook rebuilds the JSON in the official format before running `prepare_kvasir.py`. (2) The model packages are pinned in `requirements-colab.txt` (`ultralytics==8.4.174`, SAM 2 at git commit `2b90b9f`), not in `requirements.txt`; torch and torchvision are Colab's preinstalled 2.11.0+cu130 / 0.26.0+cu130.
+- **Alternatives considered:** (1) Upload Member 1's original zip to Google Drive and use it on Colab. Possible, and preferred if the Kaggle copy ever differs; not needed now because the results match. (2) Add the model packages to `requirements.txt`. Rejected: CI installs that file on every push and would download PyTorch, and the local CPU environment does not need it.
+- **Reason / evidence:** The official link (`datasets.simula.no/downloads/kvasir-seg.zip`) returned 0 bytes from Colab on 2026-10-09. With the Kaggle copy, `prepare_kvasir.py` verified 1,000 / 1,000 / 1,000, reused the committed split, and reproduced Member 1's numbers exactly (boxes 749 / 107 / 207, 143 specks, mean extent IoU 0.9874). The rebuilt JSON is only used for verification and the box-agreement report; YOLO labels come from the masks (DL-06).
+- **Status:** implemented
+- **Affects:** `notebooks/03_environment_smoke_test.ipynb`, `requirements.txt`, `requirements-colab.txt`, `docs/setup_guide.md`
+
 ## Change log
 
 Dated record of what changed and why. One line per change; the `DL-` number links it to the decision.
@@ -276,5 +287,10 @@ Dated record of what changed and why. One line per change; the `DL-` number link
 | 2026-10-08 | `README.md` rewritten. | DL-23 |
 | 2026-10-09 | CVC-ClinicDB preprocessing and verification completed (612 images, masks and labels). | DL-03, DL-24 |
 | 2026-10-09 | Dataset statistics notebook, per-image statistics, comparison table and plots added; cross-dataset findings documented. | DL-25 |
+| 2026-10-09 | `src/data/make_corruptions.py` added: blur, brightness/contrast and Gaussian noise at 3 strengths on the 200 Kvasir-SEG test images (9 settings, PNG output, noise seeded per image). | DL-20 |
+| 2026-10-09 | DL-21 revised: each member works on their own branch from `main` and merges by pull request; `project-divison` no longer used for new work. | DL-21 |
+| 2026-10-09 | `notebooks/03_environment_smoke_test.ipynb` added: Colab environment, baseline checks, both datasets prepared, YOLO → SAM 2 smoke test on 5 test images (pipeline runs; 1 of 5 polyps missed by YOLO), corruption set built, overlay check 20/20 on both datasets. | DL-15, DL-17, DL-18, DL-20, DL-26 |
+| 2026-10-09 | `docs/setup_guide.md` and four figures in `docs/figures/` added; `requirements-colab.txt` added and `requirements.txt` comment updated. | DL-26 |
+| 2026-10-09 | `tests/test_make_corruptions.py` added (4 tests); DL-20 parameters recorded and status set to implemented. | DL-20, DL-22 |
 
 

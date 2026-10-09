@@ -171,7 +171,7 @@ Day 1      All three: agree on decisions D1–D5.
 Days 2–4   Member 1: 1.2–1.5, 1.7      Member 2: 2.1–2.3      Member 3: 3.1–3.3
 Days 5–6   Member 1: 1.6               Member 2: 2.4–2.5      Member 3: 3.4, 3.6
 Day 7      Member 1: 1.8               Member 2: 2.6–2.7      Member 3: 3.5, 3.7
-           All three: read each other's sections; one pull request into main.
+           Each member opens a pull request from their own branch into main; the others read it before it is merged (DL-21).
 ```
 
 Dependencies:
