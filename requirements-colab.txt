@@ -1,0 +1,8 @@
+# Model packages for Google Colab (T4 GPU). Install on Colab AFTER requirements.txt:
+#     pip install -r requirements-colab.txt
+#     SAM2_BUILD_CUDA=0 pip install "git+https://github.com/facebookresearch/sam2.git@2b90b9f5ceec907a1c18123530e92e794ad901a4"
+# Kept separate from requirements.txt so CI and the local CPU environment do not download PyTorch (DL-26).
+# Versions are the ones the smoke test ran with on 2026-10-09 (docs/setup_guide.md, section 2).
+#
+# torch==2.11.0+cu130 and torchvision==0.26.0+cu130 come preinstalled on Colab; do not reinstall them.
+ultralytics==8.4.174

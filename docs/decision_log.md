@@ -192,7 +192,8 @@ Status meanings: *proposed* = suggested, not yet agreed by the group; *accepted*
 - **Decision:** Blur, brightness/contrast change and Gaussian noise at three strengths are applied to the 200 test images only, giving the "image shifts" promised in the title.
 - **Alternatives considered:** Drop image shifts and cover only the dataset shift (CVC-ClinicDB).
 - **Reason / evidence:** The approved title promises both kinds of shift. Corruptions never touch training data, so they measure robustness, not learned invariance. To be confirmed with the instructor if in doubt.
-- **Status:** proposed
+- **Parameters (2026-10-09):** blur sigma 1 / 2 / 4 px; brightness/contrast ×0.8 −20, ×0.6 −40, ×0.4 −60 (contrast around the image mean, then a darker shift); Gaussian noise std 10 / 20 / 40 on the 0–255 scale. Output saved as PNG; noise seeded per image so reruns are identical. Masks and labels copied unchanged. Strength 3 was chosen so the polyp is still clearly visible (`docs/figures/corruption_examples.png`).
+- **Status:** implemented (`src/data/make_corruptions.py`, `tests/test_make_corruptions.py`); still to be confirmed by the group, and with the instructor if in doubt
 - **Affects:** `src/data/make_corruptions.py`, `data/processed/kvasir-corrupted/`
 
 ## Part D — Working process
@@ -250,6 +251,14 @@ Status meanings: *proposed* = suggested, not yet agreed by the group; *accepted*
 * **Affects:** `notebooks/02_dataset_statistics.ipynb`, `notebooks/dataset_statistics.csv`, `notebooks/dataset_comparison.csv`, the dataset-statistics plots, `docs/data_report.md` §3
 
 
+### DL-26 — Colab environment: Kvasir-SEG from the author's Kaggle copy; model packages in a separate requirements file
+- **Date:** 2026-10-09   **Owner:** Member 3
+- **Decision:** (1) On Colab, Kvasir-SEG is downloaded from Kaggle `debeshjha1/kvasirseg` (uploaded by the dataset's author). That copy has one box CSV per image instead of `kavsir_bboxes.json`, so the notebook rebuilds the JSON in the official format before running `prepare_kvasir.py`. (2) The model packages are pinned in `requirements-colab.txt` (`ultralytics==8.4.174`, SAM 2 at git commit `2b90b9f`), not in `requirements.txt`; torch and torchvision are Colab's preinstalled 2.11.0+cu130 / 0.26.0+cu130.
+- **Alternatives considered:** (1) Upload Member 1's original zip to Google Drive and use it on Colab. Possible, and preferred if the Kaggle copy ever differs; not needed now because the results match. (2) Add the model packages to `requirements.txt`. Rejected: CI installs that file on every push and would download PyTorch, and the local CPU environment does not need it.
+- **Reason / evidence:** The official link (`datasets.simula.no/downloads/kvasir-seg.zip`) returned 0 bytes from Colab on 2026-10-09. With the Kaggle copy, `prepare_kvasir.py` verified 1,000 / 1,000 / 1,000, reused the committed split, and reproduced Member 1's numbers exactly (boxes 749 / 107 / 207, 143 specks, mean extent IoU 0.9874). The rebuilt JSON is only used for verification and the box-agreement report; YOLO labels come from the masks (DL-06).
+- **Status:** implemented
+- **Affects:** `notebooks/03_environment_smoke_test.ipynb`, `requirements.txt`, `requirements-colab.txt`, `docs/setup_guide.md`
+
 ## Change log
 
 Dated record of what changed and why. One line per change; the `DL-` number links it to the decision.
@@ -280,5 +289,8 @@ Dated record of what changed and why. One line per change; the `DL-` number link
 | 2026-10-09 | Dataset statistics notebook, per-image statistics, comparison table and plots added; cross-dataset findings documented. | DL-25 |
 | 2026-10-09 | `src/data/make_corruptions.py` added: blur, brightness/contrast and Gaussian noise at 3 strengths on the 200 Kvasir-SEG test images (9 settings, PNG output, noise seeded per image). | DL-20 |
 | 2026-10-09 | DL-21 revised: each member works on their own branch from `main` and merges by pull request; `project-divison` no longer used for new work. | DL-21 |
+| 2026-10-09 | `notebooks/03_environment_smoke_test.ipynb` added: Colab environment, baseline checks, both datasets prepared, YOLO → SAM 2 smoke test on 5 test images (pipeline runs; 1 of 5 polyps missed by YOLO), corruption set built, overlay check 20/20 on both datasets. | DL-15, DL-17, DL-18, DL-20, DL-26 |
+| 2026-10-09 | `docs/setup_guide.md` and four figures in `docs/figures/` added; `requirements-colab.txt` added and `requirements.txt` comment updated. | DL-26 |
+| 2026-10-09 | `tests/test_make_corruptions.py` added (4 tests); DL-20 parameters recorded and status set to implemented. | DL-20, DL-22 |
 
 
