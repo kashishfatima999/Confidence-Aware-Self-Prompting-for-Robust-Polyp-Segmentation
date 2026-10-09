@@ -197,12 +197,14 @@ Status meanings: *proposed* = suggested, not yet agreed by the group; *accepted*
 
 ## Part D — Working process
 
-### DL-21 — Git workflow
-- **Date:** 2026-10-08   **Owner:** Member 1
-- **Decision:** All members work on the `project-divison` branch during Phase 2 and push it so the skeleton, helpers and split files are shared; one pull request merges it into `main` at the end of the phase. Every commit is made by a group member by hand, with a short message naming what changed and why. Every change to data, code or decisions gets an entry in this log in the same commit.
-- **Alternatives considered:** One branch per member. Rejected for Phase 2 because Members 2 and 3 depend on Member 1's files immediately; separate branches can be used in Phase 3 for the method and the baseline.
-- **Reason / evidence:** The division plan's dependency list: Members 2 and 3 need tasks 1.1 and 1.7 before they can start.
-- **Status:** accepted
+### DL-21 — Git workflow: one branch per member, merged into main
+- **Date:** 2026-10-08, revised 2026-10-09   **Owner:** group (originally Member 1; revision written by Member 3)
+- **Decision:** Each member works on their own branch created from `main` (for example `member3-zahra`) and opens a pull request into `main` when their part is ready. Another member reads the pull request before it is merged. Before starting new work, a member pulls the latest `main` into their branch so shared files (`src/data/common.py`, `splits/`, `requirements.txt`, this log) stay in step. Every commit is made by a group member by hand, with a short message naming what changed and why. Every change to data, code or decisions gets an entry in this log in the same commit.
+- **Alternatives considered:**
+  1. One shared `project-divison` branch for all of Phase 2, merged into `main` once at the end (the original version of this entry). Replaced: in practice members merged their own work into `main` as it was finished (for example `prepare_clinicdb.py` is on `main` but not on `project-divison`), so the shared branch fell out of date and caused confusion about where the latest code is.
+  2. Everyone commits directly to `main`. Rejected: nobody reviews a change before it reaches the code the others depend on.
+- **Reason / evidence:** Each member owns separate files (Member 1: `prepare_kvasir.py`, `common.py`; Member 2: `prepare_clinicdb.py`, statistics notebook; Member 3: `make_corruptions.py`, smoke-test notebook, `setup_guide.md`), so separate branches rarely conflict. Pull requests give a review step and a record of who added what.
+- **Status:** accepted (revised 2026-10-09). `project-divison` is no longer used for new work.
 - **Affects:** all commits
 
 ### DL-22 — Automated tests and continuous integration
@@ -276,5 +278,7 @@ Dated record of what changed and why. One line per change; the `DL-` number link
 | 2026-10-08 | `README.md` rewritten. | DL-23 |
 | 2026-10-09 | CVC-ClinicDB preprocessing and verification completed (612 images, masks and labels). | DL-03, DL-24 |
 | 2026-10-09 | Dataset statistics notebook, per-image statistics, comparison table and plots added; cross-dataset findings documented. | DL-25 |
+| 2026-10-09 | `src/data/make_corruptions.py` added: blur, brightness/contrast and Gaussian noise at 3 strengths on the 200 Kvasir-SEG test images (9 settings, PNG output, noise seeded per image). | DL-20 |
+| 2026-10-09 | DL-21 revised: each member works on their own branch from `main` and merges by pull request; `project-divison` no longer used for new work. | DL-21 |
 
 
