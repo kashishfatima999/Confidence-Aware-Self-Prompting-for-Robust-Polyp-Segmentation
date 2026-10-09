@@ -225,6 +225,28 @@ Status meanings: *proposed* = suggested, not yet agreed by the group; *accepted*
 - **Affects:** `README.md`
 
 ---
+### DL-24 — CVC-ClinicDB preprocessing and verification
+
+* **Date:** 2026-10-09   **Owner:** Member 2
+* **Decision:** Use all 612 CVC-ClinicDB PNG images as an external test-only dataset. Derive binary masks and YOLO bounding boxes using the shared helpers in `src/data/common.py`.
+* **Alternatives considered:** Use TIF files, split ClinicDB into training and test sets, or use the raw masks directly without binarisation.
+* **Reason / evidence:** PNG Original and Ground Truth folders each contain 612 matching files. All images and masks decoded successfully, filenames and dimensions matched, and all files measured 384×288. Processing produced 612 images, 612 masks, 612 labels and 646 bounding boxes. Mean polyp area was 9.1657%; mask threshold was 127 and the minimum box component area was 0.05% of the image.
+* **Status:** implemented; external-test-only decision still requires group confirmation
+* **Affects:** `src/data/prepare_clinicdb.py`, `configs/cvc_clinicdb.yaml`, `data/processed/cvc-clinicdb/reports/verification.json`, `docs/data_report.md`
+
+### DL-25 — Dataset statistics and cross-dataset comparison
+
+* **Date:** 2026-10-09   **Owner:** Member 2
+* **Decision:** Calculate descriptive statistics for all 1,000 Kvasir-SEG images and all 612 CVC-ClinicDB images using the same analysis procedure. Save the per-image statistics, dataset comparison table, plots and analysis notebook under `notebooks/`. CVC-ClinicDB remains external-test-only.
+* **Alternatives considered:**
+
+  1. Compare the Kvasir-SEG test split with the full CVC-ClinicDB dataset. Rejected for the main comparison because the dataset scopes differ.
+  2. Report only dataset-level averages without retaining per-image results or plots. Rejected because the underlying measurements and distributions should remain inspectable.
+  3. Treat connected mask components as verified individual polyps. Rejected because connected components are only an approximation and may not correspond exactly to distinct polyps.
+* **Reason / evidence:** The analysis includes 1,000 Kvasir-SEG images and 612 CVC-ClinicDB images. Mean polyp area was 15.391% for Kvasir-SEG and 9.166% for CVC-ClinicDB; mean brightness was 97.482 and 76.195, respectively; mean grayscale contrast was 59.445 and 54.166. Mean bounding-box aspect ratios were 0.982 and 1.163, respectively. These descriptive differences indicate potential cross-dataset variation but do not establish its causes or quantify its effect on model performance.
+* **Status:** implemented
+* **Affects:** `notebooks/02_dataset_statistics.ipynb`, `notebooks/dataset_statistics.csv`, `notebooks/dataset_comparison.csv`, the dataset-statistics plots, `docs/data_report.md` §3
+
 
 ## Change log
 
@@ -252,3 +274,7 @@ Dated record of what changed and why. One line per change; the `DL-` number link
 | 2026-10-08 | `prepare_kvasir.py`: `--expected-images` option added (default 1000) so the script can run on synthetic data in tests. | DL-22 |
 | 2026-10-08 | `tests/` added (25 tests) and `.github/workflows/ci.yml` created. | DL-22 |
 | 2026-10-08 | `README.md` rewritten. | DL-23 |
+| 2026-10-09 | CVC-ClinicDB preprocessing and verification completed (612 images, masks and labels). | DL-03, DL-24 |
+| 2026-10-09 | Dataset statistics notebook, per-image statistics, comparison table and plots added; cross-dataset findings documented. | DL-25 |
+
+

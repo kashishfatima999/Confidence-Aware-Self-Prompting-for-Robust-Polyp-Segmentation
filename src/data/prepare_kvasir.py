@@ -36,7 +36,7 @@ BOX_AGREEMENT_IOU = 0.9
 
 def parse_args():
     parser = argparse.ArgumentParser(description=__doc__, formatter_class=argparse.RawDescriptionHelpFormatter)
-    parser.add_argument("--raw", type=Path, default=REPO_ROOT / "data/raw/kvasir-seg/Kvasir-SEG")
+    parser.add_argument("--raw", type=Path, default=REPO_ROOT / "data/raw/kvasir-seg")
     parser.add_argument("--out", type=Path, default=REPO_ROOT / "data/processed/kvasir")
     parser.add_argument("--splits-dir", type=Path, default=REPO_ROOT / "splits")
     parser.add_argument("--train", type=int, default=700)

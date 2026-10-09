@@ -1,0 +1,10 @@
+
+# CVC-ClinicDB external test dataset
+# All 612 images are reserved for external evaluation.
+
+path: data/processed/cvc-clinicdb
+
+test: images/test
+
+names:
+  0: polyp
