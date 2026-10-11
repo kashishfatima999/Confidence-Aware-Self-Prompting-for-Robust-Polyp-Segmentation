@@ -279,6 +279,73 @@ Status meanings: *proposed* = suggested, not yet agreed by the group; *accepted*
 - **Status:** implemented; the notebook must be run once on Colab ("Run all") to fill in its outputs before submission
 - **Affects:** `docs/submissions/phase2/`, `docs/requirements/phase2_requirements.md`
 
+## Part E — Phase 3: implementation and execution
+
+### DL-30 — Phase 3 scope and division (one week)
+- **Date:** 2026-10-11   **Owner:** Member 1
+- **Decision:** Phase 3 (Monday–Sunday) delivers: the baseline trained on our split, the method (CASP v1), four control experiments, per-image results on Kvasir-SEG test and CVC-ClinicDB, a report and a reproducing Colab notebook. Member 1 owns the evaluation harness, configs, tables and report assembly (~25%); Member 2 the detector (~35%); Member 3 the segmenter and the method (~40%). Full plan: `project-division/Project-Division-Phase-3.md`.
+- **Alternatives considered:** (1) Equal thirds. Rejected: Member 1 carried most of Phase 2 (repository, Kvasir pipeline, tests, CI, submission). (2) Everyone works on the method together. Rejected: in one week, parallel ownership of detector / segmenter / harness is the only way all runs finish.
+- **Reason / evidence:** The TA's Phase 3 text is one line ("choose appropriate algorithms ... standard frameworks"); the detailed requirements arrive late (Phase 2's came 8 hours before the deadline), so the plan follows standard research practice for an implementation phase: fixed recipe, validation-only tuning, reproducible runs, per-image outputs.
+- **Status:** accepted
+- **Affects:** `project-division/Project-Division-Phase-3.md`
+
+### DL-31 — Baseline recipe, fixed before training
+- **Date:** 2026-10-11   **Owner:** Member 1 (Member 2 runs it)
+- **Decision:** YOLOv8-m from COCO weights, 50 epochs, `imgsz=640`, batch 16, seed 42, `deterministic=True`, `patience=50` (no early stopping), Ultralytics default optimiser and augmentation, best checkpoint by val mAP50-95 (`configs/yolo_train.yaml`). SAM 2 `sam2_hiera_large.pt`, frozen, box prompt, `multimask_output=False`. Baseline inference: boxes with confidence ≥ 0.5 → SAM 2, union of masks per image, no detection = empty mask.
+- **Alternatives considered:** (1) `imgsz=680` as the paper states. Not a multiple of 32; Ultralytics would round it to 704 silently, and the paper's own code uses 640. (2) A learning-rate / augmentation sweep. Rejected: one week; the comparison that matters is baseline vs method on the same detector. (3) YOLOv8-l (baseline README) or -s. Rejected: the paper says medium was chosen over both.
+- **Reason / evidence:** Paper (arXiv 2409.09484): YOLOv8-m, input 680, batch 64, A100, SAM 2 large, 80/20 split, epochs and optimiser not stated; baseline README: 50 epochs; `Test.py`: `conf=0.5`, `imgsz=640`. Batch 16 is what a T4 holds.
+- **Status:** accepted; training result to be added by Member 2
+- **Affects:** `configs/yolo_train.yaml`, `src/train_yolo.py`, `configs/experiments/baseline.yaml`
+
+### DL-32 — Evaluation harness
+- **Date:** 2026-10-11   **Owner:** Member 1
+- **Decision:** `src/eval/metrics.py` reports per-image mean Dice and IoU with a percentile-bootstrap 95% CI (1,000 resamples, seed 42) and the dataset-pooled Dice and IoU (the paper's definition); an image with no prediction is an empty mask, Dice = IoU = 0 (DL-18), never skipped; multi-polyp images are scored as union of predicted masks vs the single GT mask; box precision / recall at IoU ≥ 0.5 by greedy matching of predicted boxes (confidence order) to mask-derived GT boxes. Every run writes `per_image.csv`, `detections.jsonl`, `summary.json`.
+- **Alternatives considered:** (1) Per-image only. Rejected: not comparable with the paper. (2) Per-polyp matching of masks. Rejected: Kvasir-SEG ground truth is one mask per image, so polyp identity is not annotated. (3) No confidence intervals. Rejected: with 200 test images a 1–2 point Dice difference needs an interval to be read.
+- **Reason / evidence:** DL-18 and DL-19 (Phase 2); 11 unit tests on synthetic masks.
+- **Status:** implemented
+- **Affects:** `src/eval/metrics.py`, `tests/test_metrics.py`, every `summary.json`
+
+### DL-33 — Two-stage execution with a detection cache
+- **Date:** 2026-10-11   **Owner:** Member 1 (Member 2 runs `detect.py`)
+- **Decision:** YOLO runs once per dataset at confidence 0.05 and all candidate boxes are cached in `runs/detections/<dataset>.json`; every experiment reads the cache and applies its own thresholds. SAM 2 is wrapped so the image embedding is computed once per image and each prompt costs only the prompt decoder (`src/pipeline/sam2_prompter.py`).
+- **Alternatives considered:** Re-run YOLO inside every experiment. Rejected: slower, and two experiments could silently see different detector outputs (non-determinism, different image sizes).
+- **Reason / evidence:** Six experiments and a 27-point validation grid in one week are only feasible if detection is paid once; the cache also guarantees that B, T and C compare the same boxes.
+- **Status:** implemented (GPU parts untested until Colab)
+- **Affects:** `src/pipeline/detect.py`, `src/pipeline/sam2_prompter.py`, `src/pipeline/run_experiment.py`
+
+### DL-34 — CASP v1: confidence-aware self-prompting
+- **Date:** 2026-10-11   **Owner:** Member 1 (design), Member 3 (owner of the code and the thresholds)
+- **Decision:** Per detection with YOLO confidence c: c ≥ t_high → box prompt unchanged; t_low ≤ c < t_high → four candidate prompts (box; box enlarged by 10% and by 20% per side; box + positive point at its centre), SAM 2's predicted IoU selects the best, one self-prompting iteration re-prompts with the tight box and centroid of the selected mask (kept if SAM's score does not drop), and the mask is accepted only if SAM's predicted IoU ≥ s_min and it fills ≥ 10% of its box; c < t_low → dropped. t_low, t_high, s_min are chosen on `kvasir_val` only over t_low ∈ {0.15, 0.25, 0.35}, t_high ∈ {0.6, 0.7, 0.8}, s_min ∈ {0.6, 0.7, 0.8} by per-image mean Dice; the chosen values are written here before any test run.
+- **Alternatives considered:** (1) Fine-tune SAM with perturbed prompts (PP-SAM style). Rejected: changes the frozen-SAM setting of the baseline and needs training time we do not have. (2) Learn a box-refinement model (RoBox-SAM style). Rejected: same reasons; v1 must be training-free. (3) Gaussian-YOLO localisation uncertainty as the signal. Rejected: requires modifying the detector; YOLO's confidence is the signal named in the proposal. (4) Test-time-augmentation box ensembles. Deferred to Phase 4: doubles detection cost. (5) Several self-prompting iterations. One iteration in v1 (RoBox-SAM reports most of the gain in the first); `self_prompt_iters` is a parameter.
+- **Reason / evidence:** PP-SAM (CVPRW 2024) and BREPS (2026) show SAM's accuracy falls sharply with loose or shifted boxes; RoBox-SAM (2024) recovers it by moving the box and adding points; our Phase 2 smoke test showed SAM 2 at Dice 0.96–0.97 when the box is right and 0 when the detector misses, so the box, not the segmenter, is the lever. SAM's predicted IoU is used as the quality signal because it is free and needs no training. 14 unit tests with a mocked SAM.
+- **Chosen thresholds (to be filled by Member 3 after the validation grid):** t_low = ?, t_high = ?, s_min = ?; val mean Dice = ?.
+- **Status:** implemented; thresholds pending
+- **Affects:** `src/pipeline/refine.py`, `tests/test_refine.py`, `configs/experiments/casp*.yaml`, `configs/experiments/threshold_only.yaml`
+
+### DL-35 — Experiment set
+- **Date:** 2026-10-11   **Owner:** Member 1
+- **Decision:** Six runs per test dataset, one config each: **B** baseline (conf 0.5); **T** threshold-only (t_low, no refinement, no acceptance); **C** CASP; **C-all** CASP without gating (every kept detection refined); **C-noiter** CASP without the self-prompting iteration; **O** oracle (ground-truth boxes → SAM 2). Datasets: `kvasir_test` and `clinicdb` for all six; `kvasir_val` for the grid only; the nine corrupted settings for B and C if time remains, otherwise first thing in Phase 4.
+- **Alternatives considered:** More ablations (each candidate prompt alone, several s_min values on test). Rejected: the test split is touched once per experiment; extra variants go on the validation split in Phase 4.
+- **Reason / evidence:** T isolates recall; C-all isolates gating; C-noiter isolates self-prompting; O bounds what any prompt refinement can achieve.
+- **Status:** accepted
+- **Affects:** `configs/experiments/`, `docs/phase3_report.md` §5
+
+### DL-36 — Phase 3 code layout and outputs
+- **Date:** 2026-10-11   **Owner:** Member 1
+- **Decision:** `src/eval/` (metrics, summarize), `src/pipeline/` (detect, sam2_prompter, refine, run_experiment), `src/train_yolo.py`, `configs/experiments/`, `configs/yolo_train.yaml`, `notebooks/04_phase3_colab.ipynb`, `docs/phase3_report.md`, `docs/tables/phase3/`. All run outputs go to the git-ignored `runs/` (and to Drive `MyDrive/F26-13/`); only `docs/tables/phase3/results.{csv,md}`, small figures and the report are committed. Tables are rebuilt by `summarize.py`, never typed.
+- **Alternatives considered:** Notebooks as the primary code. Rejected: not testable in CI, not diffable; the notebook only calls the scripts.
+- **Reason / evidence:** Same pattern as Phase 2 (DL-22, DL-27); 31 new tests run without a GPU.
+- **Status:** implemented
+- **Affects:** repository tree, `.github/workflows/ci.yml` (unchanged: `unittest discover` picks the new tests up), `requirements.txt` (+ PyYAML for the configs)
+
+### DL-37 — What the one-week limit cut, and why
+- **Date:** 2026-10-11   **Owner:** Member 1
+- **Decision:** Cut from Phase 3 and moved to Phase 4 or later: a second training seed (variance of the baseline); the corrupted-set evaluation unless time remains on Saturday; TTA box ensembles; error analysis and the bias check (Phase 4 by the guidelines); any SAM fine-tuning (never, by DL-31).
+- **Alternatives considered:** Run everything and accept untested code. Rejected: a wrong number in a results table is worse than a missing one.
+- **Reason / evidence:** One week, one T4 per person, three people.
+- **Status:** accepted
+- **Affects:** `project-division/Project-Division-Phase-3.md` §1
+
 ## Change log
 
 Dated record of what changed and why. One line per change; the `DL-` number links it to the decision.
@@ -320,3 +387,4 @@ Dated record of what changed and why. One line per change; the `DL-` number link
 | 2026-10-11 | `docs/submissions/phase2/`: `F26-13.pdf`, `report_source.html`, `F26-13.ipynb` created. `README.md` and division-file tree updated. | DL-29 |
 | 2026-10-11 | `F26-13.ipynb`: install cell no longer installs `requirements.txt` (Pillow upgrade broke the Colab kernel, challenge C7); clone cells in both Colab notebooks made safe to re-run. | DL-26, DL-29 |
 | 2026-10-11 | `F26-13.ipynb` executed on Colab (T4, commit `343fa1a`): all 16 cells ran without error, 34 tests OK, same verification numbers as the local runs. Executed notebook committed; `docs/figures/` (9 PNG) and `docs/tables/` (2 CSV) regenerated by that run; Kvasir brightness/contrast updated to 97.477 / 59.408 in the data report. | DL-25, DL-29 |
+| 2026-10-11 | Phase 3 planned and scaffolded on `kashish-phase3`: `project-division/Project-Division-Phase-3.md`, DL-30..37, `src/eval/{metrics,summarize}.py`, `src/pipeline/{refine,run_experiment,detect,sam2_prompter}.py`, `src/train_yolo.py`, `configs/yolo_train.yaml`, `configs/experiments/*.yaml`, `notebooks/04_phase3_colab.ipynb`, `docs/phase3_report.md` skeleton; 31 new tests (65 total). GPU parts untested until the first Colab run. | DL-30 to DL-37 |
