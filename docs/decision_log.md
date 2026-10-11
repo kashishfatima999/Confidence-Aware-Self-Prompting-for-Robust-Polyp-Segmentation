@@ -227,29 +227,24 @@ Status meanings: *proposed* = suggested, not yet agreed by the group; *accepted*
 - **Status:** implemented
 - **Affects:** `README.md`
 
----
 ### DL-24 — CVC-ClinicDB preprocessing and verification
-
-* **Date:** 2026-10-09   **Owner:** Member 2
-* **Decision:** Use all 612 CVC-ClinicDB PNG images as an external test-only dataset. Derive binary masks and YOLO bounding boxes using the shared helpers in `src/data/common.py`.
-* **Alternatives considered:** Use TIF files, split ClinicDB into training and test sets, or use the raw masks directly without binarisation.
-* **Reason / evidence:** PNG Original and Ground Truth folders each contain 612 matching files. All images and masks decoded successfully, filenames and dimensions matched, and all files measured 384×288. Processing produced 612 images, 612 masks, 612 labels and 646 bounding boxes. Mean polyp area was 9.1657%; mask threshold was 127 and the minimum box component area was 0.05% of the image.
-* **Status:** implemented; external-test-only decision still requires group confirmation
-* **Affects:** `src/data/prepare_clinicdb.py`, `configs/cvc_clinicdb.yaml`, `data/processed/cvc-clinicdb/reports/verification.json`, `docs/data_report.md`
+- **Date:** 2026-10-09   **Owner:** Member 2
+- **Decision:** Use all 612 CVC-ClinicDB PNG images as an external test-only dataset. Derive binary masks and YOLO bounding boxes using the shared helpers in `src/data/common.py`.
+- **Alternatives considered:** Use TIF files, split ClinicDB into training and test sets, or use the raw masks directly without binarisation.
+- **Reason / evidence:** PNG Original and Ground Truth folders each contain 612 matching files. All images and masks decoded successfully, filenames and dimensions matched, and all files measured 384×288. Processing produced 612 images, 612 masks, 612 labels and 646 bounding boxes. Mean polyp area was 9.1657%; mask threshold was 127 and the minimum box component area was 0.05% of the image.
+- **Status:** implemented; external-test-only decision still requires group confirmation
+- **Affects:** `src/data/prepare_clinicdb.py`, `configs/cvc_clinicdb.yaml`, `data/processed/cvc-clinicdb/reports/verification.json`, `docs/data_report.md`
 
 ### DL-25 — Dataset statistics and cross-dataset comparison
-
-* **Date:** 2026-10-09   **Owner:** Member 2
-* **Decision:** Calculate descriptive statistics for all 1,000 Kvasir-SEG images and all 612 CVC-ClinicDB images using the same analysis procedure. Save the per-image statistics, dataset comparison table, plots and analysis notebook under `notebooks/`. CVC-ClinicDB remains external-test-only.
-* **Alternatives considered:**
-
+- **Date:** 2026-10-09   **Owner:** Member 2
+- **Decision:** Calculate descriptive statistics for all 1,000 Kvasir-SEG images and all 612 CVC-ClinicDB images using the same analysis procedure. Save the per-image statistics, dataset comparison table, plots and analysis notebook under `notebooks/`. CVC-ClinicDB remains external-test-only.
+- **Alternatives considered:**
   1. Compare the Kvasir-SEG test split with the full CVC-ClinicDB dataset. Rejected for the main comparison because the dataset scopes differ.
   2. Report only dataset-level averages without retaining per-image results or plots. Rejected because the underlying measurements and distributions should remain inspectable.
   3. Treat connected mask components as verified individual polyps. Rejected because connected components are only an approximation and may not correspond exactly to distinct polyps.
-* **Reason / evidence:** The analysis includes 1,000 Kvasir-SEG images and 612 CVC-ClinicDB images. Mean polyp area was 15.391% for Kvasir-SEG and 9.166% for CVC-ClinicDB; mean brightness was 97.482 and 76.195, respectively; mean grayscale contrast was 59.445 and 54.166. Mean bounding-box aspect ratios were 0.982 and 1.163, respectively. These descriptive differences indicate potential cross-dataset variation but do not establish its causes or quantify its effect on model performance.
-* **Status:** implemented
-* **Affects:** `notebooks/02_dataset_statistics.ipynb`, `notebooks/dataset_statistics.csv`, `notebooks/dataset_comparison.csv`, the dataset-statistics plots, `docs/data_report.md` §3
-
+- **Reason / evidence:** The analysis includes 1,000 Kvasir-SEG images and 612 CVC-ClinicDB images. Mean polyp area was 15.391% for Kvasir-SEG and 9.166% for CVC-ClinicDB; mean brightness was 97.482 and 76.195, respectively; mean grayscale contrast was 59.445 and 54.166. Mean bounding-box aspect ratios were 0.982 and 1.163, respectively. These descriptive differences indicate potential cross-dataset variation but do not establish its causes or quantify its effect on model performance.
+- **Status:** implemented
+- **Affects:** `notebooks/02_dataset_statistics.ipynb`, `docs/tables/dataset_statistics.csv`, `docs/tables/dataset_comparison.csv`, `docs/figures/stats_*.png`, `docs/data_report.md` §3
 
 ### DL-26 — Colab environment: Kvasir-SEG from the author's Kaggle copy; model packages in a separate requirements file
 - **Date:** 2026-10-09   **Owner:** Member 3
@@ -258,6 +253,30 @@ Status meanings: *proposed* = suggested, not yet agreed by the group; *accepted*
 - **Reason / evidence:** The official link (`datasets.simula.no/downloads/kvasir-seg.zip`) returned 0 bytes from Colab on 2026-10-09. With the Kaggle copy, `prepare_kvasir.py` verified 1,000 / 1,000 / 1,000, reused the committed split, and reproduced Member 1's numbers exactly (boxes 749 / 107 / 207, 143 specks, mean extent IoU 0.9874). The rebuilt JSON is only used for verification and the box-agreement report; YOLO labels come from the masks (DL-06).
 - **Status:** implemented
 - **Affects:** `notebooks/03_environment_smoke_test.ipynb`, `requirements.txt`, `requirements-colab.txt`, `docs/setup_guide.md`
+
+### DL-27 — Repository layout for the Phase 2 submission
+- **Date:** 2026-10-11   **Owner:** Member 1
+- **Decision:** The repository root holds only code, configuration and the entry files (`README.md`, `LICENSE`, `requirements*.txt`, `.gitignore`, `.github/`, `configs/`, `docs/`, `notebooks/`, `splits/`, `src/`, `tests/`). Everything written for people lives under `docs/`: `docs/requirements/` (the course guidelines PDF and the Phase 2 requirement text with a compliance checklist), `docs/proposal/` (the approved proposal), `docs/figures/` (every figure), `docs/tables/` (every CSV), `docs/submissions/phase2/` (the files handed in on Google Classroom), plus the three living documents `data_report.md`, `decision_log.md`, `setup_guide.md`. Notebooks write their figures and tables into `docs/`, not next to themselves.
+- **Alternatives considered:** Leave the PDFs in the root and the statistics outputs in `notebooks/` (the state on 2026-10-09). Rejected: the root had two PDFs with spaces in their names and a one-off script (`verify_clinicdb.py`), and figures were split between `notebooks/` and `docs/figures/`, so a reader had to know who produced what.
+- **Reason / evidence:** A reader (or grader) should find every document under `docs/` and every runnable thing under `src/`, `tests/` or `notebooks/`. Two code fixes were made in the same change: (1) `prepare_kvasir.py --raw` accepts both `data/raw/kvasir-seg` and its `Kvasir-SEG/` subfolder (the default had been changed on 2026-10-09 to the parent folder, which broke the documented layout; Member 3 hit it as challenge C2); (2) `verify_clinicdb.py` was removed because every check it printed is performed, and stopped on, by `prepare_clinicdb.py`.
+- **Status:** implemented
+- **Affects:** repository tree, `README.md`, `project-division/Project-Division-Phase-2.md` §4, `notebooks/02_dataset_statistics.ipynb`, `src/data/prepare_kvasir.py`
+
+### DL-28 — `prepare_clinicdb.py` follows the same contract as `prepare_kvasir.py`
+- **Date:** 2026-10-11   **Owner:** Member 1 (review of Member 2's script; outputs unchanged)
+- **Decision:** The CVC-ClinicDB script takes `--raw`, `--out` and `--expected-images`, verifies every file (full decode, pairing, sizes, empty masks, at least one box) and stops before writing anything if a problem is found, and writes the same kind of `verification.json` as the Kvasir script (resolution range, unreadable/empty counts, boxes per image, specks ignored, mean and median polyp area). `tests/test_prepare_clinicdb.py` runs it end to end on a 4-image synthetic set.
+- **Alternatives considered:** Leave the script with hard-coded paths and no test. Rejected: it could not be exercised by CI, and its report had fewer fields than the Kvasir one, so the two datasets were not documented to the same standard.
+- **Reason / evidence:** The processed images, masks and labels are produced by exactly the same helper calls as before, so Member 2's numbers (612 images, 646 boxes, mean polyp area 9.1657%) are unchanged. 34 tests pass locally.
+- **Status:** implemented
+- **Affects:** `src/data/prepare_clinicdb.py`, `tests/test_prepare_clinicdb.py`, `docs/data_report.md` §2.5
+
+### DL-29 — Phase 2 submission package
+- **Date:** 2026-10-11   **Owner:** Member 1
+- **Decision:** The Google Classroom submission is `F26-13.pdf` (the 2–4 page Phase 2 report required by the TA, sections: dataset source and description, data collection method, preprocessing steps, brief EDA, final dataset summary) and `F26-13.ipynb` (one Colab notebook that reproduces the whole Phase 2 pipeline: environment, tests, both datasets, statistics, corruption set, smoke test), plus the GitHub link. Both files live in `docs/submissions/phase2/` and are re-generated from the repository: the PDF from `report_source.html` with headless Chrome, the notebook assembled from the two member notebooks.
+- **Alternatives considered:** (1) LaTeX for the PDF. Not available on the group's machines; the final Phase 6 report will be LaTeX, this short report does not need it. (2) Submitting `notebooks/03_environment_smoke_test.ipynb` as-is. Rejected: it does not contain the statistics step and installed unpinned package versions. (3) A `.py` driver script instead of a notebook. Rejected: the smoke test and the figures need Colab's GPU and are better shown with outputs.
+- **Reason / evidence:** The TA's requirement text is kept verbatim in `docs/requirements/phase2_requirements.md` with a checklist that maps each requirement to the file that satisfies it.
+- **Status:** implemented; the notebook must be run once on Colab ("Run all") to fill in its outputs before submission
+- **Affects:** `docs/submissions/phase2/`, `docs/requirements/phase2_requirements.md`
 
 ## Change log
 
@@ -292,5 +311,9 @@ Dated record of what changed and why. One line per change; the `DL-` number link
 | 2026-10-09 | `notebooks/03_environment_smoke_test.ipynb` added: Colab environment, baseline checks, both datasets prepared, YOLO → SAM 2 smoke test on 5 test images (pipeline runs; 1 of 5 polyps missed by YOLO), corruption set built, overlay check 20/20 on both datasets. | DL-15, DL-17, DL-18, DL-20, DL-26 |
 | 2026-10-09 | `docs/setup_guide.md` and four figures in `docs/figures/` added; `requirements-colab.txt` added and `requirements.txt` comment updated. | DL-26 |
 | 2026-10-09 | `tests/test_make_corruptions.py` added (4 tests); DL-20 parameters recorded and status set to implemented. | DL-20, DL-22 |
-
-
+| 2026-10-11 | Repository reorganised: PDFs moved to `docs/requirements/` and `docs/proposal/`, statistics figures to `docs/figures/stats_*.png`, CSVs to `docs/tables/`, `verify_clinicdb.py` removed; `docs/requirements/phase2_requirements.md` added with the TA's text and a compliance checklist. | DL-27 |
+| 2026-10-11 | `prepare_kvasir.py`: `--raw` accepts both `data/raw/kvasir-seg` and `data/raw/kvasir-seg/Kvasir-SEG` (fixes challenge C2); test added. | DL-27 |
+| 2026-10-11 | `prepare_clinicdb.py` rewritten with `--raw/--out/--expected-images`, verify-before-write and a fuller report; `tests/test_prepare_clinicdb.py` added (4 tests). Outputs unchanged. | DL-28 |
+| 2026-10-11 | `notebooks/02_dataset_statistics.ipynb` writes to `docs/figures/` and `docs/tables/`; `notebooks/03_environment_smoke_test.ipynb` installs the pinned versions from `requirements-colab.txt`. Both need a re-run on Colab to refresh the outputs of the edited cells. | DL-26, DL-27 |
+| 2026-10-11 | `docs/data_report.md`: CVC-ClinicDB citation corrected (Bernal et al., CMIG 2015), usage terms quoted from the grand-challenge page, metric definitions added, sections 4–6 (corruption set, validation, final summary) added. | DL-24, DL-25 |
+| 2026-10-11 | `docs/submissions/phase2/`: `F26-13.pdf`, `report_source.html`, `F26-13.ipynb` created. `README.md` and division-file tree updated. | DL-29 |

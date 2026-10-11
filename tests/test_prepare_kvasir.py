@@ -112,6 +112,12 @@ class PrepareKvasirTests(unittest.TestCase):
         # raw data untouched
         self.assertEqual(sorted(p.name for p in (self.raw / "images").iterdir()), sorted(f"{i}.jpg" for i in SYNTHETIC))
 
+    def test_raw_may_point_at_parent_of_kvasir_seg_folder(self):
+        # the official zip extracts to <raw>/Kvasir-SEG/, so both locations must work (DL-27)
+        result = run_script(self.raw.parent, self.out, self.splits_dir)
+        self.assertEqual(result.returncode, 0, result.stderr)
+        self.assertTrue((self.out / "reports" / "verification.json").exists())
+
     def test_second_run_reuses_split_files(self):
         first = run_script(self.raw, self.out, self.splits_dir)
         self.assertEqual(first.returncode, 0, first.stderr)

@@ -188,16 +188,17 @@ The recorded environment uses Python 3.12.10, numpy 2.5.3, Pillow 12.3.0, and op
 |                            |                                                                             |
 | -------------------------- | --------------------------------------------------------------------------- |
 | Dataset                    | CVC-ClinicDB                                                                |
-| Dataset page               | https://www.kaggle.com/datasets/balraj98/cvcclinicdb                        |
-| Original dataset reference | Bernal et al. (2015)                                                        |
-| Downloaded                 | 2026-10-09                                                                  |
-| Source format used         | PNG                                                                         |
+| Dataset page               | https://polyp.grand-challenge.org/CVCClinicDB/ (original, login required)   |
+| Download used              | Kaggle mirror https://www.kaggle.com/datasets/balraj98/cvcclinicdb (the mirror the baseline uses); PNG version |
+| Original dataset reference | Bernal et al. (2015), see citation below                                    |
+| Downloaded                 | 2026-10-09 (Member 2 via the Kaggle website; Member 3 via `kagglehub` on Colab, same file counts and verification numbers) |
+| Content                    | 612 frames extracted from colonoscopy video sequences, each with a hand-drawn polyp mask |
 | Stored in                  | `data/raw/cvc-clinicdb/` (not in git)                                       |
-| Usage terms                | Verify the applicable dataset terms before redistribution or commercial use |
+| Usage terms                | "Completely restricted for research and educational purposes" and "forbidden for commercial purposes" (grand-challenge page). Original images © Hospital Clínic, Barcelona; ground-truth masks © Computer Vision Center, Barcelona. |
 
 The downloaded dataset contains `PNG/Original/` and `PNG/Ground Truth/`, each with 612 PNG files. The TIF versions were not used in preprocessing. Raw files remain unchanged; processed outputs are written to `data/processed/cvc-clinicdb/`.
 
-**Citation:** Bernal et al. (2015). *Comparative validation of polyp detection methods in video colonoscopy: results from the MICCAI 2015 Endoscopic Vision Challenge.*
+**Citation:** J. Bernal, F. J. Sánchez, G. Fernández-Esparrach, D. Gil, C. Rodríguez, F. Vilariño. "WM-DOVA maps for accurate polyp highlighting in colonoscopy: Validation vs. saliency maps from physicians." *Computerized Medical Imaging and Graphics*, 43:99–111, 2015. (The dataset was also the training set of the MICCAI 2015 polyp detection sub-challenge.)
 
 ### 2.2 Verification
 
@@ -261,7 +262,9 @@ The script checks the expected file counts, filename pairing, image readability,
 
 CVC-ClinicDB is used as an external test set, so its results measure cross-dataset performance and should not be presented as directly equivalent to results from a model evaluated on its own dataset's training/test split.
 
-The downloaded archive's exact byte size, SHA-256, and applicable usage terms should be recorded after checking the local archive and its source terms.
+No archive hash is recorded for CVC-ClinicDB: Kaggle re-packages the archive on every download, so a hash would not be stable. The file-level record (612 + 612 PNG files, all 384 × 288, all readable, 646 mask-derived boxes, identical numbers on two independent downloads) is the provenance record instead. `verification.json` also stores the resolution range, the number of specks ignored and the boxes-per-image histogram.
+
+The script accepts `--raw` and `--out` so it can run on other locations and on the synthetic data used by `tests/test_prepare_clinicdb.py`.
 
 ---
 
@@ -298,6 +301,8 @@ Statistics were calculated from the processed images and masks using the same an
 | Mean brightness                          |     97.482 |       76.195 |
 | Mean grayscale contrast                  |     59.445 |       54.166 |
 
+Definitions (as computed in `notebooks/02_dataset_statistics.ipynb`): *polyp area* = fraction of mask pixels above 127; *connected components per image* = regions of at least 0.05% of the image (8-connectivity), the same rule the YOLO labels use; *box aspect ratio* = component width / height, averaged per image and then across images; *brightness* = mean grey value of the image (0–255); *contrast* = standard deviation of the grey values.
+
 ### 3.3 Interpretation and domain shift
 
 Kvasir-SEG has a higher mean polyp area (15.391%) than CVC-ClinicDB (9.166%). Its images are also brighter on average (97.482 vs. 76.195) and have higher grayscale contrast (59.445 vs. 54.166). The mean bounding-box aspect ratio is higher for ClinicDB (1.163) than for Kvasir-SEG (0.982).
@@ -306,8 +311,39 @@ These differences suggest variation in image characteristics and polyp size betw
 
 Both datasets were analysed using the same procedure. The connected-region count is an estimate derived from mask components and should not be interpreted as a verified count of distinct polyps. Bounding-box aspect ratios are also derived from the mask-connected components. These descriptive statistics indicate differences between the datasets but do not establish their causes or quantify their effect on model performance.
 
-The five distribution plots and the underlying per-image statistics are saved in `notebooks/`. The summary table is saved as `notebooks/dataset_comparison.csv`, and the per-image results are saved as `notebooks/dataset_statistics.csv`. The analysis notebook is `notebooks/02_dataset_statistics.ipynb`.
+The five distribution plots are saved as `docs/figures/stats_*.png`. The summary table is `docs/tables/dataset_comparison.csv` and the per-image results are `docs/tables/dataset_statistics.csv`. The analysis notebook is `notebooks/02_dataset_statistics.ipynb`.
 
 CVC-ClinicDB remains reserved for external evaluation and must not be used for model training or confidence-threshold selection.
 
 ---
+
+## 4. Image-shift test set — Member 3
+
+`src/data/make_corruptions.py` (DL-20) applies three corruptions at three strengths to the **200 Kvasir-SEG test images only**; training and validation images are never touched. Masks and labels are copied unchanged because none of the corruptions moves the polyp.
+
+| Corruption | Strength 1 | Strength 2 | Strength 3 |
+|---|---|---|---|
+| Gaussian blur (sigma, px) | 1 | 2 | 4 |
+| Brightness/contrast (contrast ×, brightness shift) | ×0.8, −20 | ×0.6, −40 | ×0.4, −60 |
+| Gaussian noise (std on 0–255) | 10 | 20 | 40 |
+
+Output: `data/processed/kvasir-corrupted/<corruption>_s<strength>/{images,masks,labels}/test/`, 9 settings × 200 images = 1,800 corrupted PNG images, plus `manifest.json` with every parameter. Noise is seeded per image, so reruns are byte-identical. Example: `docs/figures/corruption_examples.png`. Details and the Colab run: `docs/setup_guide.md` §7.
+
+## 5. Validation of the processed data — Member 3
+
+- **Overlay check** (`docs/figures/overlay_kvasir.png`, `overlay_clinicdb.png`): 20 random test images per dataset with the mask outline and the YOLO label box drawn; 20/20 correct on both datasets, including two-polyp frames and polyps touching the frame edge (`docs/setup_guide.md` §8).
+- **Smoke test** (`docs/figures/smoke_test.png`): YOLO → SAM 2 runs end to end on Colab on 5 test images with the baseline's shipped weights; 4 of 5 polyps are segmented with Dice 0.96–0.97 and 1 is missed entirely by the detector (`docs/setup_guide.md` §6). Not a reported result (DL-17).
+- **Automated tests**: 34 tests in `tests/` run on every push (`.github/workflows/ci.yml`): helper functions, split files, and synthetic end-to-end runs of all three preparation scripts.
+
+## 6. Final dataset summary
+
+| | Kvasir-SEG | CVC-ClinicDB | Kvasir-SEG corrupted |
+|---|---|---|---|
+| Role | train / val / test | external test only | image-shift test only |
+| Images | 700 / 100 / 200 | 612 | 9 × 200 = 1,800 |
+| Mask-derived boxes | 749 / 107 / 207 | 646 | 207 per setting (copied) |
+| Image format | JPG (original) | PNG (original) | PNG |
+| Mask format | PNG, 0/255 | PNG, 0/255 | PNG, 0/255 (copied) |
+| Resolution | 333 distinct, 332–1920 × 352–1072 | 384 × 288 | as Kvasir test |
+| Mean polyp area | 15.4% | 9.2% | as Kvasir test |
+| Config | `configs/kvasir.yaml` | `configs/cvc_clinicdb.yaml` | point `path` at a setting folder |

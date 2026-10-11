@@ -1,6 +1,7 @@
 """Verify, clean, split and convert Kvasir-SEG for the YOLO -> SAM 2 pipeline.
 
 Input  (never modified):  data/raw/kvasir-seg/Kvasir-SEG/{images,masks,kavsir_bboxes.json}
+                          (--raw may point at data/raw/kvasir-seg or at the Kvasir-SEG/ folder inside it)
 Output: data/processed/kvasir/images/{train,val,test}/<id>.jpg   copies of the originals
         data/processed/kvasir/masks/{train,val,test}/<id>.png    binary masks (0 / 255)
         data/processed/kvasir/labels/{train,val,test}/<id>.txt   YOLO boxes derived from the masks
@@ -46,6 +47,14 @@ def parse_args():
     parser.add_argument("--expected-images", type=int, default=EXPECTED_IMAGES,
                         help="number of images the raw folder must contain (tests use small synthetic sets)")
     return parser.parse_args()
+
+
+def locate_raw(raw):
+    """Accept the folder that holds images/ or its parent: the official zip extracts to a Kvasir-SEG/ subfolder."""
+    for candidate in (raw, raw / "Kvasir-SEG"):
+        if (candidate / "images").is_dir() and (candidate / "masks").is_dir():
+            return candidate
+    raise SystemExit(f"{raw}: expected images/, masks/ and kavsir_bboxes.json here or in a Kvasir-SEG/ subfolder")
 
 
 def verify_raw(raw, expected_images=EXPECTED_IMAGES):
@@ -137,6 +146,7 @@ def load_or_create_splits(ids, splits_dir, sizes, seed):
 
 def main():
     args = parse_args()
+    args.raw = locate_raw(args.raw)
     ids, official, summary = verify_raw(args.raw, args.expected_images)
     splits, created = load_or_create_splits(
         ids, args.splits_dir, {"train": args.train, "val": args.val, "test": args.test}, args.seed

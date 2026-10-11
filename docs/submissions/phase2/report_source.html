@@ -1,0 +1,133 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<title>F26-13 Phase 2 Report</title>
+<style>
+  @page { size: A4; margin: 16mm 17mm 16mm 17mm; }
+  html { font-family: "Segoe UI", Arial, Helvetica, sans-serif; font-size: 10.2pt; line-height: 1.33; color: #111; }
+  body { margin: 0; }
+  h1 { font-size: 16pt; margin: 0 0 2pt 0; line-height: 1.2; }
+  h2 { font-size: 12pt; margin: 11pt 0 4pt 0; border-bottom: 1px solid #999; padding-bottom: 1pt; }
+  h3 { font-size: 10.5pt; margin: 8pt 0 2pt 0; }
+  p { margin: 0 0 5pt 0; text-align: justify; }
+  ul, ol { margin: 0 0 5pt 0; padding-left: 18pt; }
+  li { margin-bottom: 1.5pt; }
+  table { border-collapse: collapse; width: 100%; margin: 3pt 0 6pt 0; font-size: 9.2pt; page-break-inside: avoid; }
+  th, td { border: 1px solid #bbb; padding: 2.2pt 4pt; vertical-align: top; }
+  th { background: #eee; text-align: left; }
+  td.num, th.num { text-align: right; }
+  .meta { font-size: 9.5pt; color: #333; margin-bottom: 6pt; }
+  .meta table { width: auto; font-size: 9.5pt; margin: 3pt 0; }
+  .meta td { border: none; padding: 0 12pt 0 0; }
+  code { font-family: Consolas, "Courier New", monospace; font-size: 8.8pt; background: #f3f3f3; padding: 0 2pt; }
+  figure { margin: 4pt 0 6pt 0; page-break-inside: avoid; text-align: center; }
+  figcaption { font-size: 8.8pt; color: #333; margin-top: 2pt; text-align: left; }
+  .row { display: flex; gap: 8pt; align-items: flex-start; }
+  .row figure { flex: 1; margin: 0; }
+  .refs { font-size: 8.6pt; }
+  .refs li { margin-bottom: 1pt; }
+  .small { font-size: 8.8pt; color: #333; }
+</style>
+</head>
+<body>
+
+<h1>Confidence-Aware Self-Prompting for Robust Polyp Segmentation Under Image and Domain Shifts</h1>
+<div class="meta">
+  <b>Phase 2 report: Data Acquisition &amp; Setup</b> &nbsp;·&nbsp; Group F26-13 &nbsp;·&nbsp; AI2002 Artificial Intelligence (BDS-5A), FAST-NUCES Lahore, Fall 2026 &nbsp;·&nbsp; Track A (R&amp;D) &nbsp;·&nbsp; Instructor: Dr. Hajra Waheed &nbsp;·&nbsp; 11 October 2026
+  <table>
+    <tr><td>Kashish Fatima (24L-2605, lead)</td><td>Khushbakht Sohail (24L-2604)</td><td>Zahra Saeed (24L-2512)</td></tr>
+  </table>
+  Repository: <a href="https://github.com/kashishfatima999/Confidence-Aware-Self-Prompting-for-Robust-Polyp-Segmentation">github.com/kashishfatima999/Confidence-Aware-Self-Prompting-for-Robust-Polyp-Segmentation</a> &nbsp;·&nbsp; Notebook: <code>F26-13.ipynb</code> (reproduces every step below on Google Colab)
+</div>
+
+<p><b>Context.</b> The project tests whether using YOLOv8's detection confidence to find uncertain detections, and refining their bounding-box prompt before it is passed to a frozen SAM 2, improves polyp segmentation over the YOLO-SAM2 baseline of Mansoori et al. [1]. Phase 2 prepared the data this needs: a primary dataset with a fixed train/validation/test split in YOLO format, an external dataset for the domain-shift test, a corrupted copy of the test split for the image-shift test, and a working environment in which the baseline pipeline runs on the prepared data. Every number in this report is read from the verification files written by the preprocessing scripts; every design choice is recorded with its alternatives and evidence in <code>docs/decision_log.md</code> (entries DL-01 to DL-29).</p>
+
+<h2>1. Dataset source and description</h2>
+<table>
+  <tr><th style="width:17%"></th><th style="width:41%">Kvasir-SEG [3] — primary dataset</th><th>CVC-ClinicDB [4] — external evaluation dataset</th></tr>
+  <tr><td>Publisher</td><td>Simula Research Laboratory, <code>datasets.simula.no/kvasir-seg</code></td><td>Hospital Clínic &amp; Computer Vision Center, Barcelona; <code>polyp.grand-challenge.org/CVCClinicDB</code></td></tr>
+  <tr><td>Content</td><td>1,000 colonoscopy images, each with a pixel-level polyp mask verified by a gastroenterologist, plus a bounding-box file</td><td>612 frames extracted from colonoscopy video sequences, each with a hand-drawn polyp mask</td></tr>
+  <tr><td>Resolution</td><td>333 distinct sizes, 332–1920 × 352–1072 px</td><td>all 384 × 288 px</td></tr>
+  <tr><td>Formats</td><td>JPG images, JPG masks (RGB), JSON boxes</td><td>PNG images and masks (TIF also available)</td></tr>
+  <tr><td>Role in this project</td><td>training, validation and test (700 / 100 / 200)</td><td>external test set only; never used for training or tuning</td></tr>
+  <tr><td>Terms</td><td>research and educational use only; commercial use needs written permission</td><td>"completely restricted for research and educational purposes", commercial use forbidden</td></tr>
+</table>
+<p>Kvasir-SEG is the dataset the baseline was trained and evaluated on, so it is the natural primary set. CVC-ClinicDB comes from a different hospital, a different endoscope and a different annotation team; it is used in its entirety as a held-out test set because the project's question is robustness to such shifts, and because its frames come from video sequences, so a random split would leak near-identical frames between train and test (DL-03). The baseline code (<code>sajjad-sh33/YOLO_SAM2</code>, commit <code>d86e375</code>) has no license; it was cloned for reading only, is cited, and none of it was copied into our repository (DL-16).</p>
+
+<h2>2. Data collection method</h2>
+<ul>
+  <li><b>Kvasir-SEG</b> was downloaded from the official URL on 2026-10-07: <code>kvasir-seg.zip</code>, 46,227,172 bytes, SHA-256 <code>03b30e21d584e04fa…3478f7</code> (full hash in <code>docs/data_report.md</code>). The archive is kept next to the extracted files and the hash is re-checked after processing. On Google Colab the official link returned 0 bytes on 2026-10-09, so the notebook uses the dataset author's Kaggle copy (<code>debeshjha1/kvasirseg</code>); it reproduced exactly the same verification numbers, split and box counts (DL-26).</li>
+  <li><b>CVC-ClinicDB</b> requires a login on the original site, so the Kaggle mirror used by the baseline authors (<code>balraj98/cvcclinicdb</code>, PNG version) was downloaded on 2026-10-09, once through the website and once through <code>kagglehub</code> on Colab; both gave 612 + 612 files with identical verification results. Kaggle re-packages archives on download, so the file-level record (counts, resolution, readability, box counts) is the provenance record instead of an archive hash (DL-24).</li>
+  <li><b>Raw data is never modified</b> (DL-01). Downloads live in <code>data/raw/</code>, everything derived is written to <code>data/processed/</code>, and images are copied, never moved, unlike the baseline's own preprocessing script, which moves the original files. Datasets and weights are git-ignored and are not redistributed.</li>
+</ul>
+
+<h2>3. Preprocessing steps</h2>
+<p>All three preparation scripts (<code>src/data/prepare_kvasir.py</code>, <code>prepare_clinicdb.py</code>, <code>make_corruptions.py</code>) share one helper module and follow the same contract: verify every input file, stop before writing anything if a check fails, write the outputs, write a <code>verification.json</code>.</p>
+<ol>
+  <li><b>Verification.</b> Counts, one-to-one image/mask pairing, equal image and mask sizes (and, for Kvasir-SEG, agreement with the box file), full decoding of every image and mask, no empty mask after thresholding. Result: Kvasir-SEG 1,000 / 1,000 / 1,000, CVC-ClinicDB 612 / 612; 0 unreadable files and 0 empty masks in both (DL-11).</li>
+  <li><b>Mask binarisation</b> (DL-04). Kvasir-SEG masks are lossy RGB JPGs: every mask contains pixels that are close to but not exactly 0 or 255 (0.73% of all mask pixels), which the baseline reads as values like 0.98 that count as neither polyp nor background. No pixel lies between 11 and 244, so thresholding at 127 is unambiguous. All masks of both datasets are converted to single-channel PNGs with values 0 and 255 only.</li>
+  <li><b>Specks</b> (DL-05). After thresholding, Kvasir-SEG masks contain 143 isolated regions smaller than 0.05% of the image. They are kept in the masks (the ground truth is not edited) but ignored when boxes are derived, so YOLO is not trained on compression noise.</li>
+  <li><b>Bounding boxes from masks</b> (DL-06, DL-07). One box per connected polyp region (8-connectivity). The official Kvasir-SEG box file is not used as labels because it is wrong for 18 of 1,000 images (Section 4) and because CVC-ClinicDB has no box file; deriving boxes from masks gives both datasets the same definition. Boxes are <code>(xmin, ymin, xmax, ymax)</code> with exclusive maxima; on the 982 images where the official file agrees, it differs from ours by at most 1 px per side.</li>
+  <li><b>Fixed, seeded split</b> (DL-02). The paper's split cannot be reproduced (the baseline takes the first 800 files of an unsorted, unseeded <code>glob</code>). Image ids are sorted, shuffled once with seed 42 and cut 700 / 100 / 200; the lists are committed in <code>splits/</code> and reused by every run, and an automated test fails if they change. The validation split exists so that the confidence threshold can be chosen without touching the test set. The split is random, not stratified: mean polyp area is 14.7% (train), 18.2% (val), 16.4% (test).</li>
+  <li><b>YOLO format</b> (DL-09, DL-15). Images are copied at their original resolution into <code>images/&lt;split&gt;/</code>, labels <code>0 x_center y_center width height</code> (normalised) into <code>labels/&lt;split&gt;/</code>, with one class, <code>polyp</code>; <code>configs/kvasir.yaml</code> and <code>configs/cvc_clinicdb.yaml</code> describe the datasets to Ultralytics. No resizing or augmentation is done in preprocessing; CVC-ClinicDB goes entirely into a <code>test</code> split.</li>
+  <li><b>Image-shift test set</b> (DL-20). Three corruptions at three strengths are applied to the 200 Kvasir-SEG test images only: Gaussian blur (σ = 1, 2, 4 px), brightness/contrast (contrast ×0.8/×0.6/×0.4 around the image mean with a −20/−40/−60 shift) and Gaussian noise (σ = 10, 20, 40 on 0–255). Masks and labels are copied unchanged; noise is seeded per image so reruns are byte-identical; outputs are PNG so no extra JPEG artefacts are added. 9 settings × 200 images.</li>
+  <li><b>Validation of the result.</b> (a) 34 automated tests run on every push (GitHub Actions): helper functions, split files, and synthetic end-to-end runs of all three scripts. (b) An independent script re-checked every Kvasir-SEG output: 1,000 image copies byte-identical to the raw files, 1,000 masks with only 0/255 and equal to the thresholded originals, 1,000 well-formed labels that convert back to the mask boxes within 0.001 px. (c) An overlay check drew the mask outline and label box on 20 random test images per dataset: 20/20 correct on both. (d) A smoke test ran the baseline YOLO → SAM 2 pipeline on Colab (T4) on five prepared test images: it runs end to end, which confirms the data is ready for model implementation (Section 4).</li>
+</ol>
+
+<h2>4. Brief EDA: key insights</h2>
+<table>
+  <tr><th>Statistic (all images)</th><th class="num">Kvasir-SEG (1,000)</th><th class="num">CVC-ClinicDB (612)</th></tr>
+  <tr><td>Mean polyp area (% of frame)</td><td class="num">15.39</td><td class="num">9.17</td></tr>
+  <tr><td>Connected polyp regions per image (mean)</td><td class="num">1.063</td><td class="num">1.056</td></tr>
+  <tr><td>Images with 1 / 2 / 3 / 4 / 10 regions (Kvasir-SEG)</td><td class="num">952 / 41 / 5 / 1 / 1</td><td class="num">—</td></tr>
+  <tr><td>Mask-derived boxes in total</td><td class="num">1,063 (749 / 107 / 207)</td><td class="num">646</td></tr>
+  <tr><td>Mean box aspect ratio (width / height)</td><td class="num">0.982</td><td class="num">1.163</td></tr>
+  <tr><td>Mean brightness (grey value 0–255)</td><td class="num">97.5</td><td class="num">76.2</td></tr>
+  <tr><td>Mean contrast (std of grey values)</td><td class="num">59.4</td><td class="num">54.2</td></tr>
+  <tr><td>Resolution</td><td class="num">333 distinct</td><td class="num">1 (384 × 288)</td></tr>
+</table>
+<div class="row">
+  <figure><img src="../../figures/stats_polyp_area_percent.png" style="width:100%"></figure>
+  <figure><img src="../../figures/stats_brightness.png" style="width:100%"></figure>
+</div>
+<figcaption><b>Figure 1.</b> Per-image polyp area (left) and mean brightness (right) for both datasets. Per-image values for all five statistics are in <code>docs/tables/dataset_statistics.csv</code>; the other plots are in <code>docs/figures/</code>.</figcaption>
+
+<ul style="margin-top:6pt">
+  <li><b>A measurable domain shift exists.</b> CVC-ClinicDB polyps are smaller (9.2% vs 15.4% of the frame), its frames are darker and lower-contrast, its boxes are wider than tall rather than roughly square, and its resolution is fixed and low. These are exactly the conditions under which a detector trained on Kvasir-SEG can become uncertain, which is what the proposed method targets. The statistics describe the datasets; they do not by themselves quantify the performance drop.</li>
+  <li><b>The official Kvasir-SEG box file is unreliable.</b> Comparing it with mask-derived boxes: 982 images agree (extent IoU ≥ 0.985), but in 10 images the official box starts at pixel (0, 0) and covers 82–100% of the frame while the polyp covers 46–90% (IoU 0.46–0.90), and in 8 images it lists an extra box around a speck. Mean extent IoU over all 1,000 images is 0.987. Training YOLO on these boxes would teach it 10 badly wrong targets; deriving boxes from the masks avoids this.</li>
+  <li><b>Polyp size varies enormously.</b> Kvasir-SEG polyp area ranges from under 1% to over 90% of the frame (median 11%). One test image's polyp fills 76% of the frame and its label box covers the whole image, which tells SAM 2 almost nothing about location; such near-full-frame boxes are a case the prompt refinement will have to handle.</li>
+  <li><b>The detector, not the segmenter, is the weak point.</b> In the smoke test with the baseline's shipped weights, SAM 2 reached Dice 0.96–0.97 on the four images where YOLO found the polyp, and 0.00 on the fifth, where YOLO produced no box even at confidence 0.05. The baseline's evaluation code skips images without a detection, which would hide this miss (mean Dice 0.965 instead of 0.772 over the five images); our evaluation will count missed polyps as empty predictions (DL-18). These numbers come from weights whose training split is unknown and are not a reported result (DL-17).</li>
+  <li><b>Masks are not binary and contain noise.</b> 0.73% of raw mask pixels are neither 0 nor 255, and 143 specks exist after thresholding. Without the cleaning in Section 3 both would silently distort Dice/IoU.</li>
+</ul>
+<figure>
+  <img src="../../figures/corruption_examples.png" style="width:100%">
+  <figcaption><b>Figure 2.</b> One Kvasir-SEG test image (left) and its nine corrupted versions: blur, brightness/contrast and noise at strengths 1–3. The polyp stays visible at every strength, so the set measures robustness rather than impossibility.</figcaption>
+</figure>
+
+<h2>5. Final dataset summary</h2>
+<table>
+  <tr><th style="width:22%"></th><th>Kvasir-SEG</th><th>CVC-ClinicDB</th><th>Kvasir-SEG corrupted</th></tr>
+  <tr><td>Role</td><td>train / val / test</td><td>external test only</td><td>image-shift test only</td></tr>
+  <tr><td>Images</td><td>700 / 100 / 200</td><td>612 (all in <code>test</code>)</td><td>9 settings × 200 = 1,800</td></tr>
+  <tr><td>Mask-derived boxes</td><td>749 / 107 / 207</td><td>646</td><td>207 per setting (copied)</td></tr>
+  <tr><td>Images / masks / labels</td><td>original JPG copies / PNG 0–255 / YOLO txt</td><td>original PNG copies / PNG 0–255 / YOLO txt</td><td>PNG / copied / copied</td></tr>
+  <tr><td>Resolution</td><td>original, 333 distinct</td><td>384 × 288</td><td>as Kvasir test</td></tr>
+  <tr><td>Unreadable files / empty masks</td><td>0 / 0</td><td>0 / 0</td><td>—</td></tr>
+  <tr><td>Mean polyp area</td><td>14.7% / 18.2% / 16.4%</td><td>9.2%</td><td>as Kvasir test</td></tr>
+  <tr><td>Location and config</td><td><code>data/processed/kvasir</code>, <code>configs/kvasir.yaml</code></td><td><code>data/processed/cvc-clinicdb</code>, <code>configs/cvc_clinicdb.yaml</code></td><td><code>data/processed/kvasir-corrupted/&lt;setting&gt;</code> + <code>manifest.json</code></td></tr>
+</table>
+<p><b>Environment.</b> Data preparation runs locally on CPU (Python 3.12, numpy 2.5.3, Pillow 12.3.0, OpenCV 5.0.0.93, pinned in <code>requirements.txt</code>). Model work runs on Google Colab (T4): torch 2.11.0, ultralytics 8.4.174, SAM 2 at commit <code>2b90b9f</code> (<code>requirements-colab.txt</code>); weights <code>sam2_hiera_large.pt</code> (898 MB) and <code>yolov8m.pt</code> are stored in Google Drive. The whole Phase 2 pipeline re-runs from a clean Colab session with <code>F26-13.ipynb</code> in about ten minutes.</p>
+<p><b>Known limitations carried into Phase 3.</b> The split is not stratified by polyp size; CVC-ClinicDB results will be cross-dataset and not comparable with the paper's in-domain numbers; the baseline's published code does not run as-is (notebook syntax in <code>.py</code> files, missing imports, indentation errors, a hard-coded confidence threshold of 0.5 and an evaluation that skips missed polyps), so the evaluation will be re-implemented; the paper and its code disagree on the YOLO model size and image size, so both will be recorded when we train.</p>
+
+<h3>References</h3>
+<ol class="refs">
+  <li>M. Mansoori et al. Self-Prompting Polyp Segmentation in Colonoscopy using Hybrid YOLO-SAM 2 Model. arXiv:2409.09484, 2024. Code: github.com/sajjad-sh33/YOLO_SAM2.</li>
+  <li>N. Ravi et al. SAM 2: Segment Anything in Images and Videos. arXiv:2408.00714, 2024.</li>
+  <li>D. Jha, P. H. Smedsrud, M. A. Riegler, P. Halvorsen, T. de Lange, D. Johansen, H. D. Johansen. Kvasir-SEG: A Segmented Polyp Dataset. MMM 2020, pp. 451–462. arXiv:1911.07069.</li>
+  <li>J. Bernal, F. J. Sánchez, G. Fernández-Esparrach, D. Gil, C. Rodríguez, F. Vilariño. WM-DOVA maps for accurate polyp highlighting in colonoscopy: Validation vs. saliency maps from physicians. Computerized Medical Imaging and Graphics 43:99–111, 2015.</li>
+  <li>G. Jocher et al. Ultralytics YOLOv8. github.com/ultralytics/ultralytics.</li>
+</ol>
+
+</body>
+</html>
