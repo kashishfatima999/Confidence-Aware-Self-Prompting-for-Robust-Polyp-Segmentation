@@ -1,0 +1,13 @@
+# C-noiter: ablation, CASP without the self-prompting iteration (candidate selection + acceptance only) (DL-35).
+name: casp_noiter
+oracle: false
+casp:
+  t_low: 0.25
+  t_high: 0.7
+  s_min: 0.7
+  expand_fractions: [0.10, 0.20]
+  use_center_point: true
+  self_prompt_iters: 0
+  min_box_fill: 0.10
+  gate: true
+  accept: true

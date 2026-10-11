@@ -1,0 +1,8 @@
+# B: the YOLO-SAM2 baseline as in the paper's Test.py: every box with confidence >= 0.5 -> SAM 2 (DL-31)
+name: baseline
+oracle: false
+casp:
+  t_low: 0.5
+  t_high: 0.5
+  accept: false
+  self_prompt_iters: 0

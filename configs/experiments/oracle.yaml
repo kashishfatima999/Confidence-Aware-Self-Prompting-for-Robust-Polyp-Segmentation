@@ -1,0 +1,9 @@
+# O: upper bound. The boxes derived from the ground-truth masks are given to SAM 2 (detector = perfect).
+# The gap between O and B is what the detector costs; the gap between O and C is what refinement could not recover (DL-35).
+name: oracle
+oracle: true
+casp:
+  t_low: 0.0
+  t_high: 0.0
+  accept: false
+  self_prompt_iters: 0

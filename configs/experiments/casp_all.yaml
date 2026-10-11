@@ -1,0 +1,14 @@
+# C-all: ablation, refinement applied to EVERY kept detection regardless of confidence (gate off).
+# If this matches C, confidence gating adds nothing; if it is worse or slower, gating matters (DL-35).
+name: casp_all
+oracle: false
+casp:
+  t_low: 0.25
+  t_high: 0.7
+  s_min: 0.7
+  expand_fractions: [0.10, 0.20]
+  use_center_point: true
+  self_prompt_iters: 1
+  min_box_fill: 0.10
+  gate: false
+  accept: true

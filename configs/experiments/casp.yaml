@@ -1,0 +1,15 @@
+# C: Confidence-Aware Self-Prompting v1 (DL-34).
+# t_low, t_high and s_min below are STARTING values; the final ones are chosen on kvasir_val only
+# (grid in notebooks/04_phase3_colab.ipynb) and recorded in DL-34 before the test split is run.
+name: casp
+oracle: false
+casp:
+  t_low: 0.25
+  t_high: 0.7
+  s_min: 0.7
+  expand_fractions: [0.10, 0.20]
+  use_center_point: true
+  self_prompt_iters: 1
+  min_box_fill: 0.10
+  gate: true
+  accept: true
