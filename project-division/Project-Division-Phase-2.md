@@ -62,7 +62,7 @@ Local machine check (Member 1's laptop, updated 2026-10-08): Windows 11, no NVID
 | D4 | Where data lives | `data/` folder that is git-ignored; a shared Google Drive folder for the team | Datasets and weights must not be pushed to GitHub (size, and CVC-ClinicDB is research-use only). |
 | D5 | "Image shifts" in our title | Small corruption set (blur, brightness, noise) made from the Kvasir test split | The approved title promises image shifts, but the proposal body only describes the dataset shift. This is the cheapest way to cover it. Confirm with the instructor if unsure. |
 
-**Status (2026-10-08):** D1 is accepted by Member 1 and implemented (`splits/` is committed). D2–D5 are still to be confirmed by Members 2 and 3. Every decision, with the alternatives considered and the evidence, is recorded in `docs/decision_log.md` (entries DL-01 to DL-21); any later change must be added there in the same commit.
+**Status (2026-10-11):** D1 is accepted and implemented (`splits/` is committed). D2–D5 are implemented by Members 2 and 3 (DL-03, DL-13, DL-12, DL-20); D2 and D5 are still marked "to be confirmed by the group" in the log and should be confirmed at the next meeting. Every decision, with the alternatives considered and the evidence, is recorded in `docs/decision_log.md` (entries DL-01 to DL-21); any later change must be added there in the same commit.
 
 ---
 
@@ -71,41 +71,43 @@ Local machine check (Member 1's laptop, updated 2026-10-08): Windows 11, no NVID
 ```
 Confidence-Aware-Self-Prompting-for-Robust-Polyp-Segmentation/
 ├── README.md
-├── requirements.txt
+├── LICENSE
+├── requirements.txt               # local CPU environment (data preparation, tests)
+├── requirements-colab.txt         # model packages, Colab only
 ├── .gitignore                     # ignores data/, .venv/, external/, weights/, runs/
-├── F26-13(Project Proposal).pdf
-├── Project Deliverables and guidelines.pdf
+├── .github/workflows/ci.yml       # tests on every push and pull request
 ├── project-division/
 │   └── Project-Division-Phase-2.md
 ├── docs/
-│   ├── data_report.md             # Member 2 (stats) + all members add their section
+│   ├── data_report.md             # provenance, verification, cleaning, split, statistics (all members)
 │   ├── decision_log.md            # every decision + change log; all members add entries
-│   └── setup_guide.md             # Member 3
+│   ├── setup_guide.md             # Member 3: environment, baseline, smoke test, challenges
+│   ├── requirements/              # course guidelines PDF + Phase 2 requirement text with checklist
+│   ├── proposal/                  # approved proposal PDF
+│   ├── figures/                   # every figure (overlays, smoke test, corruptions, statistics)
+│   ├── tables/                    # every CSV (per-image statistics, dataset comparison)
+│   └── submissions/phase2/        # F26-13.pdf, F26-13.ipynb, report source
 ├── data/                          # NOT in git
 │   ├── raw/
 │   │   ├── kvasir-seg/            # untouched download
 │   │   └── cvc-clinicdb/          # untouched download
 │   └── processed/
 │       ├── kvasir/                # images/, masks/, labels/ per split + reports/
-│       ├── cvc-clinicdb/          # images/, masks/, labels/ (test only)
-│       └── kvasir-corrupted/      # image-shift test set
-├── splits/                        # IN git — small text files
-│   ├── kvasir_train.txt
-│   ├── kvasir_val.txt
-│   └── kvasir_test.txt
+│       ├── cvc-clinicdb/          # images/, masks/, labels/ (test only) + reports/
+│       └── kvasir-corrupted/      # image-shift test set, 9 settings + manifest.json
+├── splits/                        # IN git — kvasir_{train,val,test}.txt
 ├── configs/
 │   ├── kvasir.yaml                # YOLO dataset config
 │   └── cvc_clinicdb.yaml
-├── src/
-│   └── data/
-│       ├── prepare_kvasir.py      # Member 1
-│       ├── prepare_clinicdb.py    # Member 2
-│       ├── make_corruptions.py    # Member 3
-│       └── common.py              # shared helpers (binarize mask, mask→boxes, YOLO label writer)
-├── tests/                         # unit + synthetic pipeline tests, run by CI (.github/workflows/ci.yml)
+├── src/data/
+│   ├── common.py                  # shared helpers (binarize mask, mask→boxes, YOLO label writer)
+│   ├── prepare_kvasir.py          # Member 1
+│   ├── prepare_clinicdb.py        # Member 2
+│   └── make_corruptions.py        # Member 3
+├── tests/                         # unit + synthetic end-to-end tests for all three scripts
 ├── notebooks/
-│   ├── 02_dataset_statistics.ipynb# Member 2
-│   └── 03_environment_smoke_test.ipynb  # Member 3
+│   ├── 02_dataset_statistics.ipynb       # Member 2 (writes to docs/figures and docs/tables)
+│   └── 03_environment_smoke_test.ipynb   # Member 3 (Colab)
 ├── external/                      # NOT in git — clone of the baseline repo
 └── weights/                       # NOT in git — SAM 2 + YOLO checkpoints
 ```
