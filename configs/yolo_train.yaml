@@ -1,0 +1,13 @@
+# YOLOv8 training recipe for the Kvasir-SEG train split (decision DL-31). One recipe, fixed before training.
+# Every key except project/name/model is passed straight to ultralytics YOLO.train().
+model: yolov8m.pt        # COCO-pretrained YOLOv8 medium, the size the paper used (25M parameters)
+epochs: 50               # the baseline README's value; the paper does not state it
+imgsz: 640               # paper says 680, but Ultralytics needs a multiple of 32 and the baseline code uses 640
+batch: 16                # fits a Colab T4; the paper used 64 on an A100
+seed: 42
+deterministic: true
+patience: 50             # no early stopping: the full 50 epochs run, best.pt = highest val mAP50-95
+optimizer: auto          # Ultralytics default (SGD/AdamW chosen automatically)
+workers: 2
+project: runs/yolo
+name: yolov8m_kvasir_s42
