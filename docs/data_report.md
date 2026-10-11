@@ -298,14 +298,16 @@ Statistics were calculated from the processed images and masks using the same an
 | Mean polyp area (%)                      |     15.391 |        9.166 |
 | Mean mask-connected components per image |      1.063 |        1.056 |
 | Mean bounding-box aspect ratio           |      0.982 |        1.163 |
-| Mean brightness                          |     97.482 |       76.195 |
-| Mean grayscale contrast                  |     59.445 |       54.166 |
+| Mean brightness                          |     97.477 |       76.195 |
+| Mean grayscale contrast                  |     59.408 |       54.166 |
+
+Brightness and contrast are the values of the 2026-10-11 Colab run (`docs/tables/dataset_comparison.csv`; Kvasir-SEG from the Kaggle copy, OpenCV 4.14). The 2026-10-09 local run gave 97.482 and 59.445 for Kvasir-SEG; the difference (below 0.1%) comes from JPEG decoding differences between the two environments, and all other statistics are identical.
 
 Definitions (as computed in `notebooks/02_dataset_statistics.ipynb`): *polyp area* = fraction of mask pixels above 127; *connected components per image* = regions of at least 0.05% of the image (8-connectivity), the same rule the YOLO labels use; *box aspect ratio* = component width / height, averaged per image and then across images; *brightness* = mean grey value of the image (0–255); *contrast* = standard deviation of the grey values.
 
 ### 3.3 Interpretation and domain shift
 
-Kvasir-SEG has a higher mean polyp area (15.391%) than CVC-ClinicDB (9.166%). Its images are also brighter on average (97.482 vs. 76.195) and have higher grayscale contrast (59.445 vs. 54.166). The mean bounding-box aspect ratio is higher for ClinicDB (1.163) than for Kvasir-SEG (0.982).
+Kvasir-SEG has a higher mean polyp area (15.391%) than CVC-ClinicDB (9.166%). Its images are also brighter on average (97.477 vs. 76.195) and have higher grayscale contrast (59.408 vs. 54.166). The mean bounding-box aspect ratio is higher for ClinicDB (1.163) than for Kvasir-SEG (0.982).
 
 These differences suggest variation in image characteristics and polyp size between the datasets, providing evidence of potential domain shift. Kvasir-SEG contains images with varied resolutions, while ClinicDB images have a fixed resolution of 384 × 288 pixels.
 
