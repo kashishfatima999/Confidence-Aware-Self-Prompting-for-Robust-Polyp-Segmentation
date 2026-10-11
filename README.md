@@ -96,7 +96,29 @@ Each script verifies its input (counts, pairing, sizes, readability, empty masks
 
 Everything that needs a GPU (statistics on both datasets, YOLO + SAM 2 smoke test, and later training) runs on Google Colab: open `docs/submissions/phase2/F26-13.ipynb` or `notebooks/03_environment_smoke_test.ipynb` with a T4 runtime and *Run all* (about 10 minutes). `docs/setup_guide.md` explains each step.
 
-## 6. How we keep this reproducible
+## 6. Phase 3: baseline and method (in progress)
+
+Decisions DL-30 to DL-37. Everything below runs on Colab (`notebooks/04_phase3_colab.ipynb`); the harness and the method logic are tested without a GPU.
+
+```bash
+python src/train_yolo.py                                                   # YOLOv8-m, recipe in configs/yolo_train.yaml
+python src/pipeline/detect.py --weights runs/yolo/yolov8m_kvasir_s42/weights/best.pt --dataset kvasir_test
+python src/pipeline/run_experiment.py --config configs/experiments/baseline.yaml --dataset kvasir_test
+python src/pipeline/run_experiment.py --config configs/experiments/casp.yaml --dataset kvasir_test --save-masks
+python src/eval/summarize.py                                               # -> docs/tables/phase3/results.{csv,md}
+```
+
+| Piece | Where |
+|---|---|
+| Metrics (per-image + pooled Dice/IoU, misses count as 0, bootstrap CI, box P/R) | `src/eval/metrics.py` |
+| Detection cache (YOLO once per dataset at conf 0.05) | `src/pipeline/detect.py` |
+| SAM 2 wrapper (embed once, prompt many, returns predicted IoU) | `src/pipeline/sam2_prompter.py` |
+| **CASP v1**: gate by confidence, candidate prompts, SAM-score selection, self-prompt iteration, accept/reject | `src/pipeline/refine.py` |
+| Experiments B, T, C, C-all, C-noiter, O | `configs/experiments/*.yaml`, `src/pipeline/run_experiment.py` |
+| Results tables | `src/eval/summarize.py` → `docs/tables/phase3/` |
+| Report | `docs/phase3_report.md` |
+
+## 7. How we keep this reproducible
 
 - **Raw data is never edited.** Everything derived lives in `data/processed/`; processed images are byte-identical copies of the raw ones.
 - **One split, committed.** `splits/` is the only split anyone uses; the tests fail if the files change or stop matching seed 42.
@@ -106,16 +128,16 @@ Everything that needs a GPU (statistics on both datasets, YOLO + SAM 2 smoke tes
 - **Tests on every push.** CI compiles the code, runs the helper tests, runs all three preparation scripts on synthetic mini-datasets, and checks the split files were not modified.
 - **One branch per member, merged by pull request** into `main` after another member has read it (DL-21).
 
-## 7. Status
+## 8. Status
 
 | Phase | Content | State |
 |---|---|---|
 | 1 | Problem definition and proposal (`docs/proposal/`) | done |
-| 2 | Data acquisition, cleaning, split, YOLO format, environment, tests, image-shift set | done; submission in `docs/submissions/phase2/` |
-| 3 | Baseline reproduction, YOLO training, confidence-aware prompt refinement | not started |
+| 2 | Data acquisition, cleaning, split, YOLO format, environment, tests, image-shift set | done; submitted (`docs/submissions/phase2/`) |
+| 3 | Baseline reproduction, YOLO training, confidence-aware prompt refinement (CASP v1) | in progress; plan in `project-division/Project-Division-Phase-3.md` |
 | 4–6 | Evaluation on both datasets and under corruptions, error and ablation analysis, LaTeX report | not started |
 
-## 8. References
+## 9. References
 
 1. M. Mansoori et al. *Self-Prompting Polyp Segmentation in Colonoscopy using Hybrid YOLO-SAM 2 Model.* arXiv:2409.09484, 2024. Code: https://github.com/sajjad-sh33/YOLO_SAM2 (commit `d86e375`, no license).
 2. N. Ravi et al. *SAM 2: Segment Anything in Images and Videos.* arXiv:2408.00714, 2024.
