@@ -3,8 +3,8 @@ name: casp_noiter
 oracle: false
 casp:
   t_low: 0.25
-  t_high: 0.7
-  s_min: 0.7
+  t_high: 0.6
+  s_min: 0.6
   expand_fractions: [0.10, 0.20]
   use_center_point: true
   self_prompt_iters: 0

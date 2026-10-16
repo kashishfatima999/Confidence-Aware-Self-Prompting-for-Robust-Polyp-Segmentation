@@ -1,6 +1,6 @@
 # T: lower the detector threshold to CASP's t_low but do nothing else (no refinement, no acceptance rule).
 # Shows how much of CASP's gain is just recall, and how many false positives a lower threshold adds (DL-35).
-# t_low here must equal the value chosen for casp.yaml on the validation split.
+# t_low here equals the value chosen for casp.yaml on the validation split (0.25, DL-34).
 name: threshold_only
 oracle: false
 casp:

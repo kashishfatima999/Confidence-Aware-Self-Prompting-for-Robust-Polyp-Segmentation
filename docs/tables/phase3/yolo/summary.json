@@ -1,0 +1,27 @@
+{
+  "recipe": {
+    "epochs": 50,
+    "imgsz": 640,
+    "batch": 16,
+    "seed": 42,
+    "deterministic": true,
+    "patience": 50,
+    "optimizer": "auto",
+    "workers": 2,
+    "model": "/content/proj/runs/yolo/yolov8m_kvasir_s42/weights/best.pt",
+    "data": "/content/proj/configs/kvasir.yaml"
+  },
+  "best_weights": "/content/proj/runs/yolo/yolov8m_kvasir_s42/weights/best.pt",
+  "val": {
+    "map50": 0.953036613852808,
+    "map50_95": 0.7498292334838282,
+    "precision": 0.9602143509911183,
+    "recall": 0.8691588785046729
+  },
+  "test": {
+    "map50": 0.9434459148349957,
+    "map50_95": 0.7468308788011495,
+    "precision": 0.867221954353803,
+    "recall": 0.9082125603864735
+  }
+}
