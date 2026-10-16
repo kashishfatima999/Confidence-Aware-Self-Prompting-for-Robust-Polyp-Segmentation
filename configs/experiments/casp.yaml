@@ -1,12 +1,12 @@
 # C: Confidence-Aware Self-Prompting v1 (DL-34).
-# t_low, t_high and s_min below are STARTING values; the final ones are chosen on kvasir_val only
-# (grid in notebooks/04_phase3_colab.ipynb) and recorded in DL-34 before the test split is run.
+# t_low, t_high and s_min were chosen on kvasir_val only (27-run grid, notebooks/04_phase3_colab.ipynb section 7,
+# docs/tables/phase3/casp_val_grid.csv, 2026-10-16): val mean Dice 0.8985 vs baseline 0.8661. Recorded in DL-34.
 name: casp
 oracle: false
 casp:
   t_low: 0.25
-  t_high: 0.7
-  s_min: 0.7
+  t_high: 0.6
+  s_min: 0.6
   expand_fractions: [0.10, 0.20]
   use_center_point: true
   self_prompt_iters: 1

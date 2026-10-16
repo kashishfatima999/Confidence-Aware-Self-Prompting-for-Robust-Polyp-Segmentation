@@ -41,12 +41,13 @@ Both datasets are restricted to research and educational use and are **not** sto
 | You want | Look at |
 |---|---|
 | The Phase 2 report and notebook handed in | `docs/submissions/phase2/F26-13.pdf`, `F26-13.ipynb` |
+| The Phase 3 results and report draft | `docs/phase3_report.md`, `docs/tables/phase3/`, `notebooks/04_phase3_colab.ipynb` (executed) |
 | The course requirements and a checklist of how each is met | `docs/requirements/` |
 | The approved proposal | `docs/proposal/F26-13_Project_Proposal.pdf` |
 | Every number about the data (provenance, verification, split, statistics) | `docs/data_report.md` |
 | Why each choice was made, with alternatives and evidence | `docs/decision_log.md` |
 | How to set up Colab, the baseline's problems, the smoke test | `docs/setup_guide.md` |
-| Figures and tables | `docs/figures/`, `docs/tables/` |
+| Figures and tables | `docs/figures/`, `docs/tables/` (Phase 3: `docs/tables/phase3/`) |
 | Who does what | `project-division/Project-Division-Phase-2.md` |
 
 ## 4. Repository layout
@@ -96,9 +97,18 @@ Each script verifies its input (counts, pairing, sizes, readability, empty masks
 
 Everything that needs a GPU (statistics on both datasets, YOLO + SAM 2 smoke test, and later training) runs on Google Colab: open `docs/submissions/phase2/F26-13.ipynb` or `notebooks/03_environment_smoke_test.ipynb` with a T4 runtime and *Run all* (about 10 minutes). `docs/setup_guide.md` explains each step.
 
-## 6. Phase 3: baseline and method (in progress)
+## 6. Phase 3: baseline and method (runs done, report in draft)
 
-Decisions DL-30 to DL-37. Everything below runs on Colab (`notebooks/04_phase3_colab.ipynb`); the harness and the method logic are tested without a GPU.
+Decisions DL-30 to DL-38. Everything below runs on Colab (`notebooks/04_phase3_colab.ipynb`, executed copy committed); the harness and the method logic are tested without a GPU. Full numbers: `docs/tables/phase3/results.md`; reading: `docs/phase3_report.md`.
+
+| Per-image Dice (misses = 0) | Kvasir-SEG test (200) | CVC-ClinicDB (612, never trained on) |
+|---|---|---|
+| B: YOLOv8-m ≥ 0.5 → SAM 2 (baseline) | 0.831 (18 missed) | 0.677 (144 missed) |
+| T: threshold 0.25, nothing else | 0.893 (1) | 0.759 (75) |
+| C: CASP v1 | **0.891** (1) | **0.757** (75) |
+| O: ground-truth boxes → SAM 2 | 0.952 (0) | 0.945 (0) |
+
+CASP beats the baseline on both test sets and on all nine corrupted settings; the ablation shows the gain is the confidence gate (T = C), while the refinement and acceptance steps are neutral in v1 (DL-38). The detector is the whole remaining gap.
 
 ```bash
 python src/train_yolo.py                                                   # YOLOv8-m, recipe in configs/yolo_train.yaml
@@ -134,7 +144,7 @@ python src/eval/summarize.py                                               # -> 
 |---|---|---|
 | 1 | Problem definition and proposal (`docs/proposal/`) | done |
 | 2 | Data acquisition, cleaning, split, YOLO format, environment, tests, image-shift set | done; submitted (`docs/submissions/phase2/`) |
-| 3 | Baseline reproduction, YOLO training, confidence-aware prompt refinement (CASP v1) | in progress; plan in `project-division/Project-Division-Phase-3.md` |
+| 3 | Baseline reproduction, YOLO training, confidence-aware prompt refinement (CASP v1) | runs done (2026-10-16); tables in `docs/tables/phase3/`, report draft `docs/phase3_report.md`, record in `project-division/Project-Division-Phase-3.md` §7 |
 | 4–6 | Evaluation on both datasets and under corruptions, error and ablation analysis, LaTeX report | not started |
 
 ## 9. References

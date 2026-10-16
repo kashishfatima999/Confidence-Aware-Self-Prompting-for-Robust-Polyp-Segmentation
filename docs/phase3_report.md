@@ -1,47 +1,167 @@
-# F26-13 — Phase 3 Report: Implementation & Execution (draft)
+# F26-13 — Phase 3 Report: Implementation & Execution
 
 **Project:** Confidence-Aware Self-Prompting for Robust Polyp Segmentation Under Image and Domain Shifts
+**Group:** F26-13 — Kashish Fatima (24L-2605), Khushbakht Sohail (24L-2604), Zahra Saeed (24L-2512). AI2002, BDS-5A, FAST-NUCES Lahore. Track A.
+**State:** all runs done (2026-10-15/16, Colab T4, commit `2b9c761`); text in draft, sections owned as in `project-division/Project-Division-Phase-3.md`.
 
-Every number in this report is read from `docs/tables/phase3/results.csv` (built by `src/eval/summarize.py` from the `summary.json` files of the runs) or from `runs/yolo/<name>/summary.json`. Decisions: DL-30 to DL-37 in `docs/decision_log.md`. Sections are owned as listed in `project-division/Project-Division-Phase-3.md`.
+Every number below is read from `docs/tables/phase3/results.csv` (built by `src/eval/summarize.py` from the `summary.json` of each run; the local rebuild is byte-identical to the Colab one), from `docs/tables/phase3/casp_val_grid.csv`, from `docs/tables/phase3/yolo/summary.json`, or from the per-image files under `runs/` (git-ignored, backed up in Drive `MyDrive/F26-13/runs_phase3/`). Decisions: DL-30 to DL-38 in `docs/decision_log.md`. The executed notebook is `notebooks/04_phase3_colab.ipynb`.
+
+## 0. Summary
+
+- The YOLOv8-m → SAM 2 baseline was trained and reproduced on our split: Kvasir-SEG test pooled Dice **0.878** / IoU **0.782** (paper: 0.866 / 0.764); per image, with misses counted as zero, **0.831** / **0.780**.
+- CASP v1 raises per-image Dice from **0.831 to 0.891** on Kvasir-SEG test and from **0.677 to 0.757** on CVC-ClinicDB (cross-dataset, never trained on), and is 0.02 to 0.08 above the baseline on all nine corrupted settings.
+- The ablations show **where the gain comes from**: lowering the detector threshold from 0.5 to the chosen `t_low` = 0.25 (run **T**) gives the same gain (0.893 / 0.759). Prompt refinement, the self-prompting iteration and the acceptance rule are, in v1, neutral: the acceptance rule never rejected a single detection because SAM 2's predicted IoU was ≥ 0.78 for every uncertain box, true or false.
+- The oracle (ground-truth boxes → SAM 2) reaches **0.952** / **0.945**. The whole remaining gap, including the domain-shift gap on ClinicDB, is the detector: SAM 2 segments ClinicDB polyps as well as Kvasir ones once it is given the right box.
+- The price of the recall gain is false positives: box precision drops from 0.877 to 0.802 (Kvasir test) and from 0.890 to 0.815 (ClinicDB). Phase 4 starts from here (DL-38).
 
 ## 1. Setup (Member 1)
 
-- Data: Kvasir-SEG 700 / 100 / 200 (DL-02), CVC-ClinicDB 612 external test (DL-03), corrupted Kvasir test set (DL-20). Phase 2 report: `docs/data_report.md`.
-- Hardware and software: Colab T4; ultralytics 8.4.174, SAM 2 commit `2b90b9f`, torch 2.11 (`requirements-colab.txt`); seed 42 everywhere.
-- Evaluation (DL-32): per-image mean Dice / IoU with bootstrap 95% CI; dataset-pooled Dice / IoU (the paper's definition); images without a prediction count as empty (DL-18); box precision / recall at IoU ≥ 0.5 against mask-derived boxes.
+- Data: Kvasir-SEG 700 / 100 / 200 (DL-02), CVC-ClinicDB 612 images as external test only (DL-03), corrupted Kvasir test set, 9 settings × 200 images (DL-20). Details and every count: `docs/data_report.md`.
+- Hardware and software: Google Colab, Tesla T4 (15 GB); ultralytics 8.4.174, SAM 2 at commit `2b90b9f`, torch 2.11.0+cu130, numpy 2.1.3, Pillow 11.3.0 (`requirements-colab.txt`); seed 42 everywhere. 65 unit tests pass on Colab and locally.
+- Evaluation (DL-32): per-image Dice and IoU averaged over images, with a bootstrap 95% CI (1,000 resamples); dataset-pooled Dice and IoU (the paper's definition: all pixels of the dataset at once); images with no prediction count as empty (Dice 0, DL-18); box precision and recall at IoU ≥ 0.5 against boxes derived from the ground-truth masks. "Missed" below = images with an empty prediction.
+- Execution record: all Colab sessions were run by Member 1 on 2026-10-15 (training, detection caches) and 2026-10-16 (validation grid, the six experiments, corrupted set), because the schedule slipped; the division of the *writing* stays as planned (`project-division/Project-Division-Phase-3.md` §7). Every run is reproducible from `runs/detections/*.json` + one config file + one command. Problems met on Colab are C7 and C8 in `docs/setup_guide.md`.
 
 ## 2. Detector (Member 2)
 
-- Recipe (DL-31): `configs/yolo_train.yaml` — YOLOv8-m, 50 epochs, 640 px, batch 16, seed 42, Ultralytics defaults otherwise.
-- Table 2.1: val and test mAP50, mAP50-95, precision, recall (from `runs/yolo/yolov8m_kvasir_s42/summary.json`).
-- Figure 2.1: training curves (`results.png`). Figure 2.2: recall vs confidence threshold on val (from the detection cache).
-- Note: how many val/test polyps have **no** candidate box even at confidence 0.05 (these cannot be recovered by any prompt refinement).
+Recipe (DL-31, `configs/yolo_train.yaml`, exact arguments in `docs/tables/phase3/yolo/args.yaml`): YOLOv8-m from COCO weights, 50 epochs, 640 px, batch 16, seed 42, deterministic, Ultralytics default optimiser ("auto") and augmentation, best checkpoint by val mAP50-95. Training took 25 minutes on the T4.
+
+**Table 2.1 — detector quality** (`docs/tables/phase3/yolo/summary.json`, Ultralytics `val()` at its default confidence)
+
+| Split | mAP50 | mAP50-95 | Precision | Recall |
+|---|---|---|---|---|
+| val (100) | 0.953 | 0.750 | 0.960 | 0.869 |
+| test (200) | 0.943 | 0.747 | 0.867 | 0.908 |
+
+Figure 2.1 (`docs/figures/phase3_yolo_training_curves.png`): all three training losses fall monotonically; val mAP50 passes 0.9 by epoch 20 and plateaus at 0.95. The validation classification loss spikes at epoch 2 (27,400, a warm-up instability of the single-class head) and is stable from epoch 4 on; it has no effect on the final model.
+
+**Figure 2.2 — recall vs confidence threshold on val** (`docs/figures/phase3_recall_vs_threshold.png`, from the detection cache). Polyp recall at IoU ≥ 0.5 is 0.888 at threshold 0.5, 0.935 at 0.25 and 0.953 at 0.05; the number of false-positive boxes on the 100 images goes from 5 to 12 to 55 over the same range. The curve is flat between 0.10 and 0.35 and falls steeply above 0.6. This is the headroom the method works with.
+
+**Detection cache** (DL-33, `runs/detections/`, backed up in Drive): candidates at confidence ≥ 0.05 are 156 boxes on val (100 images), 310 on test (200) and 865 on ClinicDB (612). Images where no prompt refinement can help because the detector proposes **nothing** even at 0.05: 0 on Kvasir test, 19 on ClinicDB (3.1%). Images whose only candidates are below the chosen `t_low` = 0.25: 1 on Kvasir test, 56 on ClinicDB.
 
 ## 3. Baseline reproduction (Member 2)
 
-- B = YOLO ≥ 0.5 → SAM 2 (`configs/experiments/baseline.yaml`).
-- Table 3.1: B on Kvasir test and CVC-ClinicDB, per-image and pooled, next to the paper's 0.764 / 0.866 (Kvasir) and 0.909 / 0.951 (ClinicDB, in-domain in the paper, cross-dataset here).
-- Why ours differs: misses count (DL-18); our split; 640 vs 680; T4 batch 16 vs A100 batch 64.
-- Oracle O (GT boxes → SAM 2): the ceiling. Gap O − B = what the detector costs.
+B = YOLO boxes with confidence ≥ 0.5 → SAM 2 (`sam2_hiera_large.pt`, frozen, box prompt, `multimask_output=False`), union of the masks per image, no box = empty mask (`configs/experiments/baseline.yaml`).
+
+**Table 3.1 — baseline against the paper**
+
+| Dataset | Ours, pooled Dice / IoU | Ours, per-image Dice / IoU (misses = 0) | Missed images | Paper (Mansoori et al.) Dice / IoU |
+|---|---|---|---|---|
+| Kvasir-SEG test (200) | 0.878 / 0.782 | 0.831 / 0.780 | 18 / 200 | 0.866 / 0.764 (80/20 split, in-domain) |
+| CVC-ClinicDB (612) | 0.755 / 0.606 | 0.677 / 0.628 | 144 / 612 | 0.951 / 0.909 (trained on ClinicDB, in-domain) |
+
+The Kvasir numbers reproduce the paper within 1–2 points on its own metric. The ClinicDB numbers are not comparable to the paper's: the paper trains and tests on ClinicDB, we test a Kvasir-trained detector on it (domain shift, the point of the project), and the baseline misses 24% of ClinicDB images outright. Other differences: our split (700/100/200, seed 42) vs the paper's 80/20; 640 px vs the paper's stated 680 (DL-31); batch 16 on a T4 vs 64 on an A100.
+
+**Oracle O** (ground-truth boxes → the same SAM 2): per-image Dice 0.952 on Kvasir test and 0.945 on ClinicDB, no misses. The gap O − B is 0.12 on Kvasir and 0.27 on ClinicDB: that is what the detector costs, and it is almost all of the domain-shift drop.
 
 ## 4. Method: Confidence-Aware Self-Prompting (Member 3)
 
-- Algorithm (DL-34) with the chosen thresholds `t_low`, `t_high`, `s_min` and the validation grid (Table 4.1, 27 runs on `kvasir_val`).
-- How many test detections fell in each branch (confident / uncertain / dropped / rejected), from `per_image.csv`.
+Algorithm (DL-34, `src/pipeline/refine.py`): each cached detection with YOLO confidence c is gated: c ≥ `t_high` → box to SAM 2 unchanged; `t_low` ≤ c < `t_high` → *uncertain*: four candidate prompts (the box; the box enlarged by 10% and by 20% per side; the box plus a positive point at its centre), SAM 2's predicted IoU selects the best, one self-prompting iteration re-prompts SAM 2 with the tight box and centroid of the selected mask (kept if the score does not drop), and the mask is accepted if SAM 2's predicted IoU ≥ `s_min` and it fills ≥ 10% of its box; c < `t_low` → dropped. The baseline is `t_low` = `t_high` = 0.5 with no acceptance rule.
+
+**Table 4.1 — validation grid** (27 runs on `kvasir_val`, `docs/tables/phase3/casp_val_grid.csv`; baseline on the same 100 images: Dice 0.866, 4 missed, 5 false-positive boxes). Top six rows:
+
+| t_low | t_high | s_min | mean Dice | mean IoU | missed | FP boxes | prompts / image |
+|---|---|---|---|---|---|---|---|
+| **0.25** | **0.6** | **0.6** | **0.8985** | 0.840 | 0 | 12 | 1.79 |
+| 0.35 | 0.6 | 0.6 | 0.8975 | 0.838 | 0 | 11 | 1.74 |
+| 0.25 | 0.7 | 0.6 | 0.8955 | 0.835 | 0 | 12 | 2.15 |
+| 0.35 | 0.7 | 0.6 | 0.8944 | 0.834 | 0 | 11 | 2.10 |
+| 0.25 | 0.8 | 0.6 | 0.8935 | 0.834 | 0 | 11 | 2.87 |
+| 0.35 | 0.8 | 0.6 | 0.8924 | 0.832 | 0 | 10 | 2.82 |
+
+What the grid says (recorded in DL-34): `t_low` matters most (every row with `t_low` ≥ 0.25 beats every row with 0.15, and 0.25 vs 0.35 differ by ≤ 0.002); the lowest `t_high`, i.e. the fewest refined detections, wins at every `t_low`; `s_min` = 0.7 and 0.8 are identical to each other and each exactly one missed image worse than 0.6, and the false-positive count never changes with `s_min`. Chosen: `t_low` = 0.25, `t_high` = 0.6, `s_min` = 0.6, written into the four configs before any test run.
+
+**How the test detections were handled** (from `per_image.csv` and `detections.jsonl` of run C):
+
+| Dataset | candidates ≥ 0.05 | confident (≥ 0.6) | uncertain (0.25–0.6) | dropped (< 0.25) | rejected by the acceptance rule | kept |
+|---|---|---|---|---|---|---|
+| Kvasir test | 310 | 183 | 60 | 67 | **0** | 243 |
+| ClinicDB | 865 | 435 | 180 | 250 | **0** | 615 |
+
+Among the uncertain detections the prompt SAM 2 preferred was the plain box in 40% (Kvasir) / 36% (ClinicDB) of cases, the box plus centre point in 25% / 26%, and an enlarged box in 22% / 21%; the self-prompting iteration was kept in 43% / 37%. SAM 2's predicted IoU for uncertain detections was never below 0.784 (median 0.947 on Kvasir, 0.917 on ClinicDB), so the acceptance threshold `s_min` = 0.6 never fired, and neither did the 10% box-fill rule. Consequence: in v1, every detection above `t_low` reaches the output; the acceptance rule as designed does not separate true from false boxes.
 
 ## 5. Results (Member 1 assembles, all write)
 
-- Table 5.1: B, T, C, C-all, C-noiter, O on Kvasir test and CVC-ClinicDB (`docs/tables/phase3/results.md`).
-- Table 5.2 (if run): B and C on the nine corrupted settings.
-- Figure 5.1: 5 images where C improved most over B, 5 where it hurt most (`--save-masks` outputs).
-- Reading the ablations: T vs B (recall alone), C vs T (acceptance + refinement), C vs C-all (gating), C vs C-noiter (self-prompting), C vs O (what is left).
+**Table 5.1 — the six experiments on the two test sets** (`docs/tables/phase3/results.md`; Dice and IoU per image, misses = 0; "pooled" = the paper's definition)
+
+| Run | Dataset | Dice [95% CI] | IoU | pooled Dice / IoU | Missed | Box prec. / recall | Prompts / img |
+|---|---|---|---|---|---|---|---|
+| B baseline | Kvasir test | 0.831 [0.792, 0.871] | 0.780 | 0.878 / 0.782 | 18 | 0.877 / 0.865 | 1.0 |
+| T threshold-only | Kvasir test | 0.893 [0.871, 0.913] | 0.832 | 0.901 / 0.820 | 1 | 0.807 / 0.947 | 1.2 |
+| C CASP | Kvasir test | 0.891 [0.868, 0.912] | 0.831 | 0.894 / 0.808 | 1 | 0.802 / 0.942 | 2.4 |
+| C-all (no gating) | Kvasir test | 0.885 [0.860, 0.907] | 0.824 | 0.879 / 0.784 | 1 | 0.802 / 0.942 | 6.1 |
+| C-noiter | Kvasir test | 0.892 [0.869, 0.913] | 0.832 | 0.895 / 0.811 | 1 | 0.807 / 0.947 | 2.1 |
+| O oracle | Kvasir test | 0.952 [0.943, 0.958] | 0.912 | 0.951 / 0.906 | 0 | 1.000 / 1.000 | 1.0 |
+| B baseline | ClinicDB | 0.677 [0.648, 0.710] | 0.628 | 0.755 / 0.606 | 144 | 0.890 / 0.686 | 0.8 |
+| T threshold-only | ClinicDB | 0.759 [0.736, 0.785] | 0.698 | 0.799 / 0.665 | 75 | 0.820 / 0.780 | 1.0 |
+| C CASP | ClinicDB | 0.757 [0.734, 0.783] | 0.695 | 0.795 / 0.660 | 75 | 0.815 / 0.775 | 2.2 |
+| C-all (no gating) | ClinicDB | 0.757 [0.734, 0.784] | 0.696 | 0.794 / 0.658 | 75 | 0.808 / 0.769 | 5.0 |
+| C-noiter | ClinicDB | 0.757 [0.734, 0.783] | 0.695 | 0.795 / 0.660 | 75 | 0.813 / 0.774 | 1.9 |
+| O oracle | ClinicDB | 0.945 [0.942, 0.948] | 0.899 | 0.945 / 0.896 | 0 | 1.000 / 1.000 | 1.1 |
+
+**Paired differences** (same images, mean of per-image Dice differences, bootstrap 95% CI, 2,000 resamples; wins / losses / ties at 10⁻⁴):
+
+| Comparison | Kvasir test (200) | ClinicDB (612) |
+|---|---|---|
+| C − B (the hypothesis) | **+0.061** [+0.032, +0.090], 27 / 8 / 165 | **+0.080** [+0.062, +0.101], 100 / 28 / 484 |
+| T − B (recall alone) | +0.063 [+0.033, +0.097], 22 / 4 / 174 | +0.082 [+0.063, +0.103], 93 / 10 / 509 |
+| C − T (refinement + acceptance on top of recall) | −0.002 [−0.006, +0.003], 13 / 14 / 173 | −0.002 [−0.004, −0.000], 39 / 60 / 513 |
+| C − C-noiter (self-prompting iteration) | −0.001 [−0.002, +0.000] | −0.000 [−0.001, +0.001] |
+| C-all − C (gating) | −0.006 [−0.017, +0.001], 16 / 40 / 144 | +0.000 [−0.002, +0.002] |
+
+Reading the ablations:
+
+1. **T vs B: the gain is recall.** Lowering the threshold recovers 17 of the 18 Kvasir images the baseline missed (their CASP Dice averages 0.73) and 69 of the 144 ClinicDB ones (average 0.70). No image that the baseline segmented becomes empty. Box recall rises from 0.865 to 0.947 (Kvasir) and from 0.686 to 0.780 (ClinicDB).
+2. **C vs T: refinement and acceptance add nothing in v1.** On the images that contain an uncertain detection (45 on Kvasir, 154 on ClinicDB) CASP is 0.008 Dice *below* T on average, with as many losses as wins. SAM 2 with the raw box is already as good as SAM 2 with the best of four prompts plus a re-prompt, and the acceptance rule never fires (§4).
+3. **C vs C-noiter:** the self-prompting iteration changes nothing measurable (it was kept for 37–43% of uncertain detections but moved Dice by < 0.001).
+4. **C-all vs C: gating matters a little on Kvasir** (−0.006, 40 losses vs 16 wins when every detection is refined, at 2.5× the prompts) and not at all on ClinicDB. Refining confident boxes can only hurt them.
+5. **C vs O: what is left is the detector.** 0.06 on Kvasir, 0.19 on ClinicDB. On ClinicDB, 75 images still have no prediction: 19 have no candidate at any confidence and 56 have candidates only below 0.25. Only a better or adapted detector (or a much lower `t_low` with a working false-positive filter) can reach them.
+6. **The cost: false positives.** Kept false-positive boxes go from 25 to 48 (Kvasir) and from 55 to 114 (ClinicDB); box precision from 0.877 to 0.802 and from 0.890 to 0.815. Per-image Dice hides most of this because a small spurious mask next to a correct one costs little, but it is the number a clinician would ask about.
+
+**Polyp size** (per-image Dice by terciles of ground-truth area, from `per_image.csv`; the Phase 4 bias check starts here):
+
+| Dataset | Tercile (GT area) | B | C | O | B missed → C missed |
+|---|---|---|---|---|---|
+| Kvasir test | small (< 9.1%) | 0.811 | 0.872 | 0.951 | 7 → 1 |
+| Kvasir test | medium (9.1–18.5%) | 0.863 | 0.899 | 0.958 | 4 → 0 |
+| Kvasir test | large (> 18.5%) | 0.819 | 0.903 | 0.948 | 7 → 0 |
+| ClinicDB | small (< 4.4%) | 0.614 | 0.714 | 0.939 | 61 → 32 |
+| ClinicDB | medium (4.4–10.2%) | 0.782 | 0.823 | 0.952 | 29 → 18 |
+| ClinicDB | large (> 10.2%) | 0.635 | 0.735 | 0.945 | 54 → 25 |
+
+Small ClinicDB polyps are the hardest case for the detector (30% of them missed by the baseline) and SAM 2 handles them as well as the others once prompted; the large-polyp ClinicDB misses are mostly frames where the polyp fills much of the 384 × 288 image and the Kvasir-trained detector does not fire.
+
+**Table 5.2 — image shift: B and C on the nine corrupted settings** (Kvasir test, 200 images each; `docs/figures/phase3_corrupted_dice.png`)
+
+| Setting | B Dice | B missed | C Dice | C missed | C − B | Images with no candidate at 0.05 |
+|---|---|---|---|---|---|---|
+| clean | 0.831 | 18 | 0.891 | 1 | +0.061 | 0 |
+| blur s1 | 0.842 | 15 | 0.870 | 5 | +0.028 | 0 |
+| blur s2 | 0.811 | 21 | 0.846 | 8 | +0.035 | 0 |
+| blur s3 | 0.724 | 37 | 0.806 | 11 | +0.082 | 1 |
+| brightness/contrast s1 | 0.837 | 17 | 0.883 | 3 | +0.046 | 0 |
+| brightness/contrast s2 | 0.834 | 16 | 0.885 | 3 | +0.050 | 0 |
+| brightness/contrast s3 | 0.799 | 25 | 0.838 | 12 | +0.040 | 6 |
+| noise s1 | 0.800 | 20 | 0.875 | 2 | +0.075 | 0 |
+| noise s2 | 0.687 | 40 | 0.761 | 23 | +0.074 | 8 |
+| noise s3 | 0.016 | 196 | 0.035 | 192 | +0.019 | 165 |
+
+CASP is above the baseline in every setting, and the gain grows with the severity of the shift up to the point where the detector stops proposing anything (noise s3: 165 of 200 images have no candidate at all, both pipelines collapse). The robustness claim of the title holds in the same form as the clean result: under shift, the detector's confidence drops before its boxes disappear, and a lower threshold recovers the polyps. Because the chosen thresholds were tuned on clean validation images, this is a genuine out-of-distribution test of the setting.
+
+**Figure 5.1** (`docs/figures/phase3_examples_kvasir_test.png`): the five Kvasir test images where C gains most over B and the five where it loses most, each as ground truth / B / C overlay with Dice. All five best cases are recovered misses (B: no detection, C: Dice 0.96–0.99). All five worst cases are a second, low-confidence box that C admits and B did not (Dice 0.97 → 0.66 in the worst): the false-positive cost of item 6 made visible, and the case the acceptance rule should have caught.
 
 ## 6. Challenges and limitations (all)
 
-- Everything that broke on Colab and how it was fixed (with the C-numbers in `docs/setup_guide.md`).
-- Single training seed; thresholds chosen on 100 validation images; corrupted set only if time.
+- **Colab** (`docs/setup_guide.md` C7, C8): the free tier dropped sessions during the silent 50-minute grid cell and two hours of runs were lost; the driver now saves every run to Drive as it finishes and restores it on re-run, so a disconnect costs one run. The first notebook version also hid all output.
+- **Thresholds on 100 images.** The grid differences are ≤ 0.006 Dice between neighbouring settings on 100 validation images; `t_high` = 0.6 and `s_min` = 0.6 both sit on the edge of the grid. The chosen setting generalised to the test sets and to all nine corruptions, but a wider grid is cheap and due.
+- **The acceptance rule is inert.** SAM 2's predicted IoU is high for false positives too (it rates its own mask, not whether the region is a polyp). `s_min` cannot do the job it was designed for; see DL-38.
+- **Single seed, single detector.** One YOLOv8-m training run; no variance estimate across seeds. The bootstrap CIs cover image sampling only.
+- **Per-image Dice with misses = 0** rewards recall and under-weights false positives; the pooled numbers and the box precision column are reported for that reason.
+- **Execution by one member.** Sessions were run by Member 1 (record in the division file §7); Members 2 and 3 own the analysis and text of §2–4 and the Phase 4 follow-ups.
 
 ## 7. Next (Phase 4)
 
-- Error analysis by polyp size, brightness and dataset (the bias check), from the per-image CSVs.
-- Corrupted-set evaluation if not finished; second seed if time.
+1. **A false-positive filter that works** (DL-38): candidates are the YOLO confidence × SAM score product, the agreement between the four candidate masks (a true polyp gives the same mask whatever the prompt; a spurious box does not), and mask-area / box-fill consistency. Evaluate on `kvasir_val` by box precision at fixed recall, then once on the test sets.
+2. **Wider validation grid**: `t_low` ∈ {0.15 … 0.45}, `t_high` ∈ {0.4, 0.5, 0.6}, the new filter's threshold; still val only, cheap runs from the cache.
+3. **Error and bias analysis** from the per-image CSVs: Dice vs polyp size, brightness, contrast and dataset; the 75 ClinicDB images with no prediction; the 10 Kvasir images where C loses.
+4. **Second training seed** if GPU time allows, to put a variance on Table 2.1 and Table 5.1.
+5. Long GPU jobs move to a workspace that runs without the browser (Kaggle "Save and Run All"), see C8.

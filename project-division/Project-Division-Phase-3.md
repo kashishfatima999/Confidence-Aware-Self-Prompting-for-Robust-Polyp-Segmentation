@@ -120,3 +120,28 @@ The detector runs once per dataset at a very low threshold and every candidate b
 - Don't use the baseline's shipped weights for any reported number (DL-17).
 - Don't tune anything on the test split, and don't look at test results before the grid is finished.
 - Don't commit `runs/`, weights or masks.
+
+---
+
+## 7. Execution record (filled 2026-10-17)
+
+What actually happened, kept next to the plan so the evaluation can compare the two. The plan above is unchanged.
+
+| Task | Planned | Done by | When | Evidence |
+|---|---|---|---|---|
+| 1.1, 1.2 harness, configs, DL-30..37, skeletons | M1 | M1 | 2026-10-11 | PR #8 |
+| 2.1 YOLO training | M2 | **M1** | 2026-10-15 | `docs/tables/phase3/yolo/`, `docs/figures/phase3_yolo_training_curves.png` |
+| 2.2 recall vs threshold | M2 | **M1** | 2026-10-16 | `docs/figures/phase3_recall_vs_threshold.png` |
+| 2.3 detection caches (val, test, ClinicDB, 9 corrupted) | M2 | **M1** | 2026-10-15/16 | Drive `detections/`, `runs/detections/` |
+| 2.4 runs B, T, O | M2 | **M1** | 2026-10-16 | `docs/tables/phase3/results.csv` |
+| 3.1 pipeline on Colab | M3 | **M1** | 2026-10-16 | executed notebook |
+| 3.2 validation grid, thresholds, DL-34 | M3 | **M1** | 2026-10-16 | `casp_val_grid.csv`, DL-34, PR #9 |
+| 3.3, 3.4 runs C, C-all, C-noiter; B + C on corrupted | M3 | **M1** | 2026-10-16 | `results.csv` rows |
+| 3.5 notebook runnable, masks saved | M3 | **M1** | 2026-10-16 | `notebooks/04_phase3_colab.ipynb`, Drive `runs_phase3/` |
+| 1.4 tables and example figures | M1 | M1 | 2026-10-17 | `docs/tables/phase3/`, `phase3_examples_kvasir_test.png`, `phase3_corrupted_dice.png` |
+| 1.5 report draft | M1 | M1 | 2026-10-17 | `docs/phase3_report.md` |
+| 2.5 Detector + Baseline sections (text, analysis) | M2 | open | — | `docs/phase3_report.md` §2–3 |
+| 3.6 Method + Ablations sections (text, analysis) | M3 | open | — | `docs/phase3_report.md` §4, §5 ablations |
+| Submission package (`docs/submissions/phase3/`) | M1 | open | — | — |
+
+Why the Colab work was run by Member 1: the schedule slipped in the first days of the week and the cached-detection design made every run a single command, so the lead ran the sessions on 15–16 October to have the numbers in time; two Colab problems (C7, C8 in `docs/setup_guide.md`) cost most of a day. Members 2 and 3 keep ownership of their code files and write their report sections from the committed tables and the per-image files; the Phase 4 items in DL-38 are theirs to run.
