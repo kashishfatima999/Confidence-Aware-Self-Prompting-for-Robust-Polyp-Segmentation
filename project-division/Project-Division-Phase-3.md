@@ -145,3 +145,17 @@ What actually happened, kept next to the plan so the evaluation can compare the 
 | Submission package (`docs/submissions/phase3/`) | M1 | open | — | — |
 
 Why the Colab work was run by Member 1: the schedule slipped in the first days of the week and the cached-detection design made every run a single command, so the lead ran the sessions on 15–16 October to have the numbers in time; two Colab problems (C7, C8 in `docs/setup_guide.md`) cost most of a day. Members 2 and 3 keep ownership of their code files and write their report sections from the committed tables and the per-image files; the Phase 4 items in DL-38 are theirs to run.
+
+### Missing or open items (logged 2026-10-17, so nothing is forgotten)
+
+| # | Item | Why it is missing | Owner | Due |
+|---|---|---|---|---|
+| O1 | Example figure for CVC-ClinicDB (5 best / 5 worst images, GT vs B vs C), like `docs/figures/phase3_examples_kvasir_test.png`. | The ClinicDB images are not on the lead's laptop; the B and C masks are in `runs/` and Drive `runs_phase3/`. Needs the ClinicDB raw data prepared locally (`src/data/prepare_clinicdb.py`) or a Colab cell. | Member 2 (ClinicDB pipeline owner) | Phase 4, with the error analysis |
+| O2 | Console log of the YOLO training run (epoch-by-epoch output). | Training ran on 2026-10-15 in a Colab session whose notebook was not downloaded; the facts are in `docs/tables/phase3/yolo/results.csv` (per-epoch metrics), `args.yaml` and `summary.json`, so no number is missing. Not recoverable. | Member 2: save the full log when the second seed is trained (Phase 4 item 4) | Phase 4 |
+| O3 | Report sections 2–3 (Detector, Baseline) in Member 2's words and sections 4–5 ablation text in Member 3's words; the draft is Member 1's. | Written by the lead from the tables so the numbers were in on time. | Member 2 (§2–3), Member 3 (§4, §5 ablations) | before the Phase 3 PDF is built |
+| O4 | `docs/submissions/phase3/F26-13.pdf` and `F26-13.ipynb`; `docs/requirements/phase3_requirements.md` checklist. | Needs the TA's Phase 3 submission text (page limit, file names). | Member 1 | Phase 3 deadline |
+| O5 | Kaggle (or other background-execution) version of the Colab driver for long runs, see setup guide C8. | Free Colab dropped the session repeatedly on 2026-10-16. | Member 3 (notebook owner), Member 1 helps | before the first Phase 4 GPU job |
+| O6 | Second training seed; variance on Tables 2.1 and 5.1. | GPU time. | Member 2 | Phase 4, if time |
+| O7 | Phase 4 method work from DL-38: a false-positive filter that works, wider validation grid, box precision in every table. | Phase 3 finding. | Member 3 (filter, grid), Member 1 (tables) | Phase 4 |
+| O8 | Error and bias analysis from the per-image CSVs (`runs/*/*/per_image.csv`): Dice vs polyp size, brightness, contrast, dataset; the 75 ClinicDB images with no prediction; the 10 Kvasir images where C loses. | Phase 4 scope by plan. | all three, Member 1 assembles | Phase 4 |
+| O9 | Local `PyYAML` install so the one skipped test (`test_yaml_experiment_configs_parse`) runs on the lead's laptop too; CI already runs it. | ~1 MB install not yet approved. | Member 1 | any time |

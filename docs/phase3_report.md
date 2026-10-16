@@ -165,3 +165,4 @@ CASP is above the baseline in every setting, and the gain grows with the severit
 3. **Error and bias analysis** from the per-image CSVs: Dice vs polyp size, brightness, contrast and dataset; the 75 ClinicDB images with no prediction; the 10 Kvasir images where C loses.
 4. **Second training seed** if GPU time allows, to put a variance on Table 2.1 and Table 5.1.
 5. Long GPU jobs move to a workspace that runs without the browser (Kaggle "Save and Run All"), see C8.
+6. **Evidence still to add:** an example figure for CVC-ClinicDB like Figure 5.1 (Member 2; the masks are saved, the images were not local when Figure 5.1 was made), and the epoch-by-epoch console log of the next training run (Member 2; the Phase 3 run's log was not saved, its per-epoch metrics are in `docs/tables/phase3/yolo/results.csv`). Owners and dates for every open item: `project-division/Project-Division-Phase-3.md` §7, "Missing or open items".
