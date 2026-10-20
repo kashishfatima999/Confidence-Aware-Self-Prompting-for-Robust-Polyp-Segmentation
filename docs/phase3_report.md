@@ -55,7 +55,34 @@ The Kvasir numbers reproduce the paper within 1–2 points on its own metric. Th
 
 ## 4. Method: Confidence-Aware Self-Prompting (Member 3)
 
-Algorithm (DL-34, `src/pipeline/refine.py`): each cached detection with YOLO confidence c is gated: c ≥ `t_high` → box to SAM 2 unchanged; `t_low` ≤ c < `t_high` → *uncertain*: four candidate prompts (the box; the box enlarged by 10% and by 20% per side; the box plus a positive point at its centre), SAM 2's predicted IoU selects the best, one self-prompting iteration re-prompts SAM 2 with the tight box and centroid of the selected mask (kept if the score does not drop), and the mask is accepted if SAM 2's predicted IoU ≥ `s_min` and it fills ≥ 10% of its box; c < `t_low` → dropped. The baseline is `t_low` = `t_high` = 0.5 with no acceptance rule.
+### 4.1 The problem with the baseline
+
+The baseline works in two steps. YOLO draws boxes around things it thinks are polyps, and gives each box a confidence score between 0 and 1. Then SAM 2 colours in the polyp inside each box. The baseline only keeps boxes with a confidence of **0.5 or more**.
+
+That one cut-off causes trouble. If YOLO finds a real polyp but is only 30% sure, the box is thrown away and the image gets no mask at all. This happened to 18 of the 200 Kvasir test images and 144 of the 612 ClinicDB images (Table 3.1). Meanwhile, a box at 51% goes through without any check, even though YOLO was barely more sure about it.
+
+### 4.2 Our idea: treat sure and unsure boxes differently
+
+Instead of one cut-off, we use two: `t_low` and `t_high`. Every box falls into one of three groups (code: `refine_detection` in `src/pipeline/refine.py`, decision DL-34):
+
+| YOLO confidence | Group | What we do |
+|---|---|---|
+| `t_high` or above | **Confident** | Send the box to SAM 2 as it is (same as the baseline). |
+| between `t_low` and `t_high` | **Uncertain** | Keep the box, but double-check it (the four steps below). |
+| below `t_low` | **Dropped** | Ignore it. |
+
+For an **uncertain** box we do four things:
+
+1. **Ask SAM 2 in four ways.** We give SAM 2 the box, the box grown by 10% on every side, the box grown by 20% on every side, and the box with a dot at its centre. The idea is that a slightly wrong box might still work if we try a few versions of it.
+2. **Keep the best answer.** With every mask, SAM 2 also gives a score saying how good it thinks its mask is. We keep the mask with the highest score.
+3. **Ask again with the mask (self-prompting).** We draw a tight box around the chosen mask, mark its centre, and give these back to SAM 2. If the new mask scores at least as well, we keep it.
+4. **Final check.** We keep the mask only if SAM 2's score is at least `s_min` and the mask fills at least 10% of its box. Otherwise we throw the box away. This step was meant to catch wrong boxes.
+
+At the end, all kept masks in an image are combined into one prediction. If we set `t_low` = `t_high` = 0.5 and switch off the final check, we get exactly the baseline. So any difference between the baseline (B) and our method (C) comes only from these new rules.
+
+### 4.3 Choosing the three thresholds
+
+We picked `t_low`, `t_high` and `s_min` using only the 100 **validation** images, never the test images. We tried every combination of `t_low` ∈ {0.15, 0.25, 0.35}, `t_high` ∈ {0.6, 0.7, 0.8} and `s_min` ∈ {0.6, 0.7, 0.8}, which is 27 runs, and kept the one with the highest average Dice. This was quick because YOLO's boxes were saved once and reused (DL-33).
 
 **Table 4.1 — validation grid** (27 runs on `kvasir_val`, `docs/tables/phase3/casp_val_grid.csv`; baseline on the same 100 images: Dice 0.866, 4 missed, 5 false-positive boxes). Top six rows:
 
@@ -68,7 +95,15 @@ Algorithm (DL-34, `src/pipeline/refine.py`): each cached detection with YOLO con
 | 0.25 | 0.8 | 0.6 | 0.8935 | 0.834 | 0 | 11 | 2.87 |
 | 0.35 | 0.8 | 0.6 | 0.8924 | 0.832 | 0 | 10 | 2.82 |
 
-What the grid says (recorded in DL-34): `t_low` matters most (every row with `t_low` ≥ 0.25 beats every row with 0.15, and 0.25 vs 0.35 differ by ≤ 0.002); the lowest `t_high`, i.e. the fewest refined detections, wins at every `t_low`; `s_min` = 0.7 and 0.8 are identical to each other and each exactly one missed image worse than 0.6, and the false-positive count never changes with `s_min`. Chosen: `t_low` = 0.25, `t_high` = 0.6, `s_min` = 0.6, written into the four configs before any test run.
+What we learned from the grid:
+
+- **`t_low` matters most.** At 0.15, too many wrong boxes get in (18–19 instead of 10–12), and 0.15 always does worse than 0.25 or 0.35 when the other two thresholds are kept the same. 0.25 and 0.35 are almost the same (at most 0.002 apart).
+- **A lower `t_high` is always better.** A lower `t_high` means fewer boxes get double-checked. That was an early hint that the double-checking is not what helps.
+- **`s_min` hardly matters.** 0.7 and 0.8 give the same result, and both lose one image compared to 0.6. The number of wrong boxes never changes with `s_min`, so the final check is not catching wrong boxes.
+
+**Chosen:** `t_low` = 0.25, `t_high` = 0.6, `s_min` = 0.6. Validation Dice 0.8985, compared with 0.866 for the baseline. These values were fixed in the config files before we looked at any test result.
+
+### 4.4 What happened on the test images
 
 **How the test detections were handled** (from `per_image.csv` and `detections.jsonl` of run C):
 
@@ -77,7 +112,10 @@ What the grid says (recorded in DL-34): `t_low` matters most (every row with `t_
 | Kvasir test | 310 | 183 | 60 | 67 | **0** | 243 |
 | ClinicDB | 865 | 435 | 180 | 250 | **0** | 615 |
 
-Among the uncertain detections the prompt SAM 2 preferred was the plain box in 40% (Kvasir) / 36% (ClinicDB) of cases, the box plus centre point in 25% / 26%, and an enlarged box in 22% / 21%; the self-prompting iteration was kept in 43% / 37%. SAM 2's predicted IoU for uncertain detections was never below 0.784 (median 0.947 on Kvasir, 0.917 on ClinicDB), so the acceptance threshold `s_min` = 0.6 never fired, and neither did the 10% box-fill rule. Consequence: in v1, every detection above `t_low` reaches the output; the acceptance rule as designed does not separate true from false boxes.
+- **The four prompts did get used.** For uncertain boxes, SAM 2 liked the plain box best in 40% (Kvasir) / 36% (ClinicDB) of cases, the box with a centre dot in 25% / 26%, and a bigger box in 22% / 21%. Self-prompting gave a better-scored mask in 43% / 37% of cases.
+- **But the final check rejected nothing.** Look at the zeros in the "rejected" column. SAM 2's score for uncertain boxes was never below 0.784 (usually around 0.95 on Kvasir and 0.92 on ClinicDB), so a cut-off of 0.6 never removed anything, and neither did the 10% rule.
+
+**Why?** SAM 2's score tells us how *neat* the mask is, not whether it is *a polyp*. If YOLO puts a box around a fold of tissue or a light reflection, SAM 2 still draws a clean shape inside it and gives itself a high score. So in this first version every box above 0.25 ends up in the output, and the method behaves almost exactly like "just lower the threshold to 0.25". Section 5 tests this directly.
 
 ## 5. Results (Member 1 assembles, all write)
 
@@ -108,14 +146,21 @@ Among the uncertain detections the prompt SAM 2 preferred was the plain box in 4
 | C − C-noiter (self-prompting iteration) | −0.001 [−0.002, +0.000] | −0.000 [−0.001, +0.001] |
 | C-all − C (gating) | −0.006 [−0.017, +0.001], 16 / 40 / 144 | +0.000 [−0.002, +0.002] |
 
-Reading the ablations:
+**Reading the ablations (Member 3).** An ablation is a run where we remove or change one part of our method to see how much that part helps. Here is what each comparison tells us, in plain words.
 
-1. **T vs B: the gain is recall.** Lowering the threshold recovers 17 of the 18 Kvasir images the baseline missed (their CASP Dice averages 0.73) and 69 of the 144 ClinicDB ones (average 0.70). No image that the baseline segmented becomes empty. Box recall rises from 0.865 to 0.947 (Kvasir) and from 0.686 to 0.780 (ClinicDB).
-2. **C vs T: refinement and acceptance add nothing in v1.** On the images that contain an uncertain detection (45 on Kvasir, 154 on ClinicDB) CASP is 0.008 Dice *below* T on average, with as many losses as wins. SAM 2 with the raw box is already as good as SAM 2 with the best of four prompts plus a re-prompt, and the acceptance rule never fires (§4).
-3. **C vs C-noiter:** the self-prompting iteration changes nothing measurable (it was kept for 37–43% of uncertain detections but moved Dice by < 0.001).
-4. **C-all vs C: gating matters a little on Kvasir** (−0.006, 40 losses vs 16 wins when every detection is refined, at 2.5× the prompts) and not at all on ClinicDB. Refining confident boxes can only hurt them.
-5. **C vs O: what is left is the detector.** 0.06 on Kvasir, 0.19 on ClinicDB. On ClinicDB, 75 images still have no prediction: 19 have no candidate at any confidence and 56 have candidates only below 0.25. Only a better or adapted detector (or a much lower `t_low` with a working false-positive filter) can reach them.
-6. **The cost: false positives.** Kept false-positive boxes go from 25 to 48 (Kvasir) and from 55 to 114 (ClinicDB); box precision from 0.877 to 0.802 and from 0.890 to 0.815. Per-image Dice hides most of this because a small spurious mask next to a correct one costs little, but it is the number a clinician would ask about.
+1. **T vs B: the gain comes from keeping more boxes.** T is the baseline with the cut-off lowered from 0.5 to 0.25, and nothing else. It improves Dice by +0.063 on Kvasir and +0.082 on ClinicDB, which is the whole improvement our method gets. The extra boxes rescue 17 of the 18 Kvasir images the baseline missed (average Dice 0.73 on them) and 69 of the 144 ClinicDB ones (average 0.70). No image that the baseline got right was lost. **In short: our method helps because it stops throwing away polyps that YOLO was unsure about.**
+
+2. **C vs T: the double-checking does not help (yet).** Our full method is 0.002 Dice *below* T on both datasets. It gets worse on slightly more images than it gets better (13 better / 14 worse on Kvasir, 39 / 60 on ClinicDB). On the images that actually had an uncertain box (45 on Kvasir, 154 on ClinicDB), it is 0.008 below T. Giving SAM 2 the plain box already works as well as trying four prompts and asking again, and the final check never removes anything (§4.4).
+
+3. **C vs C-noiter: self-prompting makes no real difference.** Removing the "ask again" step changes Dice by less than 0.001. It does change the mask in 37–43% of uncertain cases, but those masks were already good.
+
+4. **C-all vs C: double-checking sure boxes slightly hurts.** C-all double-checks *every* box, not just the uncertain ones. On Kvasir it is 0.006 worse (40 images worse, 16 better) and uses 6.1 prompts per image instead of 2.4. On ClinicDB there is no difference. A box YOLO is sure about is already a good prompt, and trying alternatives more often swaps it for a worse one than a better one. So only checking the uncertain boxes is the right choice, even if it matters little.
+
+5. **C vs O: what is still missing is the detector's fault.** O (oracle) gives SAM 2 the perfect boxes from the ground truth. It is 0.06 Dice above our method on Kvasir and 0.19 on ClinicDB. With a perfect box, SAM 2 scores about 0.95 on *both* datasets, so SAM 2 is not the weak link. YOLO is. On ClinicDB, 75 images still get no prediction: in 19 of them YOLO finds nothing at all, and in the other 56 it only finds boxes below 0.25. Fixing these needs a better detector, or a lower `t_low` plus a filter that can actually remove wrong boxes.
+
+6. **The price: more wrong boxes.** Lowering the cut-off lets in wrong boxes too. Wrong boxes kept go from 25 to 48 on Kvasir and from 55 to 114 on ClinicDB. Box precision (the share of kept boxes that are real polyps) falls from 0.877 to 0.802 and from 0.890 to 0.815. Dice barely shows this, because a small extra blob next to a correct mask costs little. For a doctor, though, a false alarm matters, and this is exactly what the final check was supposed to prevent. The worst examples in Figure 5.1 are all of this kind.
+
+**Bottom line.** Our method beats the baseline, but because of its lower threshold, not its double-checking. The next step (Phase 4, DL-38) is to build a check that can actually tell a polyp from a wrong box, so that we keep the rescued polyps without the extra false alarms.
 
 **Polyp size** (per-image Dice by terciles of ground-truth area, from `per_image.csv`; the Phase 4 bias check starts here):
 

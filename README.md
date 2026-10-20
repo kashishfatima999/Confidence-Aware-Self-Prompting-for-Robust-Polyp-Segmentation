@@ -126,6 +126,7 @@ python src/eval/summarize.py                                               # -> 
 | **CASP v1**: gate by confidence, candidate prompts, SAM-score selection, self-prompt iteration, accept/reject | `src/pipeline/refine.py` |
 | Experiments B, T, C, C-all, C-noiter, O | `configs/experiments/*.yaml`, `src/pipeline/run_experiment.py` |
 | Results tables | `src/eval/summarize.py` → `docs/tables/phase3/` |
+| Same runs on Kaggle, for long jobs that must survive a closed browser | `notebooks/05_kaggle_driver.ipynb` (setup guide C9) |
 | Report | `docs/phase3_report.md` |
 
 ## 7. How we keep this reproducible
