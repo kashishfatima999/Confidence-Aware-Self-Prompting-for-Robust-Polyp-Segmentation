@@ -140,7 +140,7 @@ What actually happened, kept next to the plan so the evaluation can compare the 
 | 3.5 notebook runnable, masks saved | M3 | **M1** | 2026-10-16 | `notebooks/04_phase3_colab.ipynb`, Drive `runs_phase3/` |
 | 1.4 tables and example figures | M1 | M1 | 2026-10-17 | `docs/tables/phase3/`, `phase3_examples_kvasir_test.png`, `phase3_corrupted_dice.png` |
 | 1.5 report draft | M1 | M1 | 2026-10-17 | `docs/phase3_report.md` |
-| 2.5 Detector + Baseline sections (text, analysis) | M2 | open | — | `docs/phase3_report.md` §2–3 |
+| 2.5 Detector + Baseline sections (text, analysis) | M2 | M2 | 2026-10-20 | `docs/phase3_report.md` Â§2â€“3, branch `khushbakht-phase3` |
 | 3.6 Method + Ablations sections (text, analysis) | M3 | M3 | 2026-10-19/20 | `docs/phase3_report.md` §4, §5 ablations, branch `zahra-phase3` |
 | Submission package (`docs/submissions/phase3/`) | M1 | open | — | — |
 
@@ -152,7 +152,7 @@ Why the Colab work was run by Member 1: the schedule slipped in the first days o
 |---|---|---|---|---|
 | O1 | Example figure for CVC-ClinicDB (5 best / 5 worst images, GT vs B vs C), like `docs/figures/phase3_examples_kvasir_test.png`. | The ClinicDB images are not on the lead's laptop; the B and C masks are in `runs/` and Drive `runs_phase3/`. Needs the ClinicDB raw data prepared locally (`src/data/prepare_clinicdb.py`) or a Colab cell. | Member 2 (ClinicDB pipeline owner) | Phase 4, with the error analysis |
 | O2 | Console log of the YOLO training run (epoch-by-epoch output). | Training ran on 2026-10-15 in a Colab session whose notebook was not downloaded; the facts are in `docs/tables/phase3/yolo/results.csv` (per-epoch metrics), `args.yaml` and `summary.json`, so no number is missing. Not recoverable. | Member 2: save the full log when the second seed is trained (Phase 4 item 4) | Phase 4 |
-| O3 | Report sections 2–3 (Detector, Baseline) in Member 2's words and sections 4–5 ablation text in Member 3's words; the draft is Member 1's. | Written by the lead from the tables so the numbers were in on time. | Member 2 (§2–3), Member 3 (§4, §5 ablations; done 2026-10-20) | before the Phase 3 PDF is built |
+| O3 | Report sections 2â€“3 (Detector, Baseline) in Member 2's words and sections 4â€“5 ablation text in Member 3's words; the draft is Member 1's. | Written by the lead from the tables so the numbers were in on time. | Member 2 (Â§2â€“3, done 2026-10-20), Member 3 (Â§4, Â§5 ablations, done 2026-10-20) | done |
 | O4 | `docs/submissions/phase3/F26-13.pdf` and `F26-13.ipynb`; `docs/requirements/phase3_requirements.md` checklist. | Needs the TA's Phase 3 submission text (page limit, file names). | Member 1 | Phase 3 deadline |
 | O5 | Kaggle (or other background-execution) version of the Colab driver for long runs, see setup guide C8. | Free Colab dropped the session repeatedly on 2026-10-16. | Member 3 (notebook owner), Member 1 helps; `notebooks/05_kaggle_driver.ipynb` added 2026-10-20, first Kaggle run still to do | before the first Phase 4 GPU job |
 | O6 | Second training seed; variance on Tables 2.1 and 5.1. | GPU time. | Member 2 | Phase 4, if time |

@@ -23,35 +23,103 @@ Every number below is read from `docs/tables/phase3/results.csv` (built by `src/
 
 ## 2. Detector (Member 2)
 
-Recipe (DL-31, `configs/yolo_train.yaml`, exact arguments in `docs/tables/phase3/yolo/args.yaml`): YOLOv8-m from COCO weights, 50 epochs, 640 px, batch 16, seed 42, deterministic, Ultralytics default optimiser ("auto") and augmentation, best checkpoint by val mAP50-95. Training took 25 minutes on the T4.
+### 2.1 What we trained
 
-**Table 2.1 — detector quality** (`docs/tables/phase3/yolo/summary.json`, Ultralytics `val()` at its default confidence)
+The detector is YOLOv8-m, the medium YOLOv8 size (about 25 million parameters), started from COCO weights and fine-tuned on the 700 Kvasir-SEG train images with one class: polyp. The recipe was written down before training and not changed afterwards (DL-31, `configs/yolo_train.yaml`; the exact arguments are in `docs/tables/phase3/yolo/args.yaml`).
+
+| Setting | Value | Why |
+|---|---|---|
+| Epochs | 50, no early stopping | the value in the baseline's README; the paper does not state one |
+| Image size | 640 px | the paper says 680, but Ultralytics needs a multiple of 32 and the baseline code uses 640 |
+| Batch size | 16 | fits a Colab T4; the paper used 64 on an A100 |
+| Seed | 42, deterministic | so the run can be repeated |
+| Optimiser, augmentation | Ultralytics defaults ("auto") | no tuning, so nothing is tuned on our data |
+| Checkpoint kept | best val mAP50-95 | `best.pt` is what every later experiment uses |
+
+Training took 25 minutes on the T4.
+
+### 2.2 How good is the detector?
+
+Four numbers describe a detector. **mAP50** scores how well its boxes overlap the true boxes (a box counts as right when overlap is at least 50%). **mAP50-95** is the stricter version that also demands tighter boxes. **Precision** is the share of drawn boxes that are real polyps. **Recall** is the share of real polyps that got a box.
+
+**Table 2.1 â€” detector quality** (`docs/tables/phase3/yolo/summary.json`, Ultralytics `val()` at its default confidence)
 
 | Split | mAP50 | mAP50-95 | Precision | Recall |
 |---|---|---|---|---|
 | val (100) | 0.953 | 0.750 | 0.960 | 0.869 |
 | test (200) | 0.943 | 0.747 | 0.867 | 0.908 |
 
-Figure 2.1 (`docs/figures/phase3_yolo_training_curves.png`): all three training losses fall monotonically; val mAP50 passes 0.9 by epoch 20 and plateaus at 0.95. The validation classification loss spikes at epoch 2 (27,400, a warm-up instability of the single-class head) and is stable from epoch 4 on; it has no effect on the final model.
+Reading the table: mAP50 drops only one point from val to test (0.953 to 0.943), so the detector did not overfit the validation images. Precision and recall sit at different points on their trade-off on the two splits. With only 100 and 200 images, a difference of this size should not be over-read.
 
-**Figure 2.2 — recall vs confidence threshold on val** (`docs/figures/phase3_recall_vs_threshold.png`, from the detection cache). Polyp recall at IoU ≥ 0.5 is 0.888 at threshold 0.5, 0.935 at 0.25 and 0.953 at 0.05; the number of false-positive boxes on the 100 images goes from 5 to 12 to 55 over the same range. The curve is flat between 0.10 and 0.35 and falls steeply above 0.6. This is the headroom the method works with.
+Figure 2.1 (`docs/figures/phase3_yolo_training_curves.png`): all three training losses fall steadily, and val mAP50 passes 0.9 by epoch 20 and then stays near 0.95. The validation classification loss spikes at epoch 2 (27,400), which looks like warm-up instability of the single-class head. It is stable from epoch 4 and does not affect the final model.
 
-**Detection cache** (DL-33, `runs/detections/`, backed up in Drive): candidates at confidence ≥ 0.05 are 156 boxes on val (100 images), 310 on test (200) and 865 on ClinicDB (612). Images where no prompt refinement can help because the detector proposes **nothing** even at 0.05: 0 on Kvasir test, 19 on ClinicDB (3.1%). Images whose only candidates are below the chosen `t_low` = 0.25: 1 on Kvasir test, 56 on ClinicDB.
+### 2.3 Recall against confidence threshold (Figure 2.2)
+
+`docs/figures/phase3_recall_vs_threshold.png`, built from the detection cache on the validation split. A polyp counts as found when a box overlaps it by at least 50%.
+
+| Threshold | Polyp recall | False-positive boxes (100 images) |
+|---|---|---|
+| 0.50 | 0.888 | 5 |
+| 0.25 | 0.935 | 12 |
+| 0.05 | 0.953 | 55 |
+
+The curve is flat between 0.10 and 0.35 and falls steeply above 0.6. Two steps explain the shape:
+
+- **From 0.50 down to 0.25** we find about 5 more points of recall (0.888 to 0.935) for only 7 more false boxes (5 to 12). That is a good trade.
+- **From 0.25 down to 0.05** we gain under 2 points of recall (0.935 to 0.953) but add 43 false boxes (12 to 55). That is a bad trade.
+
+So the detector already sees most polyps it is unsure about, and the baseline's cut-off of 0.5 throws them away. This is the room the method works in, and it matches the `t_low` = 0.25 that the validation grid picked independently in Â§4.3.
+
+### 2.4 Detection cache
+
+Following DL-33, the detector runs once per dataset at confidence 0.05 and every box is saved with its score (`runs/detections/*.json`, backed up in Drive). Every experiment afterwards only re-filters these boxes, which is why each run is a single command.
+
+| Dataset | Images | Candidate boxes at â‰¥ 0.05 | Images with no candidate at all | Images whose candidates are all below 0.25 |
+|---|---|---|---|---|
+| Kvasir val | 100 | 156 | n/a | n/a |
+| Kvasir test | 200 | 310 | 0 | 1 |
+| CVC-ClinicDB | 612 | 865 | 19 (3.1%) | 56 |
+
+The last two columns matter for later. On Kvasir, almost no image is out of reach of a lower threshold. On ClinicDB, 19 + 56 = 75 images cannot be fixed by any threshold at or above 0.25, and these are exactly the 75 images that still get no prediction in Â§5.
 
 ## 3. Baseline reproduction (Member 2)
 
-B = YOLO boxes with confidence ≥ 0.5 → SAM 2 (`sam2_hiera_large.pt`, frozen, box prompt, `multimask_output=False`), union of the masks per image, no box = empty mask (`configs/experiments/baseline.yaml`).
+### 3.1 What the baseline is
 
-**Table 3.1 — baseline against the paper**
+B is YOLO boxes with confidence at least 0.5 sent to SAM 2 (`sam2_hiera_large.pt`, frozen, box prompt, `multimask_output=False`). The masks of all boxes in an image are joined into one prediction. An image with no box gets an empty mask (`configs/experiments/baseline.yaml`).
+
+### 3.2 Our numbers against the paper
+
+**Table 3.1 â€” baseline against the paper**
 
 | Dataset | Ours, pooled Dice / IoU | Ours, per-image Dice / IoU (misses = 0) | Missed images | Paper (Mansoori et al.) Dice / IoU |
 |---|---|---|---|---|
 | Kvasir-SEG test (200) | 0.878 / 0.782 | 0.831 / 0.780 | 18 / 200 | 0.866 / 0.764 (80/20 split, in-domain) |
 | CVC-ClinicDB (612) | 0.755 / 0.606 | 0.677 / 0.628 | 144 / 612 | 0.951 / 0.909 (trained on ClinicDB, in-domain) |
 
-The Kvasir numbers reproduce the paper within 1–2 points on its own metric. The ClinicDB numbers are not comparable to the paper's: the paper trains and tests on ClinicDB, we test a Kvasir-trained detector on it (domain shift, the point of the project), and the baseline misses 24% of ClinicDB images outright. Other differences: our split (700/100/200, seed 42) vs the paper's 80/20; 640 px vs the paper's stated 680 (DL-31); batch 16 on a T4 vs 64 on an A100.
+There are two ways to score. **Pooled** (the paper's way) puts all pixels of the dataset together and computes one Dice, so a missed image barely changes it. **Per-image** computes Dice for each image and averages, and a missed image counts as 0 (DL-18). That is why our per-image numbers are lower than our pooled ones, and why we report both.
 
-**Oracle O** (ground-truth boxes → the same SAM 2): per-image Dice 0.952 on Kvasir test and 0.945 on ClinicDB, no misses. The gap O − B is 0.12 on Kvasir and 0.27 on ClinicDB: that is what the detector costs, and it is almost all of the domain-shift drop.
+### 3.3 Does it reproduce?
+
+- **Kvasir: yes.** Our pooled 0.878 / 0.782 is within 1â€“2 points of the paper's 0.866 / 0.764, on the paper's own metric.
+- **ClinicDB: not comparable.** The paper trains and tests on ClinicDB. We test a Kvasir-trained detector on ClinicDB, which is the domain shift this project studies. The baseline misses 144 of 612 images (24%) outright.
+
+Differences from the paper that could move the Kvasir numbers slightly:
+
+| Ours | Paper |
+|---|---|
+| 700 / 100 / 200 split, seed 42 | 80/20 split |
+| 640 px (DL-31) | 680 px |
+| Batch 16 on a T4 | Batch 64 on an A100 |
+| Our own training run (DL-17: shipped weights not used for any reported number) | Their trained weights |
+
+### 3.4 What the baseline gets wrong
+
+Both failures come from the single cut-off of 0.5. When YOLO finds a polyp but is less than 50% sure, the box is dropped and the image gets no mask. In Â§2.4, 56 + 19 of the 144 missed ClinicDB images either have only low-confidence boxes or none at all. This is the problem Â§4 sets out to fix.
+
+### 3.5 Oracle O: the upper bound
+
+O gives the same SAM 2 the ground-truth boxes instead of YOLO's. Per-image Dice is **0.952** on Kvasir test and **0.945** on ClinicDB, with no missed images. The gap O âˆ’ B is 0.12 on Kvasir and 0.27 on ClinicDB. That gap is what the detector costs. SAM 2 segments ClinicDB polyps as well as Kvasir ones once it is given a good box, so almost all of the domain-shift drop is the detector's.
 
 ## 4. Method: Confidence-Aware Self-Prompting (Member 3)
 
