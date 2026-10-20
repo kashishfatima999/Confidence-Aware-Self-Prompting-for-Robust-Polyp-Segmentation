@@ -112,7 +112,7 @@ What we learned from the grid:
 | Kvasir test | 310 | 183 | 60 | 67 | **0** | 243 |
 | ClinicDB | 865 | 435 | 180 | 250 | **0** | 615 |
 
-- **The four prompts did get used.** For uncertain boxes, SAM 2 liked the plain box best in 40% (Kvasir) / 36% (ClinicDB) of cases, the box with a centre dot in 25% / 26%, and a bigger box in 22% / 21%. Self-prompting gave a better-scored mask in 43% / 37% of cases.
+- **The four prompts did get used.** For uncertain boxes, SAM 2 liked the plain box best in 53% (Kvasir) / 53% (ClinicDB) of cases, the box with a centre dot in 25% / 26%, and a bigger box in 22% / 21%. Self-prompting gave a better-scored mask in 43% / 37% of cases.
 - **But the final check rejected nothing.** Look at the zeros in the "rejected" column. SAM 2's score for uncertain boxes was never below 0.784 (usually around 0.95 on Kvasir and 0.92 on ClinicDB), so a cut-off of 0.6 never removed anything, and neither did the 10% rule.
 
 **Why?** SAM 2's score tells us how *neat* the mask is, not whether it is *a polyp*. If YOLO puts a box around a fold of tissue or a light reflection, SAM 2 still draws a clean shape inside it and gives itself a high score. So in this first version every box above 0.25 ends up in the output, and the method behaves almost exactly like "just lower the threshold to 0.25". Section 5 tests this directly.
@@ -141,14 +141,14 @@ What we learned from the grid:
 | Comparison | Kvasir test (200) | ClinicDB (612) |
 |---|---|---|
 | C − B (the hypothesis) | **+0.061** [+0.032, +0.090], 27 / 8 / 165 | **+0.080** [+0.062, +0.101], 100 / 28 / 484 |
-| T − B (recall alone) | +0.063 [+0.033, +0.097], 22 / 4 / 174 | +0.082 [+0.063, +0.103], 93 / 10 / 509 |
+| T − B (recall alone) | +0.062 [+0.033, +0.097], 22 / 4 / 174 | +0.082 [+0.063, +0.103], 93 / 10 / 509 |
 | C − T (refinement + acceptance on top of recall) | −0.002 [−0.006, +0.003], 13 / 14 / 173 | −0.002 [−0.004, −0.000], 39 / 60 / 513 |
 | C − C-noiter (self-prompting iteration) | −0.001 [−0.002, +0.000] | −0.000 [−0.001, +0.001] |
 | C-all − C (gating) | −0.006 [−0.017, +0.001], 16 / 40 / 144 | +0.000 [−0.002, +0.002] |
 
 **Reading the ablations (Member 3).** An ablation is a run where we remove or change one part of our method to see how much that part helps. Here is what each comparison tells us, in plain words.
 
-1. **T vs B: the gain comes from keeping more boxes.** T is the baseline with the cut-off lowered from 0.5 to 0.25, and nothing else. It improves Dice by +0.063 on Kvasir and +0.082 on ClinicDB, which is the whole improvement our method gets. The extra boxes rescue 17 of the 18 Kvasir images the baseline missed (average Dice 0.73 on them) and 69 of the 144 ClinicDB ones (average 0.70). No image that the baseline got right was lost. **In short: our method helps because it stops throwing away polyps that YOLO was unsure about.**
+1. **T vs B: the gain comes from keeping more boxes.** T is the baseline with the cut-off lowered from 0.5 to 0.25, and nothing else. It improves Dice by +0.062 on Kvasir and +0.082 on ClinicDB, which is the whole improvement our method gets. The extra boxes rescue 17 of the 18 Kvasir images the baseline missed (average Dice 0.75 on them, 0.73 with our full method) and 69 of the 144 ClinicDB ones (average 0.70). No image that the baseline got right was lost. **In short: our method helps because it stops throwing away polyps that YOLO was unsure about.**
 
 2. **C vs T: the double-checking does not help (yet).** Our full method is 0.002 Dice *below* T on both datasets. It gets worse on slightly more images than it gets better (13 better / 14 worse on Kvasir, 39 / 60 on ClinicDB). On the images that actually had an uncertain box (45 on Kvasir, 154 on ClinicDB), it is 0.008 below T. Giving SAM 2 the plain box already works as well as trying four prompts and asking again, and the final check never removes anything (§4.4).
 
