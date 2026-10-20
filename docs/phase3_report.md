@@ -73,7 +73,7 @@ Instead of one cut-off, we use two: `t_low` and `t_high`. Every box falls into o
 
 For an **uncertain** box we do four things:
 
-1. **Ask SAM 2 in four ways.** We give SAM 2 the box, a 10% bigger box, a 20% bigger box, and the box with a dot at its centre. The idea is that a slightly wrong box might still work if we try a few versions of it.
+1. **Ask SAM 2 in four ways.** We give SAM 2 the box, the box grown by 10% on every side, the box grown by 20% on every side, and the box with a dot at its centre. The idea is that a slightly wrong box might still work if we try a few versions of it.
 2. **Keep the best answer.** With every mask, SAM 2 also gives a score saying how good it thinks its mask is. We keep the mask with the highest score.
 3. **Ask again with the mask (self-prompting).** We draw a tight box around the chosen mask, mark its centre, and give these back to SAM 2. If the new mask scores at least as well, we keep it.
 4. **Final check.** We keep the mask only if SAM 2's score is at least `s_min` and the mask fills at least 10% of its box. Otherwise we throw the box away. This step was meant to catch wrong boxes.
@@ -97,7 +97,7 @@ We picked `t_low`, `t_high` and `s_min` using only the 100 **validation** images
 
 What we learned from the grid:
 
-- **`t_low` matters most.** At 0.15, too many wrong boxes get in (18–19 instead of 10–12), and every 0.15 setting does worse. 0.25 and 0.35 are almost the same (at most 0.002 apart).
+- **`t_low` matters most.** At 0.15, too many wrong boxes get in (18–19 instead of 10–12), and 0.15 always does worse than 0.25 or 0.35 when the other two thresholds are kept the same. 0.25 and 0.35 are almost the same (at most 0.002 apart).
 - **A lower `t_high` is always better.** A lower `t_high` means fewer boxes get double-checked. That was an early hint that the double-checking is not what helps.
 - **`s_min` hardly matters.** 0.7 and 0.8 give the same result, and both lose one image compared to 0.6. The number of wrong boxes never changes with `s_min`, so the final check is not catching wrong boxes.
 
@@ -154,7 +154,7 @@ What we learned from the grid:
 
 3. **C vs C-noiter: self-prompting makes no real difference.** Removing the "ask again" step changes Dice by less than 0.001. It does change the mask in 37–43% of uncertain cases, but those masks were already good.
 
-4. **C-all vs C: double-checking sure boxes slightly hurts.** C-all double-checks *every* box, not just the uncertain ones. On Kvasir it is 0.006 worse (40 images worse, 16 better) and uses 6.1 prompts per image instead of 2.4. On ClinicDB there is no difference. A box YOLO is sure about is already a good prompt, and trying alternatives can only swap it for a worse one. So only checking the uncertain boxes is the right choice, even if it matters little.
+4. **C-all vs C: double-checking sure boxes slightly hurts.** C-all double-checks *every* box, not just the uncertain ones. On Kvasir it is 0.006 worse (40 images worse, 16 better) and uses 6.1 prompts per image instead of 2.4. On ClinicDB there is no difference. A box YOLO is sure about is already a good prompt, and trying alternatives more often swaps it for a worse one than a better one. So only checking the uncertain boxes is the right choice, even if it matters little.
 
 5. **C vs O: what is still missing is the detector's fault.** O (oracle) gives SAM 2 the perfect boxes from the ground truth. It is 0.06 Dice above our method on Kvasir and 0.19 on ClinicDB. With a perfect box, SAM 2 scores about 0.95 on *both* datasets, so SAM 2 is not the weak link. YOLO is. On ClinicDB, 75 images still get no prediction: in 19 of them YOLO finds nothing at all, and in the other 56 it only finds boxes below 0.25. Fixing these needs a better detector, or a lower `t_low` plus a filter that can actually remove wrong boxes.
 
