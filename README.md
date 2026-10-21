@@ -41,6 +41,7 @@ Both datasets are restricted to research and educational use and are **not** sto
 | You want | Look at |
 |---|---|
 | The Phase 2 report and notebook handed in | `docs/submissions/phase2/F26-13.pdf`, `F26-13.ipynb` |
+| The Phase 3 report and notebook for submission | `docs/submissions/phase3/F26-13.pdf` (source `report_source.html`), `F26-13.ipynb` |
 | The Phase 3 results and report draft | `docs/phase3_report.md`, `docs/tables/phase3/`, `notebooks/04_phase3_colab.ipynb` (executed) |
 | The course requirements and a checklist of how each is met | `docs/requirements/` |
 | The approved proposal | `docs/proposal/F26-13_Project_Proposal.pdf` |
