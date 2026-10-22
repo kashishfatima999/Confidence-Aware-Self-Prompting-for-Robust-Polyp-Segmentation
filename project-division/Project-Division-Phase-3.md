@@ -142,7 +142,7 @@ What actually happened, kept next to the plan so the evaluation can compare the 
 | 1.5 report draft | M1 | M1 | 2026-10-17 | `docs/phase3_report.md` |
 | 2.5 Detector + Baseline sections (text, analysis) | M2 | M2 | 2026-10-20 | `docs/phase3_report.md` §2–3, branch `khushbakht-phase3` |
 | 3.6 Method + Ablations sections (text, analysis) | M3 | M3 | 2026-10-19/20 | `docs/phase3_report.md` §4, §5 ablations, branch `zahra-phase3` |
-| Submission package (`docs/submissions/phase3/`) | M1 | M3 | 2026-10-21 | `F26-13.pdf` (4 pages), `F26-13.ipynb`, `report_source.html`, checklist `docs/requirements/phase3_requirements.md` |
+| Submission package (`docs/submissions/phase3/`) | M1 | M3 | 2026-10-21 | `F26-13.pdf` (title page + 4 pages), `F26-13.ipynb`, `report_source.html`, checklist `docs/requirements/phase3_requirements.md` |
 
 Why the Colab work was run by Member 1: the schedule slipped in the first days of the week and the cached-detection design made every run a single command, so the lead ran the sessions on 15–16 October to have the numbers in time; two Colab problems (C7, C8 in `docs/setup_guide.md`) cost most of a day. Members 2 and 3 keep ownership of their code files and write their report sections from the committed tables and the per-image files; the Phase 4 items in DL-38 are theirs to run.
 
