@@ -17,6 +17,17 @@
   th, td { border: 1px solid #bbb; padding: 1.8pt 3.5pt; vertical-align: top; }
   th { background: #eee; text-align: left; }
   td.num, th.num { text-align: right; white-space: nowrap; }
+  .titlepage { page-break-after: always; height: 255mm; display: flex; flex-direction: column; align-items: center; justify-content: center; text-align: center; }
+  .tp-uni { font-size: 13pt; font-weight: 600; margin-bottom: 4pt; }
+  .tp-course { font-size: 11pt; color: #333; margin-bottom: 42pt; }
+  .tp-title { font-size: 21pt; font-weight: 700; line-height: 1.25; max-width: 150mm; margin-bottom: 12pt; }
+  .tp-sub { font-size: 14pt; color: #333; margin-bottom: 40pt; }
+  table.tp-info { width: auto; font-size: 11pt; margin: 0 0 24pt 0; }
+  table.tp-info td { border: none; padding: 2pt 8pt; text-align: left; }
+  table.tp-info td:first-child { color: #555; text-align: right; }
+  table.tp-members { width: 105mm; font-size: 11pt; margin: 0 0 40pt 0; }
+  table.tp-members th, table.tp-members td { padding: 4pt 8pt; text-align: center; }
+  .tp-links { font-size: 9.5pt; color: #333; line-height: 1.5; }
   .meta { font-size: 9pt; color: #333; margin-bottom: 5pt; }
   .meta table { width: auto; font-size: 9pt; margin: 2pt 0; }
   .meta td { border: none; padding: 0 12pt 0 0; }
@@ -27,6 +38,9 @@
   .cap { font-size: 8.4pt; color: #333; margin: 0 0 4pt 0; text-align: left; }
   .refs { font-size: 8.2pt; }
   .refs li { margin-bottom: 0.5pt; }
+  ol.ieee { list-style: none; padding-left: 0; counter-reset: ref; }
+  ol.ieee li { counter-increment: ref; padding-left: 18pt; text-indent: -18pt; }
+  ol.ieee li::before { content: "[" counter(ref) "]"; display: inline-block; width: 18pt; text-indent: 0; }
   td:first-child { white-space: nowrap; }
   tr.hl td { background: #f4f7ff; font-weight: 600; }
   .flow { display: flex; align-items: stretch; gap: 0; margin: 4pt 0 3pt 0; font-size: 8.3pt; page-break-inside: avoid; }
@@ -38,20 +52,32 @@
 </head>
 <body>
 
-<h1>Confidence-Aware Self-Prompting for Robust Polyp Segmentation Under Image and Domain Shifts</h1>
-<div class="meta">
-  <b>Phase 3 report: Implementation &amp; Execution</b> &nbsp;·&nbsp; Group F26-13 &nbsp;·&nbsp; AI2002 Artificial Intelligence (BDS-5A), FAST-NUCES Lahore, Fall 2026 &nbsp;·&nbsp; Track A (R&amp;D) &nbsp;·&nbsp; Instructor: Dr. Hajra Waheed &nbsp;·&nbsp; 21 October 2026
-  <table>
-    <tr><td>Kashish Fatima (24L-2605, lead)</td><td>Khushbakht Sohail (24L-2604)</td><td>Zahra Saeed (24L-2512)</td></tr>
+<div class="titlepage">
+  <div class="tp-uni">National University of Computer &amp; Emerging Sciences, Lahore</div>
+  <div class="tp-course">AI2002 Artificial Intelligence (BDS-5A) &nbsp;·&nbsp; Fall 2026</div>
+  <div class="tp-title">Confidence-Aware Self-Prompting for Robust Polyp Segmentation Under Image and Domain Shifts</div>
+  <div class="tp-sub">Phase 3 Report: Implementation &amp; Execution</div>
+  <table class="tp-info">
+    <tr><td>Group</td><td>F26-13</td></tr>
+    <tr><td>Track</td><td>A (Research &amp; Development)</td></tr>
+    <tr><td>Instructor</td><td>Dr. Hajra Waheed</td></tr>
+    <tr><td>Date</td><td>21 October 2026</td></tr>
   </table>
-  Repository: <a href="https://github.com/kashishfatima999/Confidence-Aware-Self-Prompting-for-Robust-Polyp-Segmentation">github.com/kashishfatima999/Confidence-Aware-Self-Prompting-for-Robust-Polyp-Segmentation</a> &nbsp;·&nbsp; Notebook: <code>F26-13.ipynb</code> (the executed Colab run behind every number below)
+  <table class="tp-members">
+    <tr><th>Name</th><th>Roll number</th></tr>
+    <tr><td>Kashish Fatima (lead)</td><td>24L-2605</td></tr>
+    <tr><td>Khushbakht Sohail</td><td>24L-2604</td></tr>
+    <tr><td>Zahra Saeed</td><td>24L-2512</td></tr>
+  </table>
+  <div class="tp-links">Repository: <a href="https://github.com/kashishfatima999/Confidence-Aware-Self-Prompting-for-Robust-Polyp-Segmentation">github.com/kashishfatima999/Confidence-Aware-Self-Prompting-for-Robust-Polyp-Segmentation</a><br>Notebook: <code>F26-13.ipynb</code> (the executed Colab run behind every number in this report)</div>
 </div>
+
 
 <p><b>Summary.</b> We trained a YOLOv8-m detector on our Kvasir-SEG split, reproduced the YOLO → SAM 2 baseline of Mansoori et al. [1], and implemented our method, Confidence-Aware Self-Prompting (CASP v1), together with four control experiments. CASP raises per-image Dice from 0.831 to 0.891 on Kvasir-SEG test and from 0.677 to 0.757 on CVC-ClinicDB, a dataset the detector never saw. The control runs show that the gain comes from keeping the boxes the detector is unsure about, not from the extra checking steps. Every number is read from the result files of the runs (<code>docs/tables/phase3/</code>); every choice is recorded in <code>docs/decision_log.md</code> (DL-30 to DL-38).</p>
 
 <h2>1. Model and algorithm selection</h2>
-<p><b>Detector: YOLOv8-m [4].</b> The baseline paper [1] uses it and reports that the medium size beat both the small and the large model, so it is the fair choice for a reproduction. It is also small enough (about 25M parameters) to train on a free Colab T4 in under half an hour.</p>
-<p><b>Segmenter: SAM 2, large, frozen [2].</b> SAM 2 draws a precise mask from a single box prompt without any training on polyps. Our Phase 2 smoke test showed it reaching Dice 0.96–0.97 when the box is right and 0 when the detector misses, which told us that <i>the box, not the segmenter, is where a method can help</i>. Keeping SAM 2 frozen keeps the comparison with the baseline clean.</p>
+<p><b>Detector: YOLOv8-m [2].</b> The baseline paper [1] uses it and reports that the medium size beat both the small and the large model, so it is the fair choice for a reproduction. It is also small enough (about 25M parameters) to train on a free Colab T4 in under half an hour.</p>
+<p><b>Segmenter: SAM 2, large, frozen [3].</b> SAM 2 draws a precise mask from a single box prompt without any training on polyps. Our Phase 2 smoke test showed it reaching Dice 0.96–0.97 when the box is right and 0 when the detector misses, which told us that <i>the box, not the segmenter, is where a method can help</i>. Keeping SAM 2 frozen keeps the comparison with the baseline clean.</p>
 <p><b>Our method: CASP v1.</b> The baseline sends every box with YOLO confidence ≥ 0.5 to SAM 2 and throws away the rest, so a polyp the detector found but was only 40% sure of gets no mask at all. CASP uses two thresholds instead of one and treats each box by its confidence <i>c</i>:</p>
 <table>
   <tr><th style="width:21%">Confidence</th><th style="width:11%">Group</th><th>What happens</th></tr>
@@ -86,7 +112,7 @@
 <p>The detection cache is the key design choice (DL-33): YOLO runs once, and every experiment only re-filters the saved boxes, so all six runs see exactly the same detector output and each run is one command, for example <code>python src/pipeline/run_experiment.py --config configs/experiments/casp.yaml --dataset kvasir_test</code>. Results are copied to Google Drive as soon as each run finishes, so a dropped Colab session costs one run, not a whole evening.</p>
 
 <h2>4. Training process</h2>
-<p><b>Data split</b> (fixed in Phase 2): Kvasir-SEG [3], 700 train / 100 validation / 200 test images, seed 42. CVC-ClinicDB [5] (612 images, another hospital and endoscope) is used only for testing, never for training or tuning, and so is the corrupted copy of the Kvasir test split (blur, brightness/contrast and noise at three severities).</p>
+<p><b>Data split</b> (fixed in Phase 2): Kvasir-SEG [4], 700 train / 100 validation / 200 test images, seed 42. CVC-ClinicDB [5] (612 images, another hospital and endoscope) is used only for testing, never for training or tuning, and so is the corrupted copy of the Kvasir test split (blur, brightness/contrast and noise at three severities).</p>
 <p><b>Detector training</b> (DL-31). The recipe was written down before training and not changed afterwards:</p>
 <div class="row">
 <table style="flex:1.1">
@@ -128,7 +154,7 @@
 <p class="cap">Dice: per image, misses counted as 0. Pooled: the paper's pooled Dice. Box P / R: box precision and recall at IoU ≥ 0.5. IoU and timings for every run are in <code>docs/tables/phase3/results.csv</code>.</p>
 <ul>
   <li><b>The baseline reproduces.</b> On the paper's own pooled metric our baseline scores 0.878 Dice / 0.782 IoU on Kvasir-SEG test against the published 0.866 / 0.764. On ClinicDB the paper trains on ClinicDB itself, so its 0.951 is not comparable with our cross-dataset test; there the baseline misses 144 of 612 images (24%) completely.</li>
-  <li><b>CASP beats the baseline</b> by +0.061 Dice on Kvasir test and +0.080 on ClinicDB (paired bootstrap 95% CIs [+0.032, +0.090] and [+0.062, +0.101], both above zero). Missed images fall from 18 to 1 and from 144 to 75. It is also above the baseline on all nine corrupted settings, by +0.02 to +0.08 Dice; the gain grows with blur severity, until the strongest noise level, where the detector proposes nothing at all.</li>
+  <li><b>CASP beats the baseline</b> by +0.061 Dice on Kvasir test and +0.080 on ClinicDB (paired bootstrap 95% CIs [+0.032, +0.090] and [+0.060, +0.100], both above zero). Missed images fall from 18 to 1 and from 144 to 75. It is also above the baseline on all nine corrupted settings, by +0.02 to +0.08 Dice; the gain grows with blur severity, until the strongest noise level, where the detector proposes nothing at all.</li>
   <li><b>The gain comes from keeping uncertain boxes.</b> T, which only lowers the threshold, gets the same improvement (+0.062 and +0.082). The checking steps change Dice by −0.002, self-prompting by less than 0.001, and the acceptance rule never rejected a box: SAM 2's own score was at least 0.78 for every uncertain box, true or false, because it rates how clean its mask is, not whether the region is a polyp. Checking confident boxes too (C-all) is slightly worse on Kvasir (−0.006) at 2.5 times the prompts.</li>
   <li><b>What is left is the detector.</b> With ground-truth boxes SAM 2 reaches about 0.95 on both datasets, so it segments the unseen hospital's polyps as well as the training ones. The price of our recall gain is false alarms: box precision falls from 0.877 to 0.802 on Kvasir and from 0.890 to 0.815 on ClinicDB (Figure 2). Building a filter that removes them is the first Phase 4 task.</li>
 </ul>
@@ -139,7 +165,7 @@
 
 <h2>6. Challenges faced during implementation</h2>
 <ul>
-  <li><b>The baseline code did not run as published</b> (notebook syntax in <code>.py</code> files, missing imports, a hard-coded threshold, and an evaluation that skips missed images). We re-implemented the pipeline and checked it against the paper on its own metric (§5).</li>
+  <li><b>The baseline code [6] did not run as published</b> (notebook syntax in <code>.py</code> files, missing imports, a hard-coded threshold, and an evaluation that skips missed images). We re-implemented the pipeline and checked it against the paper on its own metric (§5).</li>
   <li><b>Colab sessions dropped.</b> The free tier disconnected during a silent 50-minute run of the threshold grid and two hours of results were lost. The notebook now prints one line per run, saves each run to Drive as soon as it finishes and skips finished runs on restart. For long jobs we added a Kaggle version (<code>notebooks/05_kaggle_driver.ipynb</code>) that keeps running with the browser closed.</li>
   <li><b>Package conflicts on Colab.</b> Installing our local requirements upgraded Pillow inside the running Colab kernel and broke the next import; on Colab we now install only the model packages and use Colab's own NumPy, Pillow and OpenCV.</li>
   <li><b>Small validation set and one seed.</b> Neighbouring threshold settings differ by at most 0.006 Dice on 100 images, and the detector was trained once, so the confidence intervals cover image sampling only. The chosen thresholds still held on both test sets and all nine corruptions.</li>
@@ -148,12 +174,13 @@
 <p class="cap"><b>Work division</b> (full record in <code>project-division/Project-Division-Phase-3.md</code> §7). Kashish Fatima (lead): evaluation harness, first versions of the pipeline code, experiment configs, results tables and the Colab runs. Khushbakht Sohail: detector code (training recipe, detection cache), detector and baseline analysis. Zahra Saeed: SAM 2 wrapper, CASP code, experiment runner and notebooks, method and ablation analysis, Kaggle driver, this report.</p>
 
 <h3>References</h3>
-<ol class="refs">
-  <li>M. Mansoori et al. Self-Prompting Polyp Segmentation in Colonoscopy using Hybrid YOLO-SAM 2 Model. arXiv:2409.09484, 2024. Code: github.com/sajjad-sh33/YOLO_SAM2.</li>
-  <li>N. Ravi et al. SAM 2: Segment Anything in Images and Videos. arXiv:2408.00714, 2024.</li>
-  <li>D. Jha et al. Kvasir-SEG: A Segmented Polyp Dataset. MMM 2020, pp. 451–462. arXiv:1911.07069.</li>
-  <li>G. Jocher et al. Ultralytics YOLOv8. github.com/ultralytics/ultralytics.</li>
-  <li>J. Bernal et al. WM-DOVA maps for accurate polyp highlighting in colonoscopy: Validation vs. saliency maps from physicians. Computerized Medical Imaging and Graphics 43:99–111, 2015.</li>
+<ol class="refs ieee">
+  <li>M. Mansoori, S. Shahabodini, J. Abouei, K. N. Plataniotis, and A. Mohammadi, “Self-prompting polyp segmentation in colonoscopy using hybrid YOLO-SAM 2 model,” 2024, <i>arXiv:2409.09484</i>.</li>
+  <li>G. Jocher, A. Chaurasia, and J. Qiu, “Ultralytics YOLOv8,” 2023. [Online]. Available: https://github.com/ultralytics/ultralytics</li>
+  <li>N. Ravi <i>et al.</i>, “SAM 2: Segment anything in images and videos,” 2024, <i>arXiv:2408.00714</i>.</li>
+  <li>D. Jha <i>et al.</i>, “Kvasir-SEG: A segmented polyp dataset,” in <i>MultiMedia Modeling (MMM 2020)</i>, Lecture Notes in Computer Science, vol. 11962. Cham, Switzerland: Springer, 2020, pp. 451–462.</li>
+  <li>J. Bernal, F. J. Sánchez, G. Fernández-Esparrach, D. Gil, C. Rodríguez, and F. Vilariño, “WM-DOVA maps for accurate polyp highlighting in colonoscopy: Validation vs. saliency maps from physicians,” <i>Comput. Med. Imag. Graph.</i>, vol. 43, pp. 99–111, Jul. 2015.</li>
+  <li>“YOLO_SAM2: Official implementation of [1],” GitHub repository. [Online]. Available: https://github.com/sajjad-sh33/YOLO_SAM2 (accessed Oct. 2026).</li>
 </ol>
 
 </body>

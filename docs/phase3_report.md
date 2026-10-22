@@ -208,11 +208,11 @@ What we learned from the grid:
 
 | Comparison | Kvasir test (200) | ClinicDB (612) |
 |---|---|---|
-| C − B (the hypothesis) | **+0.061** [+0.032, +0.090], 27 / 8 / 165 | **+0.080** [+0.062, +0.101], 100 / 28 / 484 |
-| T − B (recall alone) | +0.062 [+0.033, +0.097], 22 / 4 / 174 | +0.082 [+0.063, +0.103], 93 / 10 / 509 |
-| C − T (refinement + acceptance on top of recall) | −0.002 [−0.006, +0.003], 13 / 14 / 173 | −0.002 [−0.004, −0.000], 39 / 60 / 513 |
-| C − C-noiter (self-prompting iteration) | −0.001 [−0.002, +0.000] | −0.000 [−0.001, +0.001] |
-| C-all − C (gating) | −0.006 [−0.017, +0.001], 16 / 40 / 144 | +0.000 [−0.002, +0.002] |
+| C − B (the hypothesis) | **+0.061** [+0.032, +0.090], 27 / 8 / 165 | **+0.080** [+0.060, +0.100], 100 / 28 / 484 |
+| T − B (recall alone) | +0.062 [+0.033, +0.092], 22 / 4 / 174 | +0.082 [+0.062, +0.102], 93 / 10 / 509 |
+| C − T (refinement + acceptance on top of recall) | −0.002 [−0.006, +0.002], 13 / 14 / 173 | −0.002 [−0.004, +0.000], 39 / 60 / 513 |
+| C − C-noiter (self-prompting iteration) | −0.001 [−0.001, +0.000] | −0.000 [−0.001, +0.001] |
+| C-all − C (gating) | −0.006 [−0.018, +0.001], 16 / 40 / 144 | +0.000 [−0.002, +0.002] |
 
 **Reading the ablations (Member 3).** An ablation is a run where we remove or change one part of our method to see how much that part helps. Here is what each comparison tells us, in plain words.
 

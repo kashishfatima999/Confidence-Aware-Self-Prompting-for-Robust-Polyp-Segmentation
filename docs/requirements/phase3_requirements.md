@@ -26,8 +26,8 @@ From the project guidelines PDF, Phase 3 for Track A is: *"Choose appropriate al
 
 | # | Requirement | Where it is met | Status |
 |---|---|---|---|
-| R1 | `F26-13.pdf`, 2–4 pages | `../submissions/phase3/F26-13.pdf`, 4 pages A4 (source: `report_source.html`) | done |
-| R2 | `F26-13.ipynb` or `F26-13.py` | `../submissions/phase3/F26-13.ipynb`, the executed Colab run (copy of `notebooks/04_phase3_colab.ipynb`, all 14 code cells with outputs) | done |
+| R1 | `F26-13.pdf`, 2–4 pages | `../submissions/phase3/F26-13.pdf`: title page + 4 pages of report, A4 (source: `report_source.html`) | done |
+| R2 | `F26-13.ipynb` or `F26-13.py` | `../submissions/phase3/F26-13.ipynb`, the executed Colab run (`notebooks/04_phase3_colab.ipynb`, all 14 code cells with outputs) plus a title cell with names and roll numbers and section 10 with the report's tables and figures | done |
 | R3 | GitHub repository link | https://github.com/kashishfatima999/Confidence-Aware-Self-Prompting-for-Robust-Polyp-Segmentation | done |
 | R4 | Model/algorithm selection with justification | PDF §1 (YOLOv8-m, frozen SAM 2, CASP v1, rejected alternatives, control experiments); `../decision_log.md` DL-31, DL-34, DL-35 | done |
 | R5 | Implementation details (libraries, frameworks) | PDF §2 (PyTorch, Ultralytics, SAM 2, NumPy/Pillow/OpenCV/pandas, Colab T4, code layout, 65 tests in CI); `requirements-colab.txt` | done |
@@ -37,7 +37,7 @@ From the project guidelines PDF, Phase 3 for Track A is: *"Choose appropriate al
 | R9 | RAG embedding pipeline and prompts | Not applicable: not a RAG project | n/a |
 | R10 | Challenges faced during implementation | PDF §6; `../setup_guide.md` challenges C1–C9 | done |
 | R11 | Standard frameworks (guidelines) | PyTorch + Ultralytics + SAM 2 | done |
-| R12 | External code, datasets and models cited | PDF references [1]–[5]; `README.md` §9 | done |
+| R12 | External code, datasets and models cited | PDF references [1]–[6], IEEE style, numbered in order of first citation; `README.md` §9 | done |
 | R13 | One submission per group, by the lead | Kashish Fatima (24L-2605) submits | — |
 | R14 | Naming format | Files named exactly `F26-13.pdf` and `F26-13.ipynb` | done |
 | R15 | Able to explain the work | Owners of each file in `../../project-division/Project-Division-Phase-3.md` §3 and §7; reasoning in `../decision_log.md` | — |
