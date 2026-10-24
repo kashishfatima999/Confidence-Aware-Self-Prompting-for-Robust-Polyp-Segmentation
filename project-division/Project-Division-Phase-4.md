@@ -3,7 +3,7 @@
 **Project:** Confidence-Aware Self-Prompting for Robust Polyp Segmentation Under Image and Domain Shifts
 **Track:** A (Research & Development)
 **Phase 4 in the guidelines:** "Evaluate using relevant metrics (Accuracy, F1, RMSE, etc.) and perform a bias check."
-**Time:** one week, Monday 26 October to Sunday 1 November 2026. Decisions for this phase are DL-39 and DL-40 in `docs/decision_log.md`; the method follow-ups come from DL-38.
+**Time:** due Sunday 1 November 2026. Because of mid-term exams, Members 2 and 3 are available only on Friday 31 October from 19:00 and on Sunday 1 November (about 13 hours each), so the plan is sized for that. Decisions for this phase are DL-39 and DL-40 in `docs/decision_log.md`; the method follow-ups come from DL-38.
 **After this phase:** Phases 5 and 6 are reports only (technical report with error analysis and theoretical insights; LaTeX report with architecture diagrams, challenges and the Track B replication section). No new GPU work is planned after Phase 4.
 
 | Member | Name | Owns in Phase 4 | Share |
@@ -20,10 +20,10 @@
 2. **Comparative evaluation.** B, T, C, C-all, C-noiter and O on Kvasir-SEG test, CVC-ClinicDB and the nine corrupted settings, with paired bootstrap 95% CIs for every difference against B and against T. Most numbers exist from Phase 3; this phase adds the new metrics and one clean table per dataset.
 3. **Bias check** (DL-40). For each factor below: Dice, miss rate and false-positive boxes per subgroup for B and C, and the C − B gap with a CI, so the reader sees both *where the pipeline is weak* and *whether the method helps everyone equally*. Factors: polyp size (terciles of `gt_area_percent`), image brightness and contrast (terciles, from `docs/tables/dataset_statistics.csv`), image resolution (Kvasir-SEG has 332 × 487 to 1920 × 1072), single vs multiple polyps (`n_gt_polyps`), dataset (Kvasir-SEG vs ClinicDB: domain shift), corruption type and severity. Plus a short section on the pipeline's own biases: the detector saw only Kvasir-SEG training images; `t_low`, `t_high`, `s_min` were tuned on 100 clean Kvasir-SEG images; Kvasir-SEG and ClinicDB come from two hospitals and ClinicDB has smaller polyps and lower resolution.
 4. **Error analysis.** One label per image and run from a fixed taxonomy: *missed* (no prediction, GT present), *false positive* (prediction, no GT overlap), *under-segmentation* (Dice < 0.7 with pred area < GT area), *over-segmentation* (Dice < 0.7 with pred area > GT area), *extra box* (a correct polyp plus a false box), *good* (Dice ≥ 0.7, no false box). Counts per run and dataset; figures for the 75 ClinicDB images no run except O predicts and the 10 Kvasir-SEG images where C loses to B; the CVC-ClinicDB example figure (open item O1).
-5. **Optional, GPU, only if the above is done by Friday:** the DL-38 method work (new false-positive filter, wider validation grid, val split only) and a second training seed. Both run on Kaggle with `notebooks/05_kaggle_driver.ipynb` (open item O5: its first run is the smoke run with `SMOKE = True`).
+5. **No method work and no GPU runs in Phase 4.** The DL-38 follow-up (false-positive filter, wider validation grid) and the second training seed are deferred. A CPU-only check of a confidence × SAM-score rule on the existing `detections.jsonl` logs (every candidate box carries YOLO confidence and SAM score; ground-truth boxes are in the local labels and in the oracle logs) is noted for **Phase 5** as analysis material, if time allows; see the DL-38 status line.
 6. A Phase 4 report (`docs/phase4_report.md` → `docs/submissions/phase4/F26-13.pdf`) and a notebook that rebuilds every table and figure from the per-image files (`docs/submissions/phase4/F26-13.ipynb`).
 
-Phase 4 does **not** change any Phase 3 number. The per-image files in `runs/` and Drive `MyDrive/F26-13/runs_phase3/` are the inputs; nothing is re-run unless it is an optional item 5 job, and those write to new experiment names.
+Phase 4 does **not** change any Phase 3 number. The per-image files in `runs/` and Drive `MyDrive/F26-13/runs_phase3/` are the inputs; nothing is re-run.
 
 ---
 
@@ -72,7 +72,7 @@ No GPU session, no new script, no report section for Member 1 this phase.
 | 2.2 | `bias_check.py`: for each factor in §1 item 3, a table with n, Dice (B, T, C), miss rate, FP boxes per image, C − B gap with 95% CI per subgroup; one figure per factor (Dice by subgroup, B and C side by side). Factors from `per_image.csv` (`gt_area_percent`, `n_gt_polyps`) and `dataset_statistics.csv` (width, height, brightness, contrast; join on image id without extension). | `docs/tables/phase4/bias_*.{csv,md}`, `docs/figures/phase4_bias_*.png` |
 | 2.3 | The CVC-ClinicDB example figure (open item O1): 5 best / 5 worst C images, GT vs B vs C, same layout as `docs/figures/phase3_examples_kvasir_test.png`. ClinicDB images come from `src/data/prepare_clinicdb.py` on Colab, masks from Drive `runs_phase3/`. | `docs/figures/phase4_examples_clinicdb.png` |
 | 2.4 | Report sections: metrics (what each metric measures, why accuracy and RMSE are not informative here), the bias check (one paragraph and one table per factor), the pipeline's own biases, what a fairer pipeline would need (e.g. training on both datasets, tuning thresholds per dataset). | `docs/phase4_report.md` §2, §4 |
-| 2.5 | Optional (item 5): second training seed on Kaggle (seed 43, `configs/yolo_train.yaml` unchanged except `seed`, new run name), save the console log (open item O2), caches and B / C runs under new experiment names; variance row for the main table. | `runs/yolo_seed43/`, tables |
+| 2.5 | Deferred to the Phase 5 note (decided 2026-10-24): second training seed on Kaggle (seed 43), console log (O2), variance row. Not done in Phase 4. | — |
 
 ### Member 3 — Zahra Saeed: comparison, error analysis, package
 
@@ -83,30 +83,31 @@ No GPU session, no new script, no report section for Member 1 this phase.
 | 3.3 | `notebooks/06_phase4_analysis.ipynb`: runs 2.2, 3.1, 3.2 from `runs/` or Drive, rebuilds every Phase 4 table and figure, CPU only. | Notebook, executed |
 | 3.4 | Report sections: comparative evaluation (tables, CIs, what the ablations say), error analysis (taxonomy counts, failure figures, what the failures have in common), summary and next steps for Phases 5–6. | `docs/phase4_report.md` §1, §3, §5 |
 | 3.5 | Submission package in the Phase 3 format: `report_source.html` → `F26-13.pdf`, `F26-13.ipynb` (executed notebook with title cell and section map), `docs/requirements/phase4_requirements.md`. | `docs/submissions/phase4/` |
-| 3.6 | Optional (item 5): first Kaggle smoke run of `05_kaggle_driver.ipynb` (open item O5), then the DL-38 filter and wider grid on `kvasir_val` only; results into a new DL entry. Test sets are touched only if val shows a clear gain, and once. | Kaggle run, `casp_v2.yaml`, DL-41 |
+| 3.6 | Deferred to the Phase 5 note (decided 2026-10-24): Kaggle smoke run (O5), DL-38 filter and wider grid. Not done in Phase 4. | — |
 
 ### Dependencies
 
 - 2.1 (new metrics) is needed by 3.1 and 2.2 → target **Monday evening**; until then both scripts work with the existing Dice / IoU / box columns.
 - 3.1 and 2.2 tables are needed for the report text → **Thursday**.
 - 1.3 needs every table committed → **Saturday**.
-- Item 5 jobs must not block anything: start them only if 2.1–2.4 or 3.1–3.4 are done by Friday.
+- Nothing optional: items 2.5 and 3.6 are deferred, so no GPU job runs in this phase.
 
 ---
 
-## 5. Day-by-day
+## 5. Schedule (Friday evening and Sunday)
 
-| Day | Member 1 | Member 2 | Member 3 |
-|---|---|---|---|
-| Mon | 1.1 done; 1.2 | 2.1 metrics + tests | 3.2 taxonomy script on `runs/` |
-| Tue | 1.2 | 2.2 bias script, first tables | 3.1 comparison script and tables |
-| Wed | 1.2 | 2.2 figures; 2.3 ClinicDB figure on Colab | 3.2 failure figures (75 ClinicDB, 10 Kvasir) |
-| Thu | 1.2 | 2.4 report §2, §4 | 3.3 notebook; 3.4 report §1, §3 |
-| Fri | 1.2 | 2.4 done; optional 2.5 start on Kaggle | 3.4 done; optional 3.6 Kaggle smoke run |
-| Sat | 1.3 rebuild check, README | review Member 3's text | 3.5 package; review Member 2's text |
-| Sun | final review, merge | — | submission |
+Member 1's tasks 1.1 to 1.4 are spread over the week as reviews arrive. Members 2 and 3:
 
-Estimated effort: Member 2 about 3 to 4 working days (one day scripts, one day figures and the ClinicDB figure, one to two days report text); Member 3 the same (one day scripts, one day figures and notebook, one day text, half a day package). Every mandatory step is CPU-only and under 10 minutes of compute; the optional Kaggle jobs are 1 to 3 hours each of unattended GPU time.
+| When | Member 2 — Khushbakht | Member 3 — Zahra |
+|---|---|---|
+| Fri 31 Oct 19:00 | Download the per-image CSVs and `detections.jsonl` from Drive `runs_phase3/`; pull `main`; branch `khushbakht-phase4` (30 min) | Same setup; branch `zahra-phase4` (30 min) |
+| Fri 19:30–21:00 | 2.1 pixel precision / recall / accuracy, area error, detection F1 in `metrics.py` + tests (~40 lines); **push by 21:00** | 3.2 `error_analysis.py`: taxonomy, counts, worst-10 lists, the 75 ClinicDB and 10 Kvasir cases (~120 lines, 2.5 h) |
+| Fri 21:00–24:00 | 2.2 `bias_check.py`: join with `dataset_statistics.csv`, terciles, table per factor with C − B gap and CI (~150 lines, 3 h) | 3.1 `compare.py`: paired CIs for every run vs B and vs T, per dataset; win / loss counts (~80 lines, 1.5 h) |
+| Sun morning | 2.2 bias figures, one per factor (~60 lines, 1.5 h); 2.3 ClinicDB example figure on a Colab CPU runtime (45 min) | 3.2 failure figures; 3.3 `notebooks/06_phase4_analysis.ipynb` runs the three scripts (2 h) |
+| Sun afternoon | 2.4 report §2 (metrics) and §4 (bias check, pipeline's own biases) (2 h) | 3.4 report §1 (comparison), §3 (error analysis), §5 (summary) (2 h) |
+| Sun evening | review Zahra's text | 3.5 package: `report_source.html` → `F26-13.pdf`, executed notebook, requirements checklist (1.5 h); submission |
+
+Estimated effort: Member 2 about 9 hours, Member 3 about 10 hours, against about 13 hours available each. Every step is CPU-only and under 10 minutes of compute. If 2.1 slips past Friday 21:00, Zahra builds the comparison table from the existing Dice / IoU / box columns and adds the new metrics on Sunday.
 
 ---
 
@@ -121,9 +122,9 @@ Estimated effort: Member 2 about 3 to 4 working days (one day scripts, one day f
 
 **Don't**
 - Don't re-run or change any Phase 3 experiment; new experiments get new names and configs.
-- Don't tune anything on the test splits; the optional DL-38 work is validation-only until the very end.
+- Don't tune anything on the test splits.
 - Don't commit `runs/`, masks or weights.
-- Don't start an optional GPU job before the mandatory items are done.
+- Don't start any GPU job; the deferred items are a Phase 5 note, not Phase 4 work.
 
 ---
 
@@ -132,10 +133,10 @@ Estimated effort: Member 2 about 3 to 4 working days (one day scripts, one day f
 | # | Item | Owner in Phase 4 | Plan |
 |---|---|---|---|
 | O1 | CVC-ClinicDB example figure | Member 2 | task 2.3 |
-| O2 | Training console log | Member 2 | saved during optional 2.5; otherwise stays open with the per-epoch CSV as the record |
-| O5 | First Kaggle run of `05_kaggle_driver.ipynb` | Member 3 | optional 3.6 smoke run; if no GPU job is needed in Phase 4, closed as "not needed" |
-| O6 | Second seed | Member 2 | optional 2.5 |
-| O7 | DL-38 method work | Member 3 | optional 3.6 |
+| O2 | Training console log | — | deferred with 2.5; the per-epoch CSV `docs/tables/phase3/yolo/results.csv` stays the record |
+| O5 | First Kaggle run of `05_kaggle_driver.ipynb` | — | deferred; no GPU job in Phase 4, so not needed; stays available if Phase 5 runs anything |
+| O6 | Second seed | — | deferred, Phase 5 note (2.5) |
+| O7 | DL-38 method work | — | deferred, Phase 5 note (3.6); the CPU-only confidence × SAM-score check from the detection logs is the candidate analysis |
 | O8 | Error and bias analysis | Members 2 and 3 | tasks 2.2, 3.1, 3.2 (mandatory) |
 | O9 | Local PyYAML | Member 1 | any time; not needed for Phase 4 |
 
