@@ -2,9 +2,9 @@
 
 ```text
                                 dataset   factor subgroup   n  dice_B  miss_rate_B  fp_boxes_per_image_B  dice_T  miss_rate_T  fp_boxes_per_image_T  dice_C  miss_rate_C  fp_boxes_per_image_C  c_minus_b  ci_low  ci_high  paired_n
-                               clinicdb contrast     high 204  0.7034       0.2108                0.1127     NaN          NaN                   NaN     NaN          NaN                   NaN        NaN     NaN      NaN         0
-                               clinicdb contrast      low 204  0.6141       0.2892                0.0637     NaN          NaN                   NaN     NaN          NaN                   NaN        NaN     NaN      NaN         0
-                               clinicdb contrast   medium 204  0.7144       0.2059                0.0931     NaN          NaN                   NaN     NaN          NaN                   NaN        NaN     NaN      NaN         0
+                               clinicdb contrast     high 204  0.7034       0.2108                0.1127  0.7792       0.0980                0.2157  0.7781       0.0980                0.2255     0.0747  0.0426   0.1103       204
+                               clinicdb contrast      low 204  0.6141       0.2892                0.0637  0.6957       0.1814                0.1520  0.6927       0.1814                0.1569     0.0786  0.0459   0.1165       204
+                               clinicdb contrast   medium 204  0.7144       0.2059                0.0931  0.8036       0.0882                0.1765  0.8015       0.0882                0.1765     0.0871  0.0540   0.1227       204
                kvasir_corrupted_blur_s1 contrast     high  67  0.7859       0.1343                0.0746     NaN          NaN                   NaN  0.8258       0.0597                0.2090     0.0399 -0.0038   0.0939        67
                kvasir_corrupted_blur_s1 contrast      low  67  0.8660       0.0597                0.0896     NaN          NaN                   NaN  0.9027       0.0149                0.1791     0.0367  0.0031   0.0811        67
                kvasir_corrupted_blur_s1 contrast   medium  66  0.8745       0.0303                0.1818     NaN          NaN                   NaN  0.8817       0.0000                0.2879     0.0071 -0.0309   0.0491        66
@@ -32,7 +32,7 @@ kvasir_corrupted_brightness_contrast_s3 contrast   medium  66  0.8389       0.09
               kvasir_corrupted_noise_s3 contrast     high  67  0.0286       0.9701                0.0000     NaN          NaN                   NaN  0.0431       0.9552                0.0000     0.0145  0.0000   0.0435        67
               kvasir_corrupted_noise_s3 contrast      low  67  0.0000       1.0000                0.0000     NaN          NaN                   NaN  0.0283       0.9701                0.0000     0.0283  0.0000   0.0708        67
               kvasir_corrupted_noise_s3 contrast   medium  66  0.0178       0.9697                0.0152     NaN          NaN                   NaN  0.0325       0.9545                0.0152     0.0147  0.0000   0.0441        66
-                            kvasir_test contrast     high  67  0.7636       0.1642                0.0746     NaN          NaN                   NaN     NaN          NaN                   NaN        NaN     NaN      NaN         0
-                            kvasir_test contrast      low  67  0.8706       0.0597                0.0896     NaN          NaN                   NaN     NaN          NaN                   NaN        NaN     NaN      NaN         0
-                            kvasir_test contrast   medium  66  0.8584       0.0455                0.2121     NaN          NaN                   NaN     NaN          NaN                   NaN        NaN     NaN      NaN         0
+                            kvasir_test contrast     high  67  0.7636       0.1642                0.0746  0.8755       0.0149                0.1642  0.8714       0.0149                0.1791     0.1078  0.0508   0.1758        67
+                            kvasir_test contrast      low  67  0.8706       0.0597                0.0896  0.9200       0.0000                0.1791  0.9212       0.0000                0.1791     0.0507  0.0103   0.1034        67
+                            kvasir_test contrast   medium  66  0.8584       0.0455                0.2121  0.8838       0.0000                0.3636  0.8815       0.0000                0.3636     0.0232 -0.0143   0.0723        66
 ```

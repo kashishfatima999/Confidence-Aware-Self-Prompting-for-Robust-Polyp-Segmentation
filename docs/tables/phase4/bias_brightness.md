@@ -2,9 +2,9 @@
 
 ```text
                                 dataset     factor subgroup   n  dice_B  miss_rate_B  fp_boxes_per_image_B  dice_T  miss_rate_T  fp_boxes_per_image_T  dice_C  miss_rate_C  fp_boxes_per_image_C  c_minus_b  ci_low  ci_high  paired_n
-                               clinicdb brightness     high 204  0.7872       0.1422                0.0637     NaN          NaN                   NaN     NaN          NaN                   NaN        NaN     NaN      NaN         0
-                               clinicdb brightness      low 204  0.6092       0.2892                0.1275     NaN          NaN                   NaN     NaN          NaN                   NaN        NaN     NaN      NaN         0
-                               clinicdb brightness   medium 204  0.6355       0.2745                0.0784     NaN          NaN                   NaN     NaN          NaN                   NaN        NaN     NaN      NaN         0
+                               clinicdb brightness     high 204  0.7872       0.1422                0.0637  0.8264       0.0784                0.1422  0.8252       0.0784                0.1569     0.0381  0.0151   0.0643       204
+                               clinicdb brightness      low 204  0.6092       0.2892                0.1275  0.7109       0.1471                0.2598  0.7088       0.1471                0.2647     0.0996  0.0622   0.1391       204
+                               clinicdb brightness   medium 204  0.6355       0.2745                0.0784  0.7412       0.1422                0.1422  0.7383       0.1422                0.1373     0.1028  0.0687   0.1381       204
                kvasir_corrupted_blur_s1 brightness     high  67  0.8830       0.0149                0.2239     NaN          NaN                   NaN  0.8731       0.0000                0.4030    -0.0098 -0.0314   0.0153        67
                kvasir_corrupted_blur_s1 brightness      low  67  0.8072       0.1343                0.0299     NaN          NaN                   NaN  0.8618       0.0448                0.1343     0.0546 -0.0004   0.1119        67
                kvasir_corrupted_blur_s1 brightness   medium  66  0.8357       0.0758                0.0909     NaN          NaN                   NaN  0.8751       0.0303                0.1364     0.0394  0.0042   0.0877        66
@@ -32,7 +32,7 @@ kvasir_corrupted_brightness_contrast_s3 brightness   medium  66  0.8129       0.
               kvasir_corrupted_noise_s3 brightness     high  67  0.0033       0.9851                0.0149     NaN          NaN                   NaN  0.0033       0.9851                0.0149     0.0000  0.0000   0.0000        67
               kvasir_corrupted_noise_s3 brightness      low  67  0.0286       0.9701                0.0000     NaN          NaN                   NaN  0.0573       0.9403                0.0000     0.0287  0.0000   0.0719        67
               kvasir_corrupted_noise_s3 brightness   medium  66  0.0144       0.9848                0.0000     NaN          NaN                   NaN  0.0434       0.9545                0.0000     0.0290  0.0000   0.0726        66
-                            kvasir_test brightness     high  67  0.8376       0.0597                0.2537     NaN          NaN                   NaN     NaN          NaN                   NaN        NaN     NaN      NaN         0
-                            kvasir_test brightness      low  67  0.8196       0.1194                0.0299     NaN          NaN                   NaN     NaN          NaN                   NaN        NaN     NaN      NaN         0
-                            kvasir_test brightness   medium  66  0.8349       0.0909                0.0909     NaN          NaN                   NaN     NaN          NaN                   NaN        NaN     NaN      NaN         0
+                            kvasir_test brightness     high  67  0.8376       0.0597                0.2537  0.8763       0.0000                0.4776  0.8714       0.0000                0.4925     0.0338 -0.0059   0.0810        67
+                            kvasir_test brightness      low  67  0.8196       0.1194                0.0299  0.9084       0.0149                0.0597  0.9094       0.0149                0.0597     0.0897  0.0283   0.1574        67
+                            kvasir_test brightness   medium  66  0.8349       0.0909                0.0909  0.8948       0.0000                0.1667  0.8936       0.0000                0.1667     0.0586  0.0180   0.1123        66
 ```

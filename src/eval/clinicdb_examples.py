@@ -15,7 +15,7 @@ GT_DIR = ROOT / "data/processed/cvc-clinicdb/masks/test"
 BASELINE_DIR = RUNS / "baseline/clinicdb/masks"
 CASP_DIR = RUNS / "casp/clinicdb/masks"
 
-OUTPUT = ROOT / "docs/figures/phase4_clinicdb_examples.png"
+OUTPUT = "docs/figures/phase4_examples_clinicdb.png"
 
 
 def load_rgb(path):

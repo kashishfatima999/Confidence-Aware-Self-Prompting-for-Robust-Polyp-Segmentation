@@ -2,7 +2,7 @@
 
 ```text
                                 dataset factor subgroup   n  dice_B  miss_rate_B  fp_boxes_per_image_B  dice_T  miss_rate_T  fp_boxes_per_image_T  dice_C  miss_rate_C  fp_boxes_per_image_C  c_minus_b  ci_low  ci_high  paired_n
-                               clinicdb height      all 612  0.6773       0.2353                0.0899     NaN          NaN                   NaN     NaN          NaN                   NaN        NaN     NaN      NaN         0
+                               clinicdb height      all 612  0.6773       0.2353                0.0899  0.7595       0.1225                0.1814  0.7574       0.1225                0.1863     0.0802  0.0604   0.1001       612
                kvasir_corrupted_blur_s1 height     high  53  0.8339       0.0943                0.1132     NaN          NaN                   NaN  0.8672       0.0377                0.2075     0.0333 -0.0004   0.0796        53
                kvasir_corrupted_blur_s1 height      low  72  0.8412       0.0556                0.1667     NaN          NaN                   NaN  0.8546       0.0139                0.3194     0.0134 -0.0216   0.0586        72
                kvasir_corrupted_blur_s1 height   medium  75  0.8484       0.0800                0.0667     NaN          NaN                   NaN  0.8867       0.0267                0.1467     0.0383 -0.0029   0.0825        75
@@ -30,7 +30,7 @@ kvasir_corrupted_brightness_contrast_s3 height   medium  75  0.8143       0.1200
               kvasir_corrupted_noise_s3 height     high  53  0.0362       0.9623                0.0000     NaN          NaN                   NaN  0.0545       0.9434                0.0000     0.0183  0.0000   0.0550        53
               kvasir_corrupted_noise_s3 height      low  72  0.0031       0.9861                0.0139     NaN          NaN                   NaN  0.0031       0.9861                0.0139     0.0000  0.0000   0.0000        72
               kvasir_corrupted_noise_s3 height   medium  75  0.0127       0.9867                0.0000     NaN          NaN                   NaN  0.0508       0.9467                0.0000     0.0382  0.0000   0.0889        75
-                            kvasir_test height     high  53  0.8215       0.1132                0.0943     NaN          NaN                   NaN     NaN          NaN                   NaN        NaN     NaN      NaN         0
-                            kvasir_test height      low  72  0.8131       0.0833                0.2083     NaN          NaN                   NaN     NaN          NaN                   NaN        NaN     NaN      NaN         0
-                            kvasir_test height   medium  75  0.8541       0.0800                0.0667     NaN          NaN                   NaN     NaN          NaN                   NaN        NaN     NaN      NaN         0
+                            kvasir_test height     high  53  0.8215       0.1132                0.0943  0.8995       0.0000                0.2642  0.9004       0.0000                0.2642     0.0790  0.0193   0.1523        53
+                            kvasir_test height      low  72  0.8131       0.0833                0.2083  0.8538       0.0139                0.3194  0.8509       0.0139                0.3333     0.0378  0.0028   0.0816        72
+                            kvasir_test height   medium  75  0.8541       0.0800                0.0667  0.9264       0.0000                0.1333  0.9240       0.0000                0.1333     0.0699  0.0169   0.1256        75
 ```

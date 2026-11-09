@@ -2,7 +2,7 @@
 
 ```text
                                 dataset factor subgroup   n  dice_B  miss_rate_B  fp_boxes_per_image_B  dice_T  miss_rate_T  fp_boxes_per_image_T  dice_C  miss_rate_C  fp_boxes_per_image_C  c_minus_b  ci_low  ci_high  paired_n
-                               clinicdb  width      all 612  0.6773       0.2353                0.0899     NaN          NaN                   NaN     NaN          NaN                   NaN        NaN     NaN      NaN         0
+                               clinicdb  width      all 612  0.6773       0.2353                0.0899  0.7595       0.1225                0.1814  0.7574       0.1225                0.1863     0.0802  0.0604   0.1001       612
                kvasir_corrupted_blur_s1  width     high  50  0.8065       0.1200                0.1200     NaN          NaN                   NaN  0.8409       0.0600                0.2400     0.0344 -0.0014   0.0846        50
                kvasir_corrupted_blur_s1  width      low  67  0.8509       0.0597                0.0896     NaN          NaN                   NaN  0.8590       0.0299                0.1940     0.0081 -0.0259   0.0450        67
                kvasir_corrupted_blur_s1  width   medium  83  0.8562       0.0602                0.1325     NaN          NaN                   NaN  0.8963       0.0000                0.2410     0.0401  0.0003   0.0896        83
@@ -30,7 +30,7 @@ kvasir_corrupted_brightness_contrast_s3  width   medium  83  0.8383       0.0723
               kvasir_corrupted_noise_s3  width     high  50  0.0384       0.9600                0.0000     NaN          NaN                   NaN  0.0578       0.9400                0.0000     0.0194  0.0000   0.0583        50
               kvasir_corrupted_noise_s3  width      low  67  0.0033       0.9851                0.0149     NaN          NaN                   NaN  0.0461       0.9403                0.0149     0.0427  0.0000   0.0864        67
               kvasir_corrupted_noise_s3  width   medium  83  0.0114       0.9880                0.0000     NaN          NaN                   NaN  0.0114       0.9880                0.0000     0.0000  0.0000   0.0000        83
-                            kvasir_test  width     high  50  0.7930       0.1400                0.1000     NaN          NaN                   NaN     NaN          NaN                   NaN        NaN     NaN      NaN         0
-                            kvasir_test  width      low  67  0.8301       0.0896                0.0896     NaN          NaN                   NaN     NaN          NaN                   NaN        NaN     NaN      NaN         0
-                            kvasir_test  width   medium  83  0.8539       0.0602                0.1687     NaN          NaN                   NaN     NaN          NaN                   NaN        NaN     NaN      NaN         0
+                            kvasir_test  width     high  50  0.7930       0.1400                0.1000  0.8757       0.0200                0.2800  0.8767       0.0200                0.2800     0.0837  0.0227   0.1606        50
+                            kvasir_test  width      low  67  0.8301       0.0896                0.0896  0.9021       0.0000                0.1343  0.8973       0.0000                0.1493     0.0672  0.0214   0.1218        67
+                            kvasir_test  width   medium  83  0.8539       0.0602                0.1687  0.8964       0.0000                0.2892  0.8956       0.0000                0.2892     0.0417  0.0029   0.0890        83
 ```

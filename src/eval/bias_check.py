@@ -1,3 +1,4 @@
+
 """Phase 4 subgroup bias analysis."""
 
 from __future__ import annotations
@@ -166,7 +167,17 @@ def _attach_groups(frames, stats):
 
         merged.append(out)
 
+    # Preserve original numeric reference values.
+    # These must not be overwritten by subgroup labels.
     references = {}
+
+    reference_columns = [
+        "gt_area_percent",
+        "brightness",
+        "contrast",
+        "width",
+        "height",
+    ]
 
     for df in merged:
         if (
@@ -174,11 +185,26 @@ def _attach_groups(frames, stats):
             and df["source_dataset"].iloc[0]
             in {"kvasir_test", "clinicdb"}
         ):
-            references[df["domain"].iloc[0]] = df
+            domain = df["domain"].iloc[0]
+
+            references[domain] = {
+                col: pd.to_numeric(
+                    df[col], errors="coerce"
+                ).copy()
+                for col in reference_columns
+            }
 
     for df in merged:
         domain = df["domain"].iloc[0]
-        ref = references.get(domain, df)
+        ref = references.get(domain)
+
+        if ref is None:
+            ref = {
+                col: pd.to_numeric(
+                    df[col], errors="coerce"
+                ).copy()
+                for col in reference_columns
+            }
 
         factors = [
             ("gt_area_percent", "polyp_size"),
