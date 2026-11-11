@@ -40,19 +40,36 @@ def iou(pred, gt):
         return 1.0
     return float(np.logical_and(pred, gt).sum() / union)
 
-
 def per_image_scores(pred, gt):
     """Everything the per-image CSV needs for one image."""
     pred = np.asarray(pred, bool)
     gt = np.asarray(gt, bool)
+
+    tp = int(np.logical_and(pred, gt).sum())
+    fp = int(np.logical_and(pred, ~gt).sum())
+    fn = int(np.logical_and(~pred, gt).sum())
+    tn = int(np.logical_and(~pred, ~gt).sum())
+
+    total = tp + fp + fn + tn
+
+    gt_area_percent = 100.0 * float(gt.mean())
+    pred_area_percent = 100.0 * float(pred.mean())
+
+    pixel_precision = tp / (tp + fp) if tp + fp else 0.0
+    pixel_recall = tp / (tp + fn) if tp + fn else 0.0
+    pixel_accuracy = (tp + tn) / total if total else 0.0
+
     return {
         "dice": dice(pred, gt),
         "iou": iou(pred, gt),
-        "gt_area_percent": 100.0 * float(gt.mean()),
-        "pred_area_percent": 100.0 * float(pred.mean()),
+        "gt_area_percent": gt_area_percent,
+        "pred_area_percent": pred_area_percent,
         "pred_empty": bool(not pred.any()),
+        "pixel_precision": pixel_precision,
+        "pixel_recall": pixel_recall,
+        "pixel_accuracy": pixel_accuracy,
+        "mask_area_error_pp": abs(pred_area_percent - gt_area_percent),
     }
-
 
 class PooledScores:
     """Accumulates pixel counts over a dataset to give the paper-style pooled Dice / IoU."""
@@ -102,9 +119,19 @@ def match_boxes(pred_boxes, gt_boxes, iou_threshold=0.5):
 
 
 def precision_recall(tp, fp, fn):
+    precision = tp / (tp + fp) if tp + fp else 0.0
+    recall = tp / (tp + fn) if tp + fn else 0.0
+
+    f1 = (
+        2 * precision * recall / (precision + recall)
+        if precision + recall
+        else 0.0
+    )
+
     return {
-        "precision": tp / (tp + fp) if tp + fp else 0.0,
-        "recall": tp / (tp + fn) if tp + fn else 0.0,
+        "precision": precision,
+        "recall": recall,
+        "f1": f1,
     }
 
 
