@@ -1,0 +1,76 @@
+image_id,gt_area_percent,n_gt_polyps,n_candidates,max_confidence,oracle_dice,why
+118,14.052,1,0,0.0,0.9331,no candidate
+122,15.244,1,0,0.0,0.9273,no candidate
+135,14.316,1,0,0.0,0.9822,no candidate
+15,32.754,1,0,0.0,0.9825,no candidate
+201,5.327,1,0,0.0,0.8403,no candidate
+202,4.934,1,0,0.0,0.8888,no candidate
+152,18.714,1,0,0.0,0.9242,no candidate
+204,3.182,1,0,0.0,0.9335,no candidate
+263,10.228,1,0,0.0,0.9603,no candidate
+286,3.369,1,0,0.0,0.9143,no candidate
+51,0.977,1,0,0.0,0.9475,no candidate
+560,3.572,2,0,0.0,0.885,no candidate
+470,9.001,1,0,0.0,0.74,no candidate
+468,10.692,1,0,0.0,0.5857,no candidate
+388,23.191,1,0,0.0,0.967,no candidate
+424,2.322,1,0,0.0,0.9598,no candidate
+577,5.04,1,0,0.0,0.9478,no candidate
+585,2.186,1,0,0.0,0.8698,no candidate
+574,2.044,1,0,0.0,0.9408,no candidate
+471,19.454,1,1,0.055,0.9629,all candidates below t_low
+10,16.513,1,1,0.058,0.9578,all candidates below t_low
+74,2.481,3,2,0.0619,0.8706,all candidates below t_low
+472,20.781,1,1,0.0708,0.6684,all candidates below t_low
+362,8.177,1,1,0.0751,0.9296,all candidates below t_low
+379,1.242,1,1,0.0769,0.9191,all candidates below t_low
+200,5.262,1,2,0.0773,0.9389,all candidates below t_low
+20,16.354,1,2,0.08,0.9331,all candidates below t_low
+274,29.395,1,2,0.0801,0.9162,all candidates below t_low
+565,8.482,2,2,0.0821,0.9198,all candidates below t_low
+205,2.737,1,1,0.0829,0.874,all candidates below t_low
+246,11.122,1,1,0.0846,0.8792,all candidates below t_low
+52,0.949,1,1,0.0846,0.8941,all candidates below t_low
+23,24.337,1,2,0.0857,0.9748,all candidates below t_low
+378,1.716,1,2,0.0888,0.9521,all candidates below t_low
+377,1.968,1,1,0.0898,0.9071,all candidates below t_low
+75,2.457,3,1,0.094,0.8808,all candidates below t_low
+289,2.932,1,1,0.0998,0.9496,all candidates below t_low
+268,22.389,1,1,0.1024,0.8974,all candidates below t_low
+22,48.46,1,1,0.104,0.8162,all candidates below t_low
+251,7.218,1,1,0.1111,0.9204,all candidates below t_low
+284,2.793,1,2,0.1112,0.8768,all candidates below t_low
+531,2.637,1,3,0.1234,0.9193,all candidates below t_low
+123,13.895,1,1,0.1252,0.9541,all candidates below t_low
+576,5.108,1,1,0.1252,0.9564,all candidates below t_low
+559,0.337,1,2,0.134,0.9381,all candidates below t_low
+529,2.36,1,4,0.1454,0.9051,all candidates below t_low
+119,11.623,1,1,0.1486,0.9051,all candidates below t_low
+208,3.756,1,4,0.1491,0.9277,all candidates below t_low
+589,2.215,1,4,0.1506,0.9244,all candidates below t_low
+546,5.439,1,3,0.1589,0.9502,all candidates below t_low
+448,5.735,1,1,0.1624,0.9758,all candidates below t_low
+467,8.885,1,1,0.1684,0.9217,all candidates below t_low
+231,17.372,1,2,0.1782,0.9486,all candidates below t_low
+530,2.29,1,3,0.179,0.9369,all candidates below t_low
+209,2.559,1,3,0.1828,0.9383,all candidates below t_low
+203,4.516,1,1,0.1924,0.9441,all candidates below t_low
+19,16.359,1,3,0.1941,0.9241,all candidates below t_low
+536,6.181,1,3,0.1945,0.9336,all candidates below t_low
+376,2.339,1,2,0.1986,0.9199,all candidates below t_low
+313,6.018,1,3,0.2002,0.9645,all candidates below t_low
+381,2.427,1,1,0.2007,0.9436,all candidates below t_low
+541,4.941,1,2,0.203,0.9393,all candidates below t_low
+605,2.553,1,1,0.2052,0.9624,all candidates below t_low
+295,3.228,1,1,0.2073,0.9527,all candidates below t_low
+374,1.174,1,2,0.2152,0.905,all candidates below t_low
+355,8.891,1,2,0.2157,0.9508,all candidates below t_low
+106,13.054,1,2,0.2167,0.9644,all candidates below t_low
+590,1.941,1,4,0.2291,0.9237,all candidates below t_low
+72,2.59,3,2,0.2314,0.9193,all candidates below t_low
+292,2.178,1,1,0.2325,0.9517,all candidates below t_low
+350,12.59,1,1,0.2346,0.7985,all candidates below t_low
+360,12.125,1,2,0.2357,0.9388,all candidates below t_low
+120,15.296,1,1,0.2376,0.9444,all candidates below t_low
+297,2.56,1,2,0.2452,0.9402,all candidates below t_low
+361,9.952,1,2,0.2479,0.9411,all candidates below t_low
