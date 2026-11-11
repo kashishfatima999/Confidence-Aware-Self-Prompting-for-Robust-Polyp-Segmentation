@@ -1,3 +1,4 @@
+
 """Unit tests for src/eval/metrics.py (synthetic masks, no data, no GPU)."""
 
 import sys
@@ -25,8 +26,8 @@ class DiceIoUTests(unittest.TestCase):
         self.assertAlmostEqual(metrics.iou(m, m), 1.0)
 
     def test_half_overlap(self):
-        a = square(box=(0, 0, 10, 10))   # 100 px
-        b = square(box=(5, 0, 15, 10))   # 100 px, 50 px overlap
+        a = square(box=(0, 0, 10, 10))
+        b = square(box=(5, 0, 15, 10))
         self.assertAlmostEqual(metrics.dice(a, b), 2 * 50 / 200)
         self.assertAlmostEqual(metrics.iou(a, b), 50 / 150)
 
@@ -40,24 +41,45 @@ class DiceIoUTests(unittest.TestCase):
         self.assertEqual(metrics.dice(square(), square()), 1.0)
 
     def test_per_image_scores_fields(self):
-        s = metrics.per_image_scores(square(box=(0, 0, 10, 10)), square(box=(0, 0, 10, 10)))
+        pred = square(box=(0, 0, 10, 10))
+        gt = square(box=(0, 0, 10, 10))
+
+        s = metrics.per_image_scores(pred, gt)
+
         self.assertAlmostEqual(s["gt_area_percent"], 100 * 100 / 600)
         self.assertFalse(s["pred_empty"])
+        self.assertAlmostEqual(s["pixel_precision"], 1.0)
+        self.assertAlmostEqual(s["pixel_recall"], 1.0)
+        self.assertAlmostEqual(s["pixel_accuracy"], 1.0)
+        self.assertAlmostEqual(s["mask_area_error_pp"], 0.0)
+
+    def test_pixel_metrics_partial_overlap(self):
+        pred = square(box=(0, 0, 10, 10))
+        gt = square(box=(5, 0, 15, 10))
+
+        s = metrics.per_image_scores(pred, gt)
+
+        self.assertAlmostEqual(s["pixel_precision"], 0.5)
+        self.assertAlmostEqual(s["pixel_recall"], 0.5)
+        self.assertAlmostEqual(s["pixel_accuracy"], 500 / 600)
+        self.assertAlmostEqual(s["mask_area_error_pp"], 0.0)
 
 
 class PooledTests(unittest.TestCase):
     def test_pooled_differs_from_mean(self):
-        # image 1: perfect on a big polyp; image 2: total miss on a tiny polyp
+        # Image 1: perfect on a big polyp; image 2: total miss on a tiny polyp.
         p = metrics.PooledScores()
         big = square(box=(0, 0, 20, 20))
         tiny = square(box=(0, 0, 2, 2))
         p.add(big, big)
         p.add(square(), tiny)
         r = p.result()
+
         self.assertAlmostEqual(r["pooled_dice"], 2 * 400 / (400 + 404), places=6)
         self.assertAlmostEqual(r["pooled_iou"], 400 / 404, places=6)
+
         mean_dice = np.mean([metrics.dice(big, big), metrics.dice(square(), tiny)])
-        self.assertAlmostEqual(mean_dice, 0.5)  # per-image mean punishes the miss much more
+        self.assertAlmostEqual(mean_dice, 0.5)
 
 
 class BoxMatchingTests(unittest.TestCase):
@@ -74,13 +96,24 @@ class BoxMatchingTests(unittest.TestCase):
 
     def test_no_predictions(self):
         self.assertEqual(metrics.match_boxes([], [(0, 0, 10, 10)]), (0, 0, 1))
-        self.assertEqual(metrics.precision_recall(0, 0, 1), {"precision": 0.0, "recall": 0.0})
+        self.assertEqual(
+            metrics.precision_recall(0, 0, 1),
+            {"precision": 0.0, "recall": 0.0, "f1": 0.0},
+        )
+
+    def test_detection_f1(self):
+        result = metrics.precision_recall(2, 1, 2)
+
+        self.assertAlmostEqual(result["precision"], 2 / 3)
+        self.assertAlmostEqual(result["recall"], 0.5)
+        self.assertAlmostEqual(result["f1"], 4 / 7)
 
 
 class SummaryTests(unittest.TestCase):
     def test_bootstrap_ci_contains_mean_and_is_deterministic(self):
         values = [0.9, 0.95, 0.8, 0.0, 0.85]
         lo, hi = metrics.bootstrap_ci(values)
+
         self.assertLessEqual(lo, np.mean(values))
         self.assertGreaterEqual(hi, np.mean(values))
         self.assertEqual(metrics.bootstrap_ci(values), metrics.bootstrap_ci(values))
@@ -88,14 +121,18 @@ class SummaryTests(unittest.TestCase):
     def test_summarize_fields(self):
         gt = square(box=(0, 0, 10, 10))
         rows = [metrics.per_image_scores(gt, gt), metrics.per_image_scores(square(), gt)]
+
         pooled = metrics.PooledScores()
         pooled.add(gt, gt)
         pooled.add(square(), gt)
+
         s = metrics.summarize(rows, pooled, tp=1, fp=0, fn=1)
+
         self.assertEqual(s["images"], 2)
         self.assertAlmostEqual(s["mean_dice"], 0.5)
         self.assertEqual(s["images_with_empty_prediction"], 1)
         self.assertAlmostEqual(s["recall"], 0.5)
+        self.assertAlmostEqual(s["f1"], 2 / 3)
         self.assertAlmostEqual(s["pooled_dice"], 2 * 100 / 300, places=6)
         self.assertEqual(len(s["mean_dice_ci95"]), 2)
 

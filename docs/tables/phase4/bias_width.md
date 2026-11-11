@@ -1,0 +1,36 @@
+# Bias analysis: Image width (terciles)
+
+```text
+                                dataset factor subgroup   n  dice_B  miss_rate_B  fp_boxes_per_image_B  dice_T  miss_rate_T  fp_boxes_per_image_T  dice_C  miss_rate_C  fp_boxes_per_image_C  c_minus_b  ci_low  ci_high  paired_n
+                               clinicdb  width      all 612  0.6773       0.2353                0.0899  0.7595       0.1225                0.1814  0.7574       0.1225                0.1863     0.0802  0.0604   0.1001       612
+               kvasir_corrupted_blur_s1  width     high  50  0.8065       0.1200                0.1200     NaN          NaN                   NaN  0.8409       0.0600                0.2400     0.0344 -0.0014   0.0846        50
+               kvasir_corrupted_blur_s1  width      low  67  0.8509       0.0597                0.0896     NaN          NaN                   NaN  0.8590       0.0299                0.1940     0.0081 -0.0259   0.0450        67
+               kvasir_corrupted_blur_s1  width   medium  83  0.8562       0.0602                0.1325     NaN          NaN                   NaN  0.8963       0.0000                0.2410     0.0401  0.0003   0.0896        83
+               kvasir_corrupted_blur_s2  width     high  50  0.8129       0.1000                0.1000     NaN          NaN                   NaN  0.8518       0.0200                0.2400     0.0388 -0.0033   0.0939        50
+               kvasir_corrupted_blur_s2  width      low  67  0.8067       0.1045                0.0896     NaN          NaN                   NaN  0.8505       0.0448                0.1642     0.0437  0.0059   0.0937        67
+               kvasir_corrupted_blur_s2  width   medium  83  0.8127       0.1084                0.0843     NaN          NaN                   NaN  0.8390       0.0482                0.2892     0.0263 -0.0130   0.0743        83
+               kvasir_corrupted_blur_s3  width     high  50  0.7071       0.2200                0.0800     NaN          NaN                   NaN  0.8498       0.0200                0.2000     0.1427  0.0528   0.2415        50
+               kvasir_corrupted_blur_s3  width      low  67  0.7288       0.1940                0.0896     NaN          NaN                   NaN  0.7942       0.0746                0.2388     0.0654  0.0086   0.1333        67
+               kvasir_corrupted_blur_s3  width   medium  83  0.7293       0.1566                0.1325     NaN          NaN                   NaN  0.7883       0.0602                0.3373     0.0590  0.0183   0.1098        83
+kvasir_corrupted_brightness_contrast_s1  width     high  50  0.7737       0.1600                0.1000     NaN          NaN                   NaN  0.8605       0.0400                0.2400     0.0868  0.0234   0.1681        50
+kvasir_corrupted_brightness_contrast_s1  width      low  67  0.8643       0.0597                0.0597     NaN          NaN                   NaN  0.8738       0.0149                0.1493     0.0095 -0.0439   0.0641        67
+kvasir_corrupted_brightness_contrast_s1  width   medium  83  0.8534       0.0602                0.1325     NaN          NaN                   NaN  0.9045       0.0000                0.2892     0.0511  0.0094   0.0987        83
+kvasir_corrupted_brightness_contrast_s2  width     high  50  0.8145       0.1000                0.1400     NaN          NaN                   NaN  0.8588       0.0400                0.2200     0.0442 -0.0008   0.1018        50
+kvasir_corrupted_brightness_contrast_s2  width      low  67  0.8370       0.0896                0.0597     NaN          NaN                   NaN  0.8725       0.0149                0.1493     0.0356 -0.0256   0.1003        67
+kvasir_corrupted_brightness_contrast_s2  width   medium  83  0.8442       0.0602                0.1325     NaN          NaN                   NaN  0.9099       0.0000                0.2771     0.0657  0.0172   0.1229        83
+kvasir_corrupted_brightness_contrast_s3  width     high  50  0.7715       0.1600                0.0800     NaN          NaN                   NaN  0.8274       0.0600                0.2000     0.0558  0.0120   0.1119        50
+kvasir_corrupted_brightness_contrast_s3  width      low  67  0.7699       0.1642                0.0597     NaN          NaN                   NaN  0.8001       0.1045                0.1343     0.0302 -0.0184   0.0818        67
+kvasir_corrupted_brightness_contrast_s3  width   medium  83  0.8383       0.0723                0.1084     NaN          NaN                   NaN  0.8759       0.0241                0.2651     0.0376  0.0007   0.0822        83
+              kvasir_corrupted_noise_s1  width     high  50  0.8159       0.0800                0.1800     NaN          NaN                   NaN  0.8651       0.0200                0.3200     0.0492  0.0009   0.1112        50
+              kvasir_corrupted_noise_s1  width      low  67  0.8064       0.1194                0.0448     NaN          NaN                   NaN  0.8822       0.0149                0.1940     0.0758  0.0264   0.1329        67
+              kvasir_corrupted_noise_s1  width   medium  83  0.7859       0.0964                0.1566     NaN          NaN                   NaN  0.8755       0.0000                0.3012     0.0897  0.0325   0.1505        83
+              kvasir_corrupted_noise_s2  width     high  50  0.6952       0.1800                0.1600     NaN          NaN                   NaN  0.7556       0.1000                0.3400     0.0604  0.0130   0.1225        50
+              kvasir_corrupted_noise_s2  width      low  67  0.6774       0.2239                0.1343     NaN          NaN                   NaN  0.7759       0.1045                0.2239     0.0985  0.0364   0.1726        67
+              kvasir_corrupted_noise_s2  width   medium  83  0.6893       0.1928                0.1687     NaN          NaN                   NaN  0.7514       0.1325                0.3373     0.0620  0.0211   0.1082        83
+              kvasir_corrupted_noise_s3  width     high  50  0.0384       0.9600                0.0000     NaN          NaN                   NaN  0.0578       0.9400                0.0000     0.0194  0.0000   0.0583        50
+              kvasir_corrupted_noise_s3  width      low  67  0.0033       0.9851                0.0149     NaN          NaN                   NaN  0.0461       0.9403                0.0149     0.0427  0.0000   0.0864        67
+              kvasir_corrupted_noise_s3  width   medium  83  0.0114       0.9880                0.0000     NaN          NaN                   NaN  0.0114       0.9880                0.0000     0.0000  0.0000   0.0000        83
+                            kvasir_test  width     high  50  0.7930       0.1400                0.1000  0.8757       0.0200                0.2800  0.8767       0.0200                0.2800     0.0837  0.0227   0.1606        50
+                            kvasir_test  width      low  67  0.8301       0.0896                0.0896  0.9021       0.0000                0.1343  0.8973       0.0000                0.1493     0.0672  0.0214   0.1218        67
+                            kvasir_test  width   medium  83  0.8539       0.0602                0.1687  0.8964       0.0000                0.2892  0.8956       0.0000                0.2892     0.0417  0.0029   0.0890        83
+```
