@@ -2,7 +2,7 @@
 
 **Project:** Confidence-Aware Self-Prompting for Robust Polyp Segmentation Under Image and Domain Shifts
 **Group:** F26-13 — Kashish Fatima (24L-2605), Khushbakht Sohail (24L-2604), Zahra Saeed (24L-2512). AI2002, BDS-5A, FAST-NUCES Lahore. Track A.
-**State:** all runs done (2026-10-15/16, Colab T4, commit `2b9c761`); text in draft, sections owned as in `project-division/Project-Division-Phase-3.md`.
+**State:** final. Runs done 2026-10-15/16 (Colab T4, commit `2b9c761`); submitted 2026-10-21 (`docs/submissions/phase3/`); section owners in `project-division/Project-Division-Phase-3.md`.
 
 Every number below is read from `docs/tables/phase3/results.csv` (built by `src/eval/summarize.py` from the `summary.json` of each run; the local rebuild is byte-identical to the Colab one), from `docs/tables/phase3/casp_val_grid.csv`, from `docs/tables/phase3/yolo/summary.json`, or from the per-image files under `runs/` (git-ignored, backed up in Drive `MyDrive/F26-13/runs_phase3/`). Decisions: DL-30 to DL-38 in `docs/decision_log.md`. The executed notebook is `notebooks/04_phase3_colab.ipynb`.
 

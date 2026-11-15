@@ -75,16 +75,13 @@
     <tr><td>Zahra Saeed</td><td>24L-2512</td></tr>
   </table>
   <div class="tp-links">Repository: <a href="https://github.com/kashishfatima999/Confidence-Aware-Self-Prompting-for-Robust-Polyp-Segmentation">github.com/kashishfatima999/Confidence-Aware-Self-Prompting-for-Robust-Polyp-Segmentation</a><br>
-  Live demo: <a href="SPACE_URL">SPACE_URL_SHORT</a><br>
   Notebook: <code>F26-13.ipynb</code> (rebuilds every table and figure in this report from the Phase 3 result files, CPU only, about one minute)</div>
 </div>
 
 <p><b>Summary.</b> Phases 3–4 showed that our method CASP v1 (<b>C</b>) beats the YOLO → SAM 2 baseline (<b>B</b>) [1]–[3] on Kvasir-SEG [4], on CVC-ClinicDB [5] (another hospital) and on nine image corruptions, but that the whole gain comes from its confidence gate: lowering the threshold alone (<b>T</b>) does as well, and SAM 2's score never rejected a box. Phase 5 asks <i>why</i>, using only the saved Phase 3 logs (1,175 candidate boxes with their YOLO confidence and SAM 2 score, ground-truth boxes from the oracle run <b>O</b>; no GPU, no Phase 3 number changed). We (i) decompose the remaining error, (ii) test which signals can tell a real polyp box from a false one, (iii) explain the results theoretically and (iv) test a rule fixed in advance from that theory, the <b>fallback rule F</b> (DL-44). Code: <code>src/eval/filter_analysis.py</code>; tables: <code>docs/tables/phase5/</code>; decisions DL-44 and DL-45.</p>
 
 <h2>1. Experimental results</h2>
-<p class="callout"><b>To be written by Kashish Fatima (task 1.2).</b> The two results tables (B, T, C, F, O on Kvasir-SEG test and CVC-ClinicDB: Dice with CI, pixel precision / recall, misses, extra-box images, box P / R / F1), the paired differences and one paragraph on the corrupted settings, from <code>docs/tables/phase5/fallback_metrics.csv</code> and <code>fallback_comparison.csv</code>.</p>
 <h2>2. Error analysis</h2>
-<p class="callout"><b>To be written by Khushbakht Sohail (task 2.4, 2.5).</b> Mean Dice = P(mask) × E[Dice | mask] table and the oracle-gap split (numbers in notebook section 2), how F changes the failure taxonomy (Figure 2, <code>docs/figures/phase5_fallback_taxonomy.png</code>), and where F loses (ClinicDB second polyps / fragments, noise severity 2).</p>
 <h2>3. Theoretical insights</h2>
 <h3>3.1 Domain shift lowers detector confidence before it removes detections</h3>
 <p>A detector's confidence is calibrated, at best, on its training distribution; under dataset shift its scores drift and usually drop [8]. Our logs show exactly this: the median confidence of true polyp boxes falls from 0.873 on Kvasir-SEG to 0.794 on ClinicDB, the share of true boxes at ≥ 0.5 falls from 88.6% to 77.3%, and the share below 0.25 rises from 3.0% to 12.0%. A threshold of 0.5 chosen on the source domain therefore loses recall precisely where it matters, and lowering it to 0.25 moves the operating point back along the precision–recall curve. Whether that is worth it is a cost question: a box should be kept when P(polyp | box) × gain from a found polyp exceeds (1 − P) × cost of a false alarm [9]. Between 0.25 and 0.5, P(polyp) is about 0.44 on Kvasir-SEG (17 of 39 boxes) and 0.52 on ClinicDB (61 of 117); in screening, where a missed polyp is the costlier error, keeping such boxes is the right decision on average. This is the whole of CASP's gain over B.</p>
@@ -98,14 +95,13 @@
 <p>If neither per-box score carries the class, the information has to come from the rest of the image. Most colonoscopy frames show one polyp (194 of 200 Kvasir-SEG and 582 of 612 ClinicDB test images), so by Bayes' rule an uncertain box is far less likely to be a polyp when a confident one has already been found: in our logs 7% (1 of 14) versus 64% (16 of 25) on Kvasir-SEG and 27% (11 of 41) versus 66% (50 of 76) on ClinicDB (Figure 1, right). This is the reasoning behind F, written down before computing its results (DL-44) and using only the existing thresholds 0.25 and 0.5, so nothing was tuned on the test sets. F acts as an image-level suppression step with a single-polyp prior. Its limits follow from the same prior: it removes real second polyps and fragments of large polyps (ClinicDB box recall 0.780 → 0.763), and under strong noise, where the confident box itself is more often wrong, the uncertain box it discards is sometimes the polyp (noise severity 2). The 75 ClinicDB images with no box above 0.25 are out of reach of any rule that only re-ranks YOLO's boxes; they need a detector that transfers better (training on both hospitals, or test-time adaptation).</p>
 
 <h2>4. Functionality and reproducibility</h2>
-<p class="callout"><b>To be written by Khushbakht Sohail (task 2.6).</b> What the hosted demo shows (with its link and a screenshot), how to rerun the analysis (<code>python src/eval/filter_analysis.py --runs runs</code>; the notebook first reproduces the Phase 4 tables byte for byte) and the CI tests.</p>
 <h2>5. Conclusions</h2>
 <ol>
   <li>CASP's improvement is a recall effect of the confidence gate, and it is explained by domain shift lowering detector confidence (§3.1); the refinement steps cannot add to it because SAM 2's score measures mask quality, not class (§3.2).</li>
   <li>A context rule fixed in advance (F) keeps all of the gate's recall, matches T and C in Dice and removes about half of their false boxes on the unseen hospital, at the price of some second polyps and of robustness under strong noise.</li>
   <li>The remaining error on the training hospital is box quality; on the unseen hospital it is mostly polyps the detector never proposes. Further gains must come from the detector, not from prompting SAM 2 differently.</li>
 </ol>
-<p class="cap"><b>Work division</b> (<code>project-division/Project-Division-Phase-5.md</code>): Kashish Fatima (lead): §1, decision log, review. Khushbakht Sohail: hosted demo, §2, §4. Zahra Saeed: filter analysis, notebook, §3, summary and conclusions, package.</p>
+<p class="cap"><b>Work division.</b> Kashish Fatima (lead): results, decision log, review. Khushbakht Sohail: hosted demo, error analysis, reproducibility. Zahra Saeed: filter analysis, theoretical insights, notebook.</p>
 
 <h3>References</h3>
 <ol class="refs ieee">

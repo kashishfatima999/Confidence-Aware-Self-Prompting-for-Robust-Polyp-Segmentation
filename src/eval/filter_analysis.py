@@ -1,23 +1,15 @@
-"""Phase 5 analysis: can the false boxes that T and C add be filtered out without a GPU? (DL-44, DL-45)
+"""filter analysis for phase 5. checks if the extra boxes from T and C can be removed without a gpu.
 
     python src/eval/filter_analysis.py --runs runs --out docs/tables/phase5
 
-Two parts, both CPU-only and both read only the Phase 3 result files:
+the box check looks at single boxes. every box T kept is marked as a real polyp or a false box using the
+ground truth boxes from the oracle run, and we check how well yolo confidence, the sam 2 score and
+the image context can tell them apart (auroc).
 
-1. Box-level signals. Every candidate box in the T run's detections.jsonl carries its YOLO confidence
-   and SAM 2's predicted IoU for the mask it produced. The ground-truth boxes are the prompts of the
-   oracle run (O prompts SAM 2 with the boxes derived from the true masks). Each box that T kept is
-   labelled true or false positive with the same greedy IoU >= 0.5 matching as the evaluation
-   (metrics.match_boxes), and we measure how well each signal separates the two (AUROC with a
-   bootstrap CI). The question is the one DL-38 left open: is SAM's score a usable filter?
-
-2. The fallback rule F, fixed before looking at the test results (DL-44): use the uncertain boxes
-   (0.25 <= confidence < 0.5) only in images where YOLO found no box at 0.5 or above. Because the
-   baseline B keeps exactly the boxes >= 0.5 and SAM 2 is deterministic for a given box prompt, F's
-   output on every image is identical to B's (if the image has a box >= 0.5) or to T's (if it does
-   not). So F's per-image metrics are taken row by row from B and T without re-running SAM 2.
-   F_C does the same with C in place of T and also covers the nine corrupted settings, where T was
-   not run.
+the fallback rule F: boxes between 0.25 and 0.5 are only used when the image has no box
+of 0.5 or more. B keeps exactly the boxes >= 0.5 and sam 2 gives the same mask for the same box, so
+F's result on each image is just B's row or T's row. F_C does the same with C instead of T and also
+covers the corrupted sets.
 """
 
 import argparse
@@ -31,23 +23,19 @@ import pandas as pd
 ROOT = Path(__file__).resolve().parents[2]
 sys.path.insert(0, str(ROOT / "src" / "eval"))
 sys.path.insert(0, str(ROOT / "src" / "data"))
-import metrics  # noqa: E402
-from compare import datasets, load, paired, run_summary, shown  # noqa: E402
-from error_analysis import LABELS, labelled  # noqa: E402
+import metrics  #noqa: E402
+from compare import datasets, load, paired, run_summary, shown  #noqa: E402
+from error_analysis import LABELS, labelled  #noqa: E402
 
-T_LOW = 0.25      # CASP / T threshold (DL-34)
-T_BASE = 0.5      # baseline threshold (DL-31); F's switch, fixed in advance (DL-44)
+T_LOW = 0.25      #threshold used by casp and T
+T_BASE = 0.5      #baseline threshold, also the switch for F
 COMPARE_METRICS = ["dice", "iou", "pixel_precision", "pixel_recall"]
 
 
-# ---------------------------------------------------------------- part 2: the fallback rule
+#fallback rule
 
 def fallback(base, other, threshold=T_BASE):
-    """Per-image rows of the fallback rule: base's row where the image has a box >= threshold, else other's.
-
-    `base` must be the run that keeps exactly the boxes >= threshold (B); `other` the run that also keeps
-    lower boxes (T or C). Both are per_image frames indexed by image_id from compare.load.
-    """
+    """rows of the fallback rule. takes B's row if the image has a box >= 0.5, otherwise the other run's row (T or C)."""
     other = other.reindex(base.index)
     if not np.allclose(base["max_confidence"], other["max_confidence"], atol=1e-4):
         raise ValueError("the two runs did not read the same detection cache (max_confidence differs)")
@@ -59,7 +47,7 @@ def fallback(base, other, threshold=T_BASE):
 
 
 def fallback_tables(runs_dir):
-    """Run summaries, paired differences and taxonomy counts for F_T and F_C next to B, T, C."""
+    """summaries, paired differences and error counts for F_T and F_C next to B, T and C."""
     summary, pairs, taxonomy = [], [], []
     for ds in datasets(runs_dir):
         frames = {name: load(runs_dir, run, ds) for name, run in
@@ -90,7 +78,7 @@ def fallback_tables(runs_dir):
     return pd.DataFrame(summary), pd.DataFrame(pairs), pd.DataFrame(taxonomy)
 
 
-# ---------------------------------------------------------------- part 1: box-level signals
+#box signals
 
 def read_jsonl(path):
     by_image = {}
@@ -103,11 +91,10 @@ def read_jsonl(path):
 
 
 def label_boxes(records, gt_boxes, t_low=T_LOW, t_base=T_BASE):
-    """One row per candidate box of one image with its confidence, SAM score and true/false-positive label.
+    """one row per box in an image with its confidence, sam score and whether it is a real polyp.
 
-    Kept boxes (confidence >= t_low) are matched greedily in confidence order, exactly as the evaluation
-    does; a dropped box gets the label it would have had if it were matched against the GT boxes the kept
-    boxes left over.
+    kept boxes are matched in confidence order like in the evaluation. dropped boxes are checked
+    against the gt boxes that are still unmatched.
     """
     recs = sorted(records, key=lambda r: -r["confidence"])
     unmatched = list(range(len(gt_boxes)))
@@ -153,7 +140,7 @@ def box_table(runs_dir, run="threshold_only"):
 
 
 def auroc(scores, labels):
-    """Area under the ROC curve (probability a random true box outscores a random false one; ties count half)."""
+    """auroc, the chance a random real box scores higher than a random false box. ties count as half."""
     scores, labels = np.asarray(scores, float), np.asarray(labels, bool)
     pos, neg = scores[labels], scores[~labels]
     if len(pos) == 0 or len(neg) == 0:
@@ -162,7 +149,7 @@ def auroc(scores, labels):
     allv = np.concatenate([pos, neg])[order]
     ranks = np.empty(len(allv))
     i = 0
-    while i < len(allv):                     # average ranks over ties
+    while i < len(allv):                     #average the ranks when values tie
         j = i
         while j + 1 < len(allv) and allv[j + 1] == allv[i]:
             j += 1
@@ -206,7 +193,7 @@ def signal_table(boxes):
 
 
 def context_table(boxes):
-    """How often an uncertain box is a polyp, split by whether the image already has a box >= 0.5."""
+    """how often a box between 0.25 and 0.5 is a real polyp, split by whether the image already has a box >= 0.5."""
     band = boxes[boxes["kept"] & boxes["band"]]
     rows = []
     for (ds, ctx), s in band.groupby(["dataset", "higher_box_in_image"], sort=False):
@@ -216,7 +203,7 @@ def context_table(boxes):
     return pd.DataFrame(rows).sort_values(["dataset", "image_has_box_ge_0.5"])
 
 
-# ---------------------------------------------------------------- output
+#output
 
 def markdown(summary, pairs, taxonomy, signals, context):
     out = ["## Fallback rule F (uncertain boxes only where no box >= 0.5)\n"]
