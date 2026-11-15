@@ -2,7 +2,7 @@
 
 **Project:** Confidence-Aware Self-Prompting for Robust Polyp Segmentation Under Image and Domain Shifts · Track A.
 
-**Summary.** Phases 3–4 showed that our method CASP v1 (**C**) beats the YOLO → SAM 2 baseline (**B**) \[1\]–\[3\] on Kvasir-SEG \[4\], on CVC-ClinicDB \[5\] (another hospital) and on nine image corruptions, but that the whole gain comes from its confidence gate: lowering the threshold alone (**T**) does as well, and SAM 2's score never rejected a box. Phase 5 asks *why*, using only the saved Phase 3 logs (1,175 candidate boxes with their YOLO confidence and SAM 2 score, ground-truth boxes from the oracle run **O**; no GPU, no Phase 3 number changed). We (i) decompose the remaining error, (ii) test which signals can tell a real polyp box from a false one, (iii) explain the results theoretically and (iv) test a rule fixed in advance from that theory, the **fallback rule F** (DL-44). Code: `src/eval/filter_analysis.py`; tables: `docs/tables/phase5/`; decisions DL-44 and DL-45.
+**Summary.** Phases 3–4 showed that our method CASP v1 (**C**) beats the YOLO → SAM 2 baseline (**B**) \[1\]–\[3\] on Kvasir-SEG \[4\], on CVC-ClinicDB \[5\] (another hospital) and on nine image corruptions, but that the whole gain comes from its confidence gate: lowering the threshold alone (**T**) does as well, and SAM 2's score never rejected a box. Phase 5 asks *why*, using the saved Phase 3 logs (1,175 candidate boxes with their YOLO confidence and SAM 2 score, ground-truth boxes from the oracle run **O**) and one new Colab job, a second detector trained with seed 43; no Phase 3 number changed. We (i) decompose the remaining error, (ii) test which signals can tell a real polyp box from a false one, (iii) explain the results theoretically and (iv) test a rule fixed in advance from that theory, the **fallback rule F** (DL-44), and (v) repeat the key results with the second detector. Code: `src/eval/filter_analysis.py`, `src/eval/seed_compare.py`; tables: `docs/tables/phase5/`; decisions DL-44, DL-45 and DL-47.
 
 ## 1. Experimental results
 
@@ -28,15 +28,32 @@ SAM 2's IoU head is trained to predict the IoU between the mask it outputs and t
 
 If neither per-box score carries the class, the information has to come from the rest of the image. Most colonoscopy frames show one polyp (194 of 200 Kvasir-SEG and 582 of 612 ClinicDB test images), so by Bayes' rule an uncertain box is far less likely to be a polyp when a confident one has already been found: in our logs 7% (1 of 14) versus 64% (16 of 25) on Kvasir-SEG and 27% (11 of 41) versus 66% (50 of 76) on ClinicDB (Figure 1, right). This is the reasoning behind F, written down before computing its results (DL-44) and using only the existing thresholds 0.25 and 0.5, so nothing was tuned on the test sets. F acts as an image-level suppression step with a single-polyp prior. Its limits follow from the same prior: it removes real second polyps and fragments of large polyps (ClinicDB box recall 0.780 → 0.763), and under strong noise, where the confident box itself is more often wrong, the uncertain box it discards is sometimes the polyp (noise severity 2). The 75 ClinicDB images with no box above 0.25 are out of reach of any rule that only re-ranks YOLO's boxes; they need a detector that transfers better (training on both hospitals, or test-time adaptation).
 
+### 3.4 Does it hold for a second detector?
+
+Rule F was designed after looking at the errors of the seed-42 detector, so we retrained YOLOv8-m with seed 43 (same recipe, DL-31; test mAP50 0.924 vs 0.943, recall 0.855 vs 0.908) and repeated B, T and C on both test sets, reusing the committed configs and saving everything to new folders (`notebooks/08_phase5_seed43_colab.ipynb`, `docs/tables/phase5/seed_comparison.csv`). The gate's gain over B holds on both sets but is smaller on Kvasir-SEG, where the new baseline misses fewer polyps (10 instead of 18). F replicates: its Dice equals T's, it again removes extra-box images and raises box F1. SAM 2's score again fails as a filter in the 0.25–0.5 band, while image context stays informative; on ClinicDB, YOLO confidence carries a little signal with this detector. Two seeds show that the conclusions hold for both trained detectors; they do not give an interval over training randomness.
+
+|                                              | Kvasir-SEG test           |                           | CVC-ClinicDB              |                           |
+|----------------------------------------------|---------------------------|---------------------------|---------------------------|---------------------------|
+| Seed                                         | 42                        | 43                        | 42                        | 43                        |
+| Dice B / T / C / F                           | .831 / .893 / .891 / .895 | .856 / .885 / .885 / .890 | .677 / .760 / .757 / .756 | .712 / .783 / .782 / .782 |
+| C − B \[95% CI\]                             | +.061 \[+.032, +.090\]    | +.028 \[+.004, +.057\]    | +.080 \[+.060, +.100\]    | +.070 \[+.052, +.089\]    |
+| F − T \[95% CI\]                             | +.002 \[−.003, +.006\]    | +.005 \[−.006, +.018\]    | −.003 \[−.010, +.002\]    | −.000 \[−.006, +.005\]    |
+| Missed images B / T                          | 18 / 1                    | 10 / 0                    | 144 / 75                  | 123 / 52                  |
+| Extra-box images T → F                       | 29 → 21                   | 25 → 19                   | 59 → 29                   | 56 → 24                   |
+| Box F1 T → F                                 | .871 → .894               | .852 → .873               | .799 → .808               | .815 → .825               |
+| Band AUROC: SAM score / confidence / context | .53 / .45 / .77           | .40 / .46 / .74           | .47 / .52 / .68           | .42 / .61 / .63           |
+
+**Table 2.** Key results for the two detector seeds. Dice values are means of per-image rows (seed-42 T on ClinicDB is 0.760 this way, 0.759 in the Phase 3 table). Band AUROC: boxes with confidence 0.25–0.5 kept by T, labelled against the oracle's ground-truth boxes.
+
 ## 4. Functionality and reproducibility
 
 ## 5. Conclusions
 
 1.  CASP's improvement is a recall effect of the confidence gate, and it is explained by domain shift lowering detector confidence (§3.1); the refinement steps cannot add to it because SAM 2's score measures mask quality, not class (§3.2).
-2.  A context rule fixed in advance (F) keeps all of the gate's recall, matches T and C in Dice and removes about half of their false boxes on the unseen hospital, at the price of some second polyps and of robustness under strong noise.
+2.  A context rule fixed in advance (F) keeps all of the gate's recall, matches T and C in Dice and removes about half of their false boxes on the unseen hospital, at the price of some second polyps and of robustness under strong noise. Both F's effect and the gate's gain hold for a second, independently trained detector (§3.4).
 3.  The remaining error on the training hospital is box quality; on the unseen hospital it is mostly polyps the detector never proposes. Further gains must come from the detector, not from prompting SAM 2 differently.
 
-**Work division.** Kashish Fatima (lead): results, decision log, review. Khushbakht Sohail: hosted demo, error analysis, reproducibility. Zahra Saeed: filter analysis, theoretical insights, notebook.
+**Work division.** Kashish Fatima (lead): results, decision log, review. Khushbakht Sohail: hosted demo, error analysis, reproducibility. Zahra Saeed: filter analysis, second detector seed, theoretical insights, notebooks.
 
 ### References
 
