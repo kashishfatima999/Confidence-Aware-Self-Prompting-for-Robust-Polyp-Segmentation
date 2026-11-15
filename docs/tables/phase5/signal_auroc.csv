@@ -1,0 +1,17 @@
+dataset,boxes,signal,n,n_tp,auroc,ci_low,ci_high
+kvasir_test,all kept boxes,YOLO confidence,243,196,0.8612,0.7944,0.916
+kvasir_test,all kept boxes,SAM 2 score,243,196,0.6846,0.5941,0.7678
+kvasir_test,all kept boxes,confidence x SAM score,243,196,0.8614,0.7939,0.9165
+kvasir_test,all kept boxes,no box >= 0.5 in image,243,196,0.8038,0.7338,0.8722
+kvasir_test,uncertain band 0.25-0.5,YOLO confidence,39,17,0.4479,0.2539,0.6408
+kvasir_test,uncertain band 0.25-0.5,SAM 2 score,39,17,0.5267,0.3396,0.7083
+kvasir_test,uncertain band 0.25-0.5,confidence x SAM score,39,17,0.4706,0.2777,0.6658
+kvasir_test,uncertain band 0.25-0.5,no box >= 0.5 in image,39,17,0.766,0.6468,0.875
+clinicdb,all kept boxes,YOLO confidence,615,504,0.8199,0.7823,0.8552
+clinicdb,all kept boxes,SAM 2 score,615,504,0.6557,0.5976,0.7089
+clinicdb,all kept boxes,confidence x SAM score,615,504,0.8222,0.7852,0.857
+clinicdb,all kept boxes,no box >= 0.5 in image,615,504,0.6659,0.6202,0.7105
+clinicdb,uncertain band 0.25-0.5,YOLO confidence,117,61,0.5192,0.4176,0.626
+clinicdb,uncertain band 0.25-0.5,SAM 2 score,117,61,0.4694,0.3664,0.5798
+clinicdb,uncertain band 0.25-0.5,confidence x SAM score,117,61,0.512,0.4059,0.6154
+clinicdb,uncertain band 0.25-0.5,no box >= 0.5 in image,117,61,0.6777,0.5939,0.7617

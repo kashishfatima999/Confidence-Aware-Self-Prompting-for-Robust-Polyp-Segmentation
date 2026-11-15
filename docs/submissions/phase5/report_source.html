@@ -1,0 +1,124 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<title>F26-13 Phase 5 Report</title>
+<style>
+  @page { size: A4; margin: 15mm 16mm 15mm 16mm; }
+  html { font-family: "Segoe UI", Arial, Helvetica, sans-serif; font-size: 9.8pt; line-height: 1.3; color: #111; }
+  body { margin: 0; }
+  h1 { font-size: 15pt; margin: 0 0 2pt 0; line-height: 1.2; }
+  h2 { font-size: 11.5pt; margin: 9pt 0 3pt 0; border-bottom: 1px solid #999; padding-bottom: 1pt; page-break-after: avoid; }
+  h3 { font-size: 10pt; margin: 6pt 0 2pt 0; page-break-after: avoid; }
+  p { margin: 0 0 4pt 0; text-align: justify; }
+  ul, ol { margin: 0 0 4pt 0; padding-left: 16pt; }
+  li { margin-bottom: 1.2pt; }
+  table { border-collapse: collapse; width: 100%; margin: 2pt 0 5pt 0; font-size: 8.6pt; page-break-inside: avoid; }
+  th, td { border: 1px solid #bbb; padding: 1.8pt 3.5pt; vertical-align: top; }
+  th { background: #eee; text-align: left; }
+  td.num, th.num { text-align: right; white-space: nowrap; }
+  .titlepage { page-break-after: always; height: 255mm; display: flex; flex-direction: column; align-items: center; justify-content: center; text-align: center; }
+  .tp-uni { font-size: 13pt; font-weight: 600; margin-bottom: 4pt; }
+  .tp-course { font-size: 11pt; color: #333; margin-bottom: 42pt; }
+  .tp-title { font-size: 21pt; font-weight: 700; line-height: 1.25; max-width: 150mm; margin-bottom: 12pt; }
+  .tp-sub { font-size: 14pt; color: #333; margin-bottom: 40pt; }
+  table.tp-info { width: auto; font-size: 11pt; margin: 0 0 24pt 0; }
+  table.tp-info td { border: none; padding: 2pt 8pt; text-align: left; }
+  table.tp-info td:first-child { color: #555; text-align: right; }
+  table.tp-members { width: 105mm; font-size: 11pt; margin: 0 0 40pt 0; }
+  table.tp-members th, table.tp-members td { padding: 4pt 8pt; text-align: center; }
+  .tp-links { font-size: 9.5pt; color: #333; line-height: 1.5; }
+  .meta { font-size: 9pt; color: #333; margin-bottom: 5pt; }
+  .meta table { width: auto; font-size: 9pt; margin: 2pt 0; }
+  .meta td { border: none; padding: 0 12pt 0 0; }
+  code { font-family: Consolas, "Courier New", monospace; font-size: 8.4pt; background: #f3f3f3; padding: 0 2pt; }
+  figure { margin: 3pt 0 4pt 0; page-break-inside: avoid; text-align: center; }
+  .row { display: flex; gap: 8pt; align-items: flex-start; }
+  .row figure { margin: 0; }
+  .cap { font-size: 8.4pt; color: #333; margin: 0 0 4pt 0; text-align: left; }
+  .refs { font-size: 8.2pt; }
+  .refs li { margin-bottom: 0.5pt; }
+  ol.ieee { list-style: none; padding-left: 0; counter-reset: ref; }
+  ol.ieee li { counter-increment: ref; padding-left: 18pt; text-indent: -18pt; }
+  ol.ieee li::before { content: "[" counter(ref) "]"; display: inline-block; width: 18pt; text-indent: 0; }
+  td:first-child { white-space: nowrap; }
+  tr.hl td { background: #f4f7ff; font-weight: 600; }
+  .flow { display: flex; align-items: stretch; gap: 0; margin: 4pt 0 3pt 0; font-size: 8.3pt; page-break-inside: avoid; }
+  .flow .box { flex: 1; border: 1px solid #888; border-radius: 3pt; padding: 3pt 4pt; background: #fafafa; }
+  .flow .box b { display: block; font-size: 8.6pt; margin-bottom: 1pt; }
+  .flow .box.ours { background: #eef3ff; border-color: #5577cc; }
+  .flow .arr { display: flex; align-items: center; padding: 0 3pt; font-size: 12pt; color: #555; }
+  .fig { width: 100%; }
+  .tight td, .tight th { padding: 1.5pt 3pt; }
+  table.small { font-size: 8.2pt; }
+  .callout { border-left: 3px solid #2a78d6; background: #f4f7ff; padding: 3pt 6pt; margin: 3pt 0 5pt 0; }
+  .eq { text-align: center; margin: 2pt 0 4pt 0; font-size: 9.6pt; }
+</style>
+</head>
+<body>
+
+<div class="titlepage">
+  <div class="tp-uni">National University of Computer &amp; Emerging Sciences, Lahore</div>
+  <div class="tp-course">AI2002 Artificial Intelligence (BDS-5A) &nbsp;·&nbsp; Fall 2026</div>
+  <div class="tp-title">Confidence-Aware Self-Prompting for Robust Polyp Segmentation Under Image and Domain Shifts</div>
+  <div class="tp-sub">Phase 5 Report: Output Analysis</div>
+  <table class="tp-info">
+    <tr><td>Group</td><td>F26-13</td></tr>
+    <tr><td>Track</td><td>A (Research &amp; Development)</td></tr>
+    <tr><td>Instructor</td><td>Dr. Hajra Waheed</td></tr>
+    <tr><td>Date</td><td>15 November 2026</td></tr>
+  </table>
+  <table class="tp-members">
+    <tr><th>Name</th><th>Roll number</th></tr>
+    <tr><td>Kashish Fatima (lead)</td><td>24L-2605</td></tr>
+    <tr><td>Khushbakht Sohail</td><td>24L-2604</td></tr>
+    <tr><td>Zahra Saeed</td><td>24L-2512</td></tr>
+  </table>
+  <div class="tp-links">Repository: <a href="https://github.com/kashishfatima999/Confidence-Aware-Self-Prompting-for-Robust-Polyp-Segmentation">github.com/kashishfatima999/Confidence-Aware-Self-Prompting-for-Robust-Polyp-Segmentation</a><br>
+  Live demo: <a href="SPACE_URL">SPACE_URL_SHORT</a><br>
+  Notebook: <code>F26-13.ipynb</code> (rebuilds every table and figure in this report from the Phase 3 result files, CPU only, about one minute)</div>
+</div>
+
+<p><b>Summary.</b> Phases 3–4 showed that our method CASP v1 (<b>C</b>) beats the YOLO → SAM 2 baseline (<b>B</b>) [1]–[3] on Kvasir-SEG [4], on CVC-ClinicDB [5] (another hospital) and on nine image corruptions, but that the whole gain comes from its confidence gate: lowering the threshold alone (<b>T</b>) does as well, and SAM 2's score never rejected a box. Phase 5 asks <i>why</i>, using only the saved Phase 3 logs (1,175 candidate boxes with their YOLO confidence and SAM 2 score, ground-truth boxes from the oracle run <b>O</b>; no GPU, no Phase 3 number changed). We (i) decompose the remaining error, (ii) test which signals can tell a real polyp box from a false one, (iii) explain the results theoretically and (iv) test a rule fixed in advance from that theory, the <b>fallback rule F</b> (DL-44). Code: <code>src/eval/filter_analysis.py</code>; tables: <code>docs/tables/phase5/</code>; decisions DL-44 and DL-45.</p>
+
+<h2>1. Experimental results</h2>
+<p class="callout"><b>To be written by Kashish Fatima (task 1.2).</b> The two results tables (B, T, C, F, O on Kvasir-SEG test and CVC-ClinicDB: Dice with CI, pixel precision / recall, misses, extra-box images, box P / R / F1), the paired differences and one paragraph on the corrupted settings, from <code>docs/tables/phase5/fallback_metrics.csv</code> and <code>fallback_comparison.csv</code>.</p>
+<h2>2. Error analysis</h2>
+<p class="callout"><b>To be written by Khushbakht Sohail (task 2.4, 2.5).</b> Mean Dice = P(mask) × E[Dice | mask] table and the oracle-gap split (numbers in notebook section 2), how F changes the failure taxonomy (Figure 2, <code>docs/figures/phase5_fallback_taxonomy.png</code>), and where F loses (ClinicDB second polyps / fragments, noise severity 2).</p>
+<h2>3. Theoretical insights</h2>
+<h3>3.1 Domain shift lowers detector confidence before it removes detections</h3>
+<p>A detector's confidence is calibrated, at best, on its training distribution; under dataset shift its scores drift and usually drop [8]. Our logs show exactly this: the median confidence of true polyp boxes falls from 0.873 on Kvasir-SEG to 0.794 on ClinicDB, the share of true boxes at ≥ 0.5 falls from 88.6% to 77.3%, and the share below 0.25 rises from 3.0% to 12.0%. A threshold of 0.5 chosen on the source domain therefore loses recall precisely where it matters, and lowering it to 0.25 moves the operating point back along the precision–recall curve. Whether that is worth it is a cost question: a box should be kept when P(polyp | box) × gain from a found polyp exceeds (1 − P) × cost of a false alarm [9]. Between 0.25 and 0.5, P(polyp) is about 0.44 on Kvasir-SEG (17 of 39 boxes) and 0.52 on ClinicDB (61 of 117); in screening, where a missed polyp is the costlier error, keeping such boxes is the right decision on average. This is the whole of CASP's gain over B.</p>
+
+<h3>3.2 Why SAM 2's score cannot filter false boxes</h3>
+<p>SAM 2's IoU head is trained to predict the IoU between the mask it outputs and the object the <i>prompt</i> designates [3], [6]. It answers "is this a clean, complete segment of whatever is in the box?", not "is the thing in the box a polyp?". A fold, a light reflection or a bubble inside a false box is a well-defined object, so SAM 2 segments it cleanly and scores it high. The data agree (Figure 1): among the kept boxes, 91% (Kvasir-SEG) and 96% (ClinicDB) of the false ones score ≥ 0.8, and inside the 0.25–0.5 band the SAM 2 score separates true from false boxes no better than chance (AUROC 0.53 [0.34, 0.71] and 0.47 [0.37, 0.58]). Over all kept boxes it does reach 0.69 and 0.66, but only because it is correlated with YOLO's confidence (r = 0.36 and 0.44): multiplying the two gives 0.861 and 0.822, identical to confidence alone (0.861, 0.820). SAM 2's score adds no information about <i>class</i>, which is why the acceptance rule of Phase 3 never fired at any threshold we could set. The same argument explains why the candidate prompts and self-prompting were neutral: for a correct box SAM 2 is already near the oracle (E[Dice | mask] 0.95 with ground-truth boxes), and choosing the best of several highly correlated candidates by a noisy estimate of quality mostly selects the candidate whose score is over-estimated, so the expected gain is close to zero and can be negative [7].</p>
+<figure><img class="fig" src="../../figures/phase5_box_signals.png"></figure>
+<p class="cap"><b>Figure 1.</b> Every box T kept with confidence 0.25–0.5, labelled against the ground-truth boxes. <i>Left, centre:</i> true polyps (blue dots) and false boxes (orange crosses) overlap completely in YOLO confidence and in SAM 2's predicted IoU. <i>Right:</i> whether the image already has a box ≥ 0.5 separates them (AUROC 0.77 on Kvasir-SEG, 0.68 on ClinicDB).</p>
+
+<h3>3.3 The missing information is context, and it leads to the fallback rule</h3>
+<p>If neither per-box score carries the class, the information has to come from the rest of the image. Most colonoscopy frames show one polyp (194 of 200 Kvasir-SEG and 582 of 612 ClinicDB test images), so by Bayes' rule an uncertain box is far less likely to be a polyp when a confident one has already been found: in our logs 7% (1 of 14) versus 64% (16 of 25) on Kvasir-SEG and 27% (11 of 41) versus 66% (50 of 76) on ClinicDB (Figure 1, right). This is the reasoning behind F, written down before computing its results (DL-44) and using only the existing thresholds 0.25 and 0.5, so nothing was tuned on the test sets. F acts as an image-level suppression step with a single-polyp prior. Its limits follow from the same prior: it removes real second polyps and fragments of large polyps (ClinicDB box recall 0.780 → 0.763), and under strong noise, where the confident box itself is more often wrong, the uncertain box it discards is sometimes the polyp (noise severity 2). The 75 ClinicDB images with no box above 0.25 are out of reach of any rule that only re-ranks YOLO's boxes; they need a detector that transfers better (training on both hospitals, or test-time adaptation).</p>
+
+<h2>4. Functionality and reproducibility</h2>
+<p class="callout"><b>To be written by Khushbakht Sohail (task 2.6).</b> What the hosted demo shows (with its link and a screenshot), how to rerun the analysis (<code>python src/eval/filter_analysis.py --runs runs</code>; the notebook first reproduces the Phase 4 tables byte for byte) and the CI tests.</p>
+<h2>5. Conclusions</h2>
+<ol>
+  <li>CASP's improvement is a recall effect of the confidence gate, and it is explained by domain shift lowering detector confidence (§3.1); the refinement steps cannot add to it because SAM 2's score measures mask quality, not class (§3.2).</li>
+  <li>A context rule fixed in advance (F) keeps all of the gate's recall, matches T and C in Dice and removes about half of their false boxes on the unseen hospital, at the price of some second polyps and of robustness under strong noise.</li>
+  <li>The remaining error on the training hospital is box quality; on the unseen hospital it is mostly polyps the detector never proposes. Further gains must come from the detector, not from prompting SAM 2 differently.</li>
+</ol>
+<p class="cap"><b>Work division</b> (<code>project-division/Project-Division-Phase-5.md</code>): Kashish Fatima (lead): §1, decision log, review. Khushbakht Sohail: hosted demo, §2, §4. Zahra Saeed: filter analysis, notebook, §3, summary and conclusions, package.</p>
+
+<h3>References</h3>
+<ol class="refs ieee">
+  <li>M. Mansoori, S. Shahabodini, J. Abouei, K. N. Plataniotis, and A. Mohammadi, “Self-prompting polyp segmentation in colonoscopy using hybrid YOLO-SAM 2 model,” 2024, <i>arXiv:2409.09484</i>.</li>
+  <li>G. Jocher, A. Chaurasia, and J. Qiu, “Ultralytics YOLOv8,” 2023. [Online]. Available: https://github.com/ultralytics/ultralytics</li>
+  <li>N. Ravi <i>et al.</i>, “SAM 2: Segment anything in images and videos,” 2024, <i>arXiv:2408.00714</i>.</li>
+  <li>D. Jha <i>et al.</i>, “Kvasir-SEG: A segmented polyp dataset,” in <i>MultiMedia Modeling (MMM 2020)</i>, LNCS, vol. 11962. Cham, Switzerland: Springer, 2020, pp. 451–462.</li>
+  <li>J. Bernal <i>et al.</i>, “WM-DOVA maps for accurate polyp highlighting in colonoscopy: Validation vs. saliency maps from physicians,” <i>Comput. Med. Imag. Graph.</i>, vol. 43, pp. 99–111, 2015.</li>
+  <li>A. Kirillov <i>et al.</i>, “Segment anything,” in <i>Proc. IEEE/CVF Int. Conf. Comput. Vis. (ICCV)</i>, 2023, pp. 4015–4026.</li>
+  <li>J. E. Smith and R. L. Winkler, “The optimizer's curse: Skepticism and postdecision surprise in decision analysis,” <i>Manage. Sci.</i>, vol. 52, no. 3, pp. 311–322, 2006.</li>
+  <li>Y. Ovadia <i>et al.</i>, “Can you trust your model's uncertainty? Evaluating predictive uncertainty under dataset shift,” in <i>Adv. Neural Inf. Process. Syst. (NeurIPS)</i>, 2019.</li>
+  <li>C. Elkan, “The foundations of cost-sensitive learning,” in <i>Proc. Int. Joint Conf. Artif. Intell. (IJCAI)</i>, 2001, pp. 973–978.</li>
+</ol>
+
+</body>
+</html>
