@@ -7,7 +7,7 @@ from pathlib import Path
 import pandas as pd
 
 sys.path.insert(0, str(Path(__file__).resolve().parents[1] / "src" / "eval"))
-import filter_analysis as fa  # noqa: E402
+import filter_analysis as fa  #noqa: E402
 
 
 def frame(rows):
@@ -18,9 +18,9 @@ def frame(rows):
 class FallbackTests(unittest.TestCase):
     def setUp(self):
         self.b = frame([
-            {"image_id": "a", "max_confidence": 0.9, "dice": 0.95},   # confident box -> take B
-            {"image_id": "b", "max_confidence": 0.4, "dice": 0.0},    # only uncertain -> take T
-            {"image_id": "c", "max_confidence": 0.1, "dice": 0.0},    # nothing kept by either
+            {"image_id": "a", "max_confidence": 0.9, "dice": 0.95},   #confident box so take B
+            {"image_id": "b", "max_confidence": 0.4, "dice": 0.0},    #only uncertain boxes so take T
+            {"image_id": "c", "max_confidence": 0.1, "dice": 0.0},    #nothing kept by either run
         ])
         self.t = frame([
             {"image_id": "a", "max_confidence": 0.9, "dice": 0.70},
@@ -51,7 +51,7 @@ class LabelBoxTests(unittest.TestCase):
         gt = [(0, 0, 10, 10)]
         rows = fa.label_boxes([self.rec([0, 0, 10, 10], 0.3), self.rec([1, 1, 10, 10], 0.8)], gt)
         self.assertEqual([r["confidence"] for r in rows], [0.8, 0.3])
-        self.assertEqual([r["tp"] for r in rows], [True, False])   # the second box finds the GT already taken
+        self.assertEqual([r["tp"] for r in rows], [True, False])   #gt box is already matched
         self.assertTrue(rows[1]["higher_box_in_image"] and rows[1]["band"])
 
     def test_dropped_boxes_do_not_take_a_match(self):

@@ -276,7 +276,7 @@ Status meanings: *proposed* = suggested, not yet agreed by the group; *accepted*
 - **Decision:** The Google Classroom submission is `F26-13.pdf` (the 2–4 page Phase 2 report required by the TA, sections: dataset source and description, data collection method, preprocessing steps, brief EDA, final dataset summary) and `F26-13.ipynb` (one Colab notebook that reproduces the whole Phase 2 pipeline: environment, tests, both datasets, statistics, corruption set, smoke test), plus the GitHub link. Both files live in `docs/submissions/phase2/` and are re-generated from the repository: the PDF from `report_source.html` with headless Chrome, the notebook assembled from the two member notebooks.
 - **Alternatives considered:** (1) LaTeX for the PDF. Not available on the group's machines; the final Phase 6 report will be LaTeX, this short report does not need it. (2) Submitting `notebooks/03_environment_smoke_test.ipynb` as-is. Rejected: it does not contain the statistics step and installed unpinned package versions. (3) A `.py` driver script instead of a notebook. Rejected: the smoke test and the figures need Colab's GPU and are better shown with outputs.
 - **Reason / evidence:** The TA's requirement text is kept verbatim in `docs/requirements/phase2_requirements.md` with a checklist that maps each requirement to the file that satisfies it.
-- **Status:** implemented; the notebook must be run once on Colab ("Run all") to fill in its outputs before submission
+- **Status:** implemented; the notebook was run on Colab ("Run all") and committed with all 16 code cells executed (2026-10-11)
 - **Affects:** `docs/submissions/phase2/`, `docs/requirements/phase2_requirements.md`
 
 ## Part E — Phase 3: implementation and execution

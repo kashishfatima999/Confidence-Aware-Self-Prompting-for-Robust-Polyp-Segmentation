@@ -142,4 +142,24 @@ Estimated effort: Member 2 about 9 hours, Member 3 about 10 hours, against about
 
 ### Execution record
 
-To be filled on 2026-11-01, in the same form as the Phase 3 division §7, so plan and reality sit next to each other.
+What actually happened, from the git history and the decision-log change log. The plan above is unchanged.
+
+| Task | Planned | Done by | When | Evidence |
+|---|---|---|---|---|
+| 1.1 plan, DL-39, DL-40 | M1 | M1 | 2026-10-24 | PRs #17, #18 |
+| 3.1 `compare.py`, paired CIs, win / loss counts | M3 | M3 | 2026-11-08 | PR #19, `docs/tables/phase4/comparison.*` |
+| 3.2 `error_analysis.py`, taxonomy, worst-10, ClinicDB misses, Kvasir wins / losses | M3 | M3 | 2026-11-08 | PR #19, `docs/tables/phase4/errors_*`, DL-41 |
+| 3.3 `notebooks/06_phase4_analysis.ipynb` | M3 (M2 bias cells) | M3 | 2026-11-08, bias cells 2026-11-11 | PR #19, PR #22 |
+| 3.4 report §1, §3, §5, §6 | M3 | M3 | 2026-11-08 | `docs/phase4_report.md` |
+| 2.1 pixel metrics, area error, detection F1 | M2 | M2 | 2026-11-10 | `src/eval/metrics.py`, branch `khushbakht-phase4`, DL-42 |
+| 2.2 `bias_check.py`, eight subgroup tables and figures | M2 | M2 | 2026-11-10 | `docs/tables/phase4/bias_*`, `docs/figures/phase4_bias_*.png`, DL-42 |
+| 2.3 ClinicDB example figure (open item O1) | M2 | M2 | 2026-11-10 | `docs/figures/phase4_examples_clinicdb.png`, DL-43 |
+| 2.4 report §2, §4 | M2 | M2 | 2026-11-10 | `docs/phase4_report.md` |
+| Merge of `khushbakht-phase4` into `zahra-phase4` (two conflicts) | — | M3 | 2026-11-11 | change log 2026-11-11 |
+| 1.3 rebuild check (bias tables re-run, byte-identical) | M1 | M3 | 2026-11-11 | change log 2026-11-11 |
+| 3.5 submission package | M3 | M3 | 2026-11-11 | PR #22, `docs/submissions/phase4/`, `docs/requirements/phase4_requirements.md` |
+| 2.5, 3.6 second seed, Kaggle run, DL-38 filter | deferred | — | — | deferred 2026-10-24; the CPU-only filter check was done in Phase 5 (DL-44, DL-45) |
+
+The work ran from 8 to 11 November instead of the planned 31 October – 1 November.
+
+**Open items at the end of Phase 4:** O1 done (DL-43); O8 done (tasks 2.2, 3.1, 3.2); O2 not recoverable, the per-epoch CSV stays the record; O5 and O6 still deferred, no GPU job was needed; O7 moved to Phase 5 as the CPU-only analysis; O9 not needed for any phase so far (CI runs the YAML test).

@@ -1,16 +1,12 @@
 # F26-13 — Phase 5 report: Output analysis
 
-**Project:** Confidence-Aware Self-Prompting for Robust Polyp Segmentation Under Image and Domain Shifts · Track A. Submission source: `docs/submissions/phase5/report_source.html`; notebook `notebooks/07_phase5_analysis.ipynb`.
+**Project:** Confidence-Aware Self-Prompting for Robust Polyp Segmentation Under Image and Domain Shifts · Track A.
 
 **Summary.** Phases 3–4 showed that our method CASP v1 (**C**) beats the YOLO → SAM 2 baseline (**B**) \[1\]–\[3\] on Kvasir-SEG \[4\], on CVC-ClinicDB \[5\] (another hospital) and on nine image corruptions, but that the whole gain comes from its confidence gate: lowering the threshold alone (**T**) does as well, and SAM 2's score never rejected a box. Phase 5 asks *why*, using only the saved Phase 3 logs (1,175 candidate boxes with their YOLO confidence and SAM 2 score, ground-truth boxes from the oracle run **O**; no GPU, no Phase 3 number changed). We (i) decompose the remaining error, (ii) test which signals can tell a real polyp box from a false one, (iii) explain the results theoretically and (iv) test a rule fixed in advance from that theory, the **fallback rule F** (DL-44). Code: `src/eval/filter_analysis.py`; tables: `docs/tables/phase5/`; decisions DL-44 and DL-45.
 
 ## 1. Experimental results
 
-**To be written by Kashish Fatima (task 1.2).** The two results tables (B, T, C, F, O on Kvasir-SEG test and CVC-ClinicDB: Dice with CI, pixel precision / recall, misses, extra-box images, box P / R / F1), the paired differences and one paragraph on the corrupted settings, from `docs/tables/phase5/fallback_metrics.csv` and `fallback_comparison.csv`.
-
 ## 2. Error analysis
-
-**To be written by Khushbakht Sohail (task 2.4, 2.5).** Mean Dice = P(mask) × E\[Dice \| mask\] table and the oracle-gap split (numbers in notebook section 2), how F changes the failure taxonomy (Figure 2, `docs/figures/phase5_fallback_taxonomy.png`), and where F loses (ClinicDB second polyps / fragments, noise severity 2).
 
 ## 3. Theoretical insights
 
@@ -34,15 +30,13 @@ If neither per-box score carries the class, the information has to come from the
 
 ## 4. Functionality and reproducibility
 
-**To be written by Khushbakht Sohail (task 2.6).** What the hosted demo shows (with its link and a screenshot), how to rerun the analysis (`python src/eval/filter_analysis.py --runs runs`; the notebook first reproduces the Phase 4 tables byte for byte) and the CI tests.
-
 ## 5. Conclusions
 
 1.  CASP's improvement is a recall effect of the confidence gate, and it is explained by domain shift lowering detector confidence (§3.1); the refinement steps cannot add to it because SAM 2's score measures mask quality, not class (§3.2).
 2.  A context rule fixed in advance (F) keeps all of the gate's recall, matches T and C in Dice and removes about half of their false boxes on the unseen hospital, at the price of some second polyps and of robustness under strong noise.
 3.  The remaining error on the training hospital is box quality; on the unseen hospital it is mostly polyps the detector never proposes. Further gains must come from the detector, not from prompting SAM 2 differently.
 
-**Work division** (`project-division/Project-Division-Phase-5.md`): Kashish Fatima (lead): §1, decision log, review. Khushbakht Sohail: hosted demo, §2, §4. Zahra Saeed: filter analysis, notebook, §3, summary and conclusions, package.
+**Work division.** Kashish Fatima (lead): results, decision log, review. Khushbakht Sohail: hosted demo, error analysis, reproducibility. Zahra Saeed: filter analysis, theoretical insights, notebook.
 
 ### References
 
