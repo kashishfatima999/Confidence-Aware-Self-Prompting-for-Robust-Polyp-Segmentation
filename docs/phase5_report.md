@@ -169,7 +169,7 @@ The demo accepts an uploaded colonoscopy image and displays the segmentation out
 
 The detector is run once per uploaded image, and its detections are reused for the method comparisons. This keeps the comparison consistent and avoids unnecessary repeated detector inference.
 
-The demo also displays numerical information, including the number of YOLO detections, the selected fallback source, mean detection confidence, confidence threshold, mask area and image coverage. These measurements help users compare the outputs, but they should not be interpreted as ground-truth segmentation accuracy. Actual Dice and IoU evaluation requires ground-truth masks.
+The demo also displays numerical information, including the number of YOLO detections, the selected fallback source, mean detection confidence, confidence threshold, mask area, image coverage and IoU against CASP. These measurements help users compare the outputs, but they should not be interpreted as ground-truth segmentation accuracy. IoU against CASP measures agreement with the CASP output, not agreement with ground-truth masks.
 
 **Hosted demo:** https://huggingface.co/spaces/sugarrmelonnnnn/casp-polyp-segmentation
 
@@ -186,15 +186,21 @@ Several deployment adjustments were necessary to make the application work in th
 
 These changes were deployment-specific and did not require changing the project's core refinement or SAM 2 prompting logic.
 
-### 4.3 Functional smoke test
+### 4.3 Functional smoke test and dataset screenshots
 
-The deployed application was opened successfully and tested with an uploaded colonoscopy image. The application completed inference and displayed the B, T, C and F_C outputs.
+The deployed application was tested using colonoscopy images from both Kvasir-SEG and CVC-ClinicDB. The screenshots below document the demo outputs and numerical comparisons for the two datasets.
 
-In the recorded test, YOLO produced two detections. The fallback selected C because no detection reached the confidence threshold of 0.50. The application also displayed the numerical comparison table.
+**Kvasir-SEG demo**
 
-For this particular image, T, C and F_C produced identical masks, while B produced an empty mask. This is a single-image functional check, not a quantitative evaluation across either test dataset.
+![Kvasir-SEG demo showing B, T, C and F_C outputs and numerical measurements](figures/phase5_kvasir_demo.png)
 
-The smoke test confirms that the hosted interface can accept an image, execute the pipeline and display the comparison. It does not establish general segmentation performance or replace the full evaluation on Kvasir-SEG and ClinicDB.
+**CVC-ClinicDB demo**
+
+![CVC-ClinicDB demo showing B, T, C and F_C outputs and numerical measurements](figures/phase5_clinicdb_demo.png)
+
+The demo displays the four segmentation outputs alongside numerical measurements, including mask area, image coverage and IoU against CASP. These measurements describe the displayed predictions and agreement between methods. They are not ground-truth accuracy measurements.
+
+The screenshots provide visual evidence that the hosted interface can accept test images, execute the pipeline and display the method comparisons on both datasets. They are demonstration examples, not a replacement for the full quantitative evaluation on the test sets.
 
 ### 4.4 Reproducing the Phase 5 analysis
 
