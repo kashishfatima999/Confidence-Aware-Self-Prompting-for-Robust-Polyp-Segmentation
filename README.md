@@ -42,14 +42,17 @@ Both datasets are restricted to research and educational use and are **not** sto
 |---|---|
 | The Phase 2 report and notebook handed in | `docs/submissions/phase2/F26-13.pdf`, `F26-13.ipynb` |
 | The Phase 3 report and notebook for submission | `docs/submissions/phase3/F26-13.pdf` (source `report_source.html`), `F26-13.ipynb` |
-| The Phase 3 results and report draft | `docs/phase3_report.md`, `docs/tables/phase3/`, `notebooks/04_phase3_colab.ipynb` (executed) |
+| The Phase 4 report and notebook for submission | `docs/submissions/phase4/F26-13.pdf` (source `report_source.html`), `F26-13.ipynb` |
+| The Phase 4 results and report | `docs/phase4_report.md`, `docs/tables/phase4/`, `notebooks/06_phase4_analysis.ipynb` (executed) |
+| The Phase 5 analysis | `docs/phase5_report.md`, `src/eval/filter_analysis.py`, `docs/tables/phase5/`, `notebooks/07_phase5_analysis.ipynb` (executed) |
+| The Phase 3 results and report | `docs/phase3_report.md`, `docs/tables/phase3/`, `notebooks/04_phase3_colab.ipynb` (executed) |
 | The course requirements and a checklist of how each is met | `docs/requirements/` |
 | The approved proposal | `docs/proposal/F26-13_Project_Proposal.pdf` |
 | Every number about the data (provenance, verification, split, statistics) | `docs/data_report.md` |
 | Why each choice was made, with alternatives and evidence | `docs/decision_log.md` |
 | How to set up Colab, the baseline's problems, the smoke test | `docs/setup_guide.md` |
-| Figures and tables | `docs/figures/`, `docs/tables/` (Phase 3: `docs/tables/phase3/`) |
-| Who does what | `project-division/Project-Division-Phase-2.md` |
+| Figures and tables | `docs/figures/`, `docs/tables/` (one folder per phase: `phase3/`, `phase4/`, `phase5/`) |
+| Who does what | `project-division/Project-Division-Phase-2.md` to `Project-Division-Phase-5.md` |
 
 ## 4. Repository layout
 
@@ -98,7 +101,7 @@ Each script verifies its input (counts, pairing, sizes, readability, empty masks
 
 Everything that needs a GPU (statistics on both datasets, YOLO + SAM 2 smoke test, and later training) runs on Google Colab: open `docs/submissions/phase2/F26-13.ipynb` or `notebooks/03_environment_smoke_test.ipynb` with a T4 runtime and *Run all* (about 10 minutes). `docs/setup_guide.md` explains each step.
 
-## 6. Phase 3: baseline and method (runs done, report in draft)
+## 6. Phase 3: baseline and method
 
 Decisions DL-30 to DL-38. Everything below runs on Colab (`notebooks/04_phase3_colab.ipynb`, executed copy committed); the harness and the method logic are tested without a GPU. Full numbers: `docs/tables/phase3/results.md`; reading: `docs/phase3_report.md`.
 
@@ -146,8 +149,10 @@ python src/eval/summarize.py                                               # -> 
 |---|---|---|
 | 1 | Problem definition and proposal (`docs/proposal/`) | done |
 | 2 | Data acquisition, cleaning, split, YOLO format, environment, tests, image-shift set | done; submitted (`docs/submissions/phase2/`) |
-| 3 | Baseline reproduction, YOLO training, confidence-aware prompt refinement (CASP v1) | runs done (2026-10-16); tables in `docs/tables/phase3/`, report draft `docs/phase3_report.md`, record in `project-division/Project-Division-Phase-3.md` §7 |
-| 4–6 | Evaluation on both datasets and under corruptions, error and ablation analysis, LaTeX report | not started |
+| 3 | Baseline reproduction, YOLO training, confidence-aware prompt refinement (CASP v1) | done; submitted (`docs/submissions/phase3/`); record in `project-division/Project-Division-Phase-3.md` §7 |
+| 4 | Metrics, paired comparison, error taxonomy, bias check | done; submitted (`docs/submissions/phase4/`); record in `project-division/Project-Division-Phase-4.md` §7 |
+| 5 | Output analysis: gap to the oracle, box-level signals, why SAM 2's score cannot filter false boxes, fallback rule F, hosted demo | in progress (`docs/phase5_report.md`, `project-division/Project-Division-Phase-5.md`) |
+| 6 | LaTeX report with methodology and architecture diagrams, challenges | not started |
 
 ## 9. References
 
