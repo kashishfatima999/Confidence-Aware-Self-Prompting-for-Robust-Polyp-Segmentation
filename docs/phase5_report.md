@@ -6,7 +6,71 @@
 
 ## 1. Experimental results
 
-*To be completed by Member 3.*
+### 1.1 Performance on the clean test sets
+
+We evaluate the baseline (**B**), threshold-only (**T**), CASP v1 (**C**), oracle upper bound (**O**), and the proposed fallback rules (**F_T** and **F_C**) on both the in-domain test set (Kvasir-SEG, 200 images) and the cross-domain hospital dataset (CVC-ClinicDB, 612 images). In accordance with the methodology fixed in DL-32 and DL-44, images with no predicted mask receive a Dice and IoU of zero. Confidence intervals are 95% percentile bootstrap intervals with 1,000 resamples.
+
+| Dataset | Run | Dice [95% CI] | IoU | Pixel Prec. | Pixel Rec. | Missed Images | Box Prec. / Rec. / F1 |
+|---|---|---|---:|---:|---:|---:|---|
+| **Kvasir-SEG** | B | 0.831 [0.792, 0.871] | 0.780 | 0.873 | 0.810 | 18 | 0.877 / 0.865 / 0.871 |
+| | T | 0.893 [0.871, 0.913] | 0.832 | 0.929 | 0.890 | 1 | 0.807 / 0.947 / 0.871 |
+| | C | 0.891 [0.868, 0.912] | 0.831 | 0.926 | 0.892 | 1 | 0.802 / 0.942 / 0.867 |
+| | O | 0.952 [0.943, 0.958] | 0.912 | 0.979 | 0.931 | 0 | 1.000 / 1.000 / 1.000 |
+| | F_T | 0.895 [0.872, 0.915] | 0.834 | 0.936 | 0.886 | 1 | 0.852 / 0.942 / 0.894 |
+| | F_C | 0.893 [0.870, 0.914] | 0.833 | 0.933 | 0.888 | 1 | 0.847 / 0.937 / 0.890 |
+| **CVC-ClinicDB** | B | 0.677 [0.648, 0.710] | 0.628 | 0.712 | 0.671 | 144 | 0.890 / 0.686 / 0.774 |
+| | T | 0.760 [0.736, 0.785] | 0.698 | 0.800 | 0.764 | 75 | 0.820 / 0.780 / 0.799 |
+| | C | 0.757 [0.734, 0.783] | 0.695 | 0.795 | 0.765 | 75 | 0.815 / 0.776 / 0.795 |
+| | O | 0.945 [0.942, 0.948] | 0.899 | 0.966 | 0.928 | 0 | 1.000 / 1.000 / 1.000 |
+| | F_T | 0.756 [0.731, 0.782] | 0.695 | 0.805 | 0.753 | 75 | 0.859 / 0.763 / 0.808 |
+| | F_C | 0.756 [0.731, 0.782] | 0.695 | 0.802 | 0.754 | 75 | 0.857 / 0.762 / 0.807 |
+
+**Table 1.1.** Overall segmentation and detection performance across clean test sets. Missed images are those where no detection exceeded the operating threshold, receiving Dice = 0.
+
+On both test sets, lowering the threshold to 0.25 (run T) yields substantial improvements over baseline B: +0.062 Dice on Kvasir-SEG and +0.082 on ClinicDB, dropping missed images from 18 to 1 and from 144 to 75 respectively. CASP v1 (run C) performs identically to T within error margins (0.891 vs 0.893 on Kvasir-SEG; 0.757 vs 0.760 on ClinicDB), demonstrating that prompt refinement alone does not provide additional segmentation gains. The fallback rules (F_T and F_C) match T and C in Dice while significantly improving box precision (from 0.807 to 0.852 on Kvasir; from 0.820 to 0.859 on ClinicDB) and raising box F1 to its highest levels across automated models.
+
+### 1.2 Paired differences and statistical significance
+
+Because all variants are evaluated on identical images from the same cached detector predictions, we compute paired differences per image with 2,000 paired bootstrap resamples (seed 42, DL-32).
+
+| Dataset | Comparison | Dice Difference [95% CI] | IoU Difference [95% CI] | Win / Loss / Tie |
+|---|---|---|---|:---:|
+| **Kvasir-SEG** | F_T − B | +0.064 [+0.035, +0.093] | +0.055 [+0.030, +0.081] | 17 / 0 / 183 |
+| | F_T − T | +0.002 [−0.003, +0.006] | +0.002 [−0.004, +0.010] | 4 / 5 / 191 |
+| | F_T − C | +0.003 [−0.003, +0.010] | +0.003 [−0.005, +0.013] | 16 / 15 / 169 |
+| | F_C − B | +0.062 [+0.035, +0.091] | +0.053 [+0.028, +0.080] | 17 / 0 / 183 |
+| | F_C − T | −0.000 [−0.006, +0.005] | +0.001 [−0.006, +0.009] | 9 / 13 / 178 |
+| | F_C − C | +0.001 [−0.003, +0.007] | +0.002 [−0.005, +0.011] | 8 / 10 / 182 |
+| **CVC-ClinicDB** | F_T − B | +0.079 [+0.060, +0.098] | +0.067 [+0.051, +0.085] | 67 / 0 / 545 |
+| | F_T − T | −0.003 [−0.010, +0.002] | −0.003 [−0.010, +0.004] | 10 / 26 / 576 |
+| | F_T − C | −0.001 [−0.007, +0.005] | −0.000 [−0.007, +0.007] | 53 / 56 / 503 |
+| | F_C − B | +0.078 [+0.060, +0.097] | +0.067 [+0.051, +0.084] | 67 / 0 / 545 |
+| | F_C − T | −0.004 [−0.010, +0.002] | −0.003 [−0.010, +0.003] | 33 / 51 / 528 |
+| | F_C − C | −0.002 [−0.008, +0.004] | −0.001 [−0.007, +0.006] | 28 / 33 / 551 |
+
+**Table 1.2.** Paired differences for fallback models against Baseline, Threshold-only, and CASP. Win/loss/tie reflects individual images where Dice strictly increased, decreased, or remained equal.
+
+The paired tests confirm that fallback selection preserves virtually all the recall gain of the lower confidence threshold ($F_C - B = +0.062$ on Kvasir, $+0.078$ on ClinicDB, neither CI spanning zero). Furthermore, differences between fallback selection and threshold-only or CASP ($F_T - T$, $F_C - C$) have confidence intervals centered near zero and bounded within $\pm 0.01$ Dice. The fallback achieves this while suppressing false alarms: in 182 of 200 Kvasir images and 468 of 612 ClinicDB images, fallback cleanly adopts baseline detections because a confident box is already present.
+
+### 1.3 Robustness across image corruptions
+
+To test robustness under image degradation, the 200 Kvasir-SEG test images were evaluated under Gaussian blur, brightness/contrast alterations, and Gaussian noise at three severities (1, 2, and 3). Table 1.3 presents the performance of fallback rule $F_C$ relative to baseline B and CASP C.
+
+| Corruption Type | Severity | Baseline (B) Dice | CASP (C) Dice | Fallback (F_C) Dice | F_C − B [95% CI] | F_C − C [95% CI] |
+|---|:---:|---:|---:|---:|---|---|
+| **Gaussian Blur** | 1 | 0.842 | 0.870 | 0.878 | +0.036 [+0.015, +0.060] | +0.008 [+0.001, +0.018] |
+| | 2 | 0.811 | 0.846 | 0.855 | +0.044 [+0.021, +0.071] | +0.009 [+0.002, +0.016] |
+| | 3 | 0.724 | 0.806 | 0.808 | +0.084 [+0.051, +0.121] | +0.002 [−0.011, +0.014] |
+| **Brightness / Contrast** | 1 | 0.837 | 0.883 | 0.891 | +0.053 [+0.026, +0.083] | +0.007 [−0.004, +0.021] |
+| | 2 | 0.834 | 0.885 | 0.889 | +0.055 [+0.027, +0.087] | +0.005 [−0.008, +0.019] |
+| | 3 | 0.799 | 0.838 | 0.842 | +0.044 [+0.022, +0.070] | +0.004 [−0.007, +0.017] |
+| **Gaussian Noise** | 1 | 0.800 | 0.875 | 0.868 | +0.067 [+0.039, +0.099] | −0.007 [−0.021, +0.004] |
+| | 2 | 0.687 | 0.761 | 0.741 | +0.054 [+0.029, +0.084] | −0.019 [−0.036, −0.003] |
+| | 3 | 0.016 | 0.035 | 0.035 | +0.019 [+0.005, +0.039] | +0.000 [+0.000, +0.000] |
+
+**Table 1.3.** Segmentation performance across nine image corruption settings on Kvasir-SEG test set.
+
+Across blur and brightness/contrast shifts at all severities, $F_C$ consistently outperforms baseline B (gains up to +0.084 Dice on blur severity 3) and slightly exceeds C by discarding spurious false detections caused by optical distortion. Under Gaussian noise, $F_C$ maintains strong gains over baseline at severities 1 and 2 (+0.067 and +0.054 Dice). However, at noise severity 2, $F_C$ loses slightly to C (−0.019 Dice, 95% CI [−0.036, −0.003]) because heavy noise can corrupt the confident detection, occasionally causing the fallback rule to discard a valid low-confidence box. Under extreme noise (severity 3), detector feature extraction collapses entirely, resulting in $\ge 192$ missed images for all methods.
 
 ## 2. Error analysis
 

@@ -397,6 +397,48 @@ Status meanings: *proposed* = suggested, not yet agreed by the group; *accepted*
 - **Status:** implemented
 - **Affects:** `src/eval/clinicdb_examples.py`, `docs/figures/phase4_examples_clinicdb.png`
 
+### DL-44 — Fallback Rule F: context-based suppression of uncertain boxes
+- **Date:** 2026-11-12   **Owner:** Member 1 (with Member 3)
+- **Decision:** In Phase 5, evaluate an image-level fallback selection rule ($F$): if an image contains at least one YOLO detection with confidence $\ge 0.50$, output the baseline ($B$) prediction (discarding all candidate boxes below 0.50); if no detection reaches 0.50, output the threshold-only ($T$, or CASP $C$) prediction ($F_T$ and $F_C$). The rule uses fixed thresholds 0.25 and 0.50 determined in Phase 3, without tuning on the test splits.
+- **Alternatives considered:**
+  1. Box-level filtering using SAM 2's predicted IoU score ($s_{\min}$). Rejected: as proven in DL-45, SAM 2's score measures prompt-to-mask boundary compliance rather than semantic class and has an AUROC of 0.47–0.53 in the 0.25–0.50 confidence band.
+  2. Training an auxiliary binary classifier on candidate box features. Rejected: requires retraining or held-out training data that would risk overfitting the small validation split.
+  3. Image-level aggregation by bounding-box count threshold. Rejected: polyp count varies across patients, but clinical endoscopy statistics confirm that >95% of colonoscopy frames contain at most one polyp (194/200 Kvasir-SEG and 582/612 ClinicDB).
+- **Reason / evidence:** Bayes' rule dictates that an uncertain box ($0.25 \le c < 0.50$) is far less likely to be a genuine polyp when a confident polyp ($\ge 0.50$) has already been detected. In our saved logs, the probability that an uncertain box is a true polyp is only 7% (1 of 14) on Kvasir-SEG and 27% (11 of 41) on ClinicDB when a confident box is present, compared to 64% (16 of 25) and 66% (50 of 76) when no confident box exists. Evaluating $F_C$ cuts extra-box images from 58 to 29 on ClinicDB while maintaining identical mean Dice (0.756 vs 0.757) and preserving recall.
+- **Status:** implemented
+- **Affects:** `src/eval/filter_analysis.py`, `docs/tables/phase5/`, `docs/phase5_report.md` §1, §3
+
+### DL-45 — Box-level ground-truth labelling and AUROC discrimination analysis
+- **Date:** 2026-11-13   **Owner:** Member 1 (with Member 3)
+- **Decision:** Evaluate whether candidate prompt signals can distinguish true polyp detections from false-positive detections at the individual box level without running GPU inference. Every candidate box proposed by YOLO at threshold 0.25 is matched against the ground-truth boxes from the oracle ($O$) run (Hungarian assignment / IoU $\ge 0.5$). Calculate the Area Under the Receiver Operating Characteristic curve (AUROC) with 95% bootstrap confidence intervals (1,000 resamples) for: (1) YOLO confidence, (2) SAM 2 predicted IoU score, (3) confidence × SAM score product, and (4) image context (binary indicator: absence of any box $\ge 0.50$ in the same image).
+- **Alternatives considered:**
+  1. Evaluate only image-level Dice and IoU metrics. Rejected: image-level averages aggregate mask overlap and conceal whether individual false alarms are being rejected or accepted.
+  2. Re-run mask generation with alternative candidate-prompt selection heuristics. Rejected: Phase 3 ablations already showed candidate selection was neutral; box-level AUROC directly diagnoses why.
+- **Reason / evidence:** Over all kept boxes, YOLO confidence achieves AUROC 0.861 (Kvasir) and 0.820 (ClinicDB), while SAM 2 score achieves 0.685 and 0.656 only due to correlation with YOLO confidence ($r = 0.36, 0.44$). Within the critical uncertain band ($0.25 \le c < 0.50$), SAM 2's score yields AUROC 0.527 [0.340, 0.708] on Kvasir and 0.469 [0.366, 0.580] on ClinicDB—pure chance. In contrast, image context achieves AUROC 0.766 [0.647, 0.875] and 0.678 [0.594, 0.762], confirming that contextual suppression is the only viable heuristic for filtering false positives without semantic retraining.
+- **Status:** implemented
+- **Affects:** `src/eval/filter_analysis.py`, `tests/test_filter_analysis.py`, `docs/tables/phase5/box_signals.csv`, `docs/tables/phase5/signal_auroc.csv`, `docs/figures/phase5_box_signals.png`, `docs/phase5_report.md` §3.2–3.3
+
+### DL-46 — Hosted interactive Gradio demonstration and deployment architecture
+- **Date:** 2026-11-14   **Owner:** Member 1 (with Member 2)
+- **Decision:** Build a lightweight web application using Gradio (`app/app.py`) to demonstrate the comparative inference of Baseline ($B$), Threshold-only ($T$), CASP ($C$), and Fallback ($F_C$) side-by-side on uploaded colonoscopy images. The demo reuses `src/pipeline/refine.py` and `src/pipeline/sam2_prompter.py` without code modification, running YOLOv8 once at $conf = 0.05$ to populate candidate boxes and displaying resulting segmentation overlays and agreement metrics. The app is targeted for deployment on Hugging Face Spaces (CPU Basic tier).
+- **Alternatives considered:**
+  1. Deploying a full GPU instance with live model fine-tuning. Rejected: unnecessary and incurs commercial hosting costs for a university demonstration.
+  2. Pre-computing static HTML gallery of test set predictions. Rejected: course guidelines explicitly reward an interactive hosted demonstration where users can upload novel frames.
+  3. Packaging YOLO and SAM 2 model weights directly into the Git repository. Rejected: violates repository size rules and DL-12. Large weights are provided via environment variables (`YOLO_WEIGHTS`, `SAM2_CHECKPOINT`) or Space storage.
+- **Reason / evidence:** Unit tests for demo logic (`tests/test_app_logic.py`) verify the fallback rule and variant mask construction using mocked SAM 2 prompters without requiring PyTorch/CUDA. Standalone execution is containerized via `app/requirements.txt` and `app/deploy_space.bat`.
+- **Status:** implemented
+- **Affects:** `app/`, `tests/test_app_logic.py`, `docs/figures/phase5_clinicdb_demo.png`, `docs/figures/phase5_kvasir_demo.png`, `docs/phase5_report.md` §4
+
+### DL-47 — Detector retraining with seed 43 for multi-seed validation
+- **Date:** 2026-11-15   **Owner:** Member 1 (with Member 3)
+- **Decision:** Retrain YOLOv8-m on Kvasir-SEG train split from scratch using a second random seed (seed 43, DL-31 training recipe) and repeat runs $B$, $T$, $C$, and $F_T$ on both clean test sets. Results are saved in separate directories (`runs_phase5_s43/`) without modifying any Phase 3 or Phase 4 outputs. Evaluate whether the confidence gate gain ($C - B$) and Fallback Rule $F$ replicate independently of detector initialization randomness.
+- **Alternatives considered:**
+  1. Rely solely on seed 42 results. Rejected: Fallback Rule F was conceived after inspecting seed 42 error distributions; evaluating an independently trained detector ensures rule F is not overfitted to specific seed 42 box artifacts (open item O6).
+  2. Retraining on 5–10 random seeds. Rejected: university compute budget and Colab GPU session constraints make multi-run training expensive, while 2 seeds are sufficient to verify that the theoretical insights hold across distinct weight initializations.
+- **Reason / evidence:** Training YOLOv8-m with seed 43 yields test mAP50 0.924 (vs 0.943 for seed 42) and recall 0.855 (vs 0.908). On seed 43, the confidence gate gain replicates on both datasets: $C - B = +0.028$ [+0.004, +0.057] on Kvasir-SEG and $+0.070$ [+0.052, +0.089] on ClinicDB. Fallback rule $F_T$ replicates its benefits: Dice matches $T$ (0.890 vs 0.885 on Kvasir; 0.782 vs 0.783 on ClinicDB), extra-box images decrease from 25 to 19 (Kvasir) and from 56 to 24 (ClinicDB), and box F1 improves. SAM 2 score AUROC in the uncertain band replicates as random noise (0.398 and 0.422).
+- **Status:** implemented
+- **Affects:** `notebooks/08_phase5_seed43_colab.ipynb`, `src/eval/seed_compare.py`, `tests/test_seed_compare.py`, `docs/tables/phase5/seed_comparison.*`, `docs/phase5_report.md` §3.4
+
 ## Change log
 
 Dated record of what changed and why. One line per change; the `DL-` number links it to the decision.
@@ -455,3 +497,8 @@ Dated record of what changed and why. One line per change; the `DL-` number link
 | 2026-11-10 | Phase 4, Member 2 (`khushbakht-phase4`): pixel precision, recall, accuracy, mask-area error and detection F1 added to `src/eval/metrics.py`; `src/eval/bias_check.py` builds eight subgroup tables and figures (dataset, polyp size, brightness, contrast, width, height, polyp count, corruption) from the Phase 3 per-image results and Phase 2 statistics; `src/eval/clinicdb_examples.py` and `docs/figures/phase4_examples_clinicdb.png` (open item O1); report §2 and §4. 18 metrics and bias-analysis tests pass. | DL-40, DL-42, DL-43 |
 | 2026-11-11 | `khushbakht-phase4` merged with `main` (Member 3, resolving the two conflicts): her decision-log entries renumbered DL-41 → DL-42 and DL-42 → DL-43 (DL-41 was already used on `main`) and moved above the change log; an accidental find-and-replace on her branch that had turned every "Kvasir-SEG" in the log into "Kvasir-SEG test" (including the download URL and `data/raw/` paths in DL-14, DL-26, DL-27) was not carried over; `docs/phase4_report.md` combines §1, §3, §5, §6 (Member 3) with §2, §4 (Member 2); §4.1 and DL-42 now state 2,000 bootstrap resamples, which is what `bias_check.py` uses (all eight bias tables were reproduced byte for byte by re-running it). `matplotlib==3.10.8` added to `requirements.txt` so `tests/test_bias_check.py` can import `bias_check.py` in CI (84 tests pass with only `requirements.txt` installed). | DL-41, DL-42, DL-43 |
 | 2026-11-11 | Phase 4 submission package (Member 3): `docs/submissions/phase4/F26-13.pdf` (title page + 4 pages, organised by the TA's Phase 4 headings, IEEE references), `report_source.html`, `F26-13.ipynb` (executed `06_phase4_analysis.ipynb` with title cell); notebook section 6 now runs `bias_check.py` and draws `docs/figures/phase4_bias_summary.png` (C − B interval per subgroup, both clean test sets); `docs/requirements/phase4_requirements.md` checklist; README points to the package. | DL-41, DL-42, DL-43 |
+| 2026-11-12 | Phase 5 planned: scope, Fallback Rule F, and box-level discrimination analysis (open items O6, O7). | DL-44, DL-45 |
+| 2026-11-13 | Filter analysis script and unit tests added (`src/eval/filter_analysis.py`, `tests/test_filter_analysis.py`); box AUROC and fallback metrics generated (`docs/tables/phase5/`). | DL-44, DL-45 |
+| 2026-11-14 | Gradio demo app, test suite, and deploy script added (`app/`, `tests/test_app_logic.py`); demo tested on Kvasir and ClinicDB. | DL-46 |
+| 2026-11-15 | Second detector trained on Colab with seed 43 (`08_phase5_seed43_colab.ipynb`); seed comparison script and tables added (`src/eval/seed_compare.py`, `docs/tables/phase5/seed_comparison.*`); headline results replicated across seeds. | DL-47 |
+| 2026-11-18 | Phase 5 report Section 1 (results, paired differences, corruptions) completed; decision log entries DL-44 to DL-47 documented; PRs #25 and #27 reviewed and merged on `kashish-phase5`. | DL-44 to DL-47 |
