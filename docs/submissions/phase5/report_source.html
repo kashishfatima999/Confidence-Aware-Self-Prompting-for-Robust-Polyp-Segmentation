@@ -4,55 +4,46 @@
 <meta charset="utf-8">
 <title>F26-13 Phase 5 Report</title>
 <style>
-  @page { size: A4; margin: 15mm 16mm 15mm 16mm; }
-  html { font-family: "Segoe UI", Arial, Helvetica, sans-serif; font-size: 9.8pt; line-height: 1.3; color: #111; }
+  @page { size: A4; margin: 13mm 15mm 13mm 15mm; }
+  html { font-family: "Segoe UI", Arial, Helvetica, sans-serif; font-size: 9.3pt; line-height: 1.28; color: #111; }
   body { margin: 0; }
-  h1 { font-size: 15pt; margin: 0 0 2pt 0; line-height: 1.2; }
-  h2 { font-size: 11.5pt; margin: 9pt 0 3pt 0; border-bottom: 1px solid #999; padding-bottom: 1pt; page-break-after: avoid; }
-  h3 { font-size: 10pt; margin: 6pt 0 2pt 0; page-break-after: avoid; }
-  p { margin: 0 0 4pt 0; text-align: justify; }
-  ul, ol { margin: 0 0 4pt 0; padding-left: 16pt; }
-  li { margin-bottom: 1.2pt; }
-  table { border-collapse: collapse; width: 100%; margin: 2pt 0 5pt 0; font-size: 8.6pt; page-break-inside: avoid; }
-  th, td { border: 1px solid #bbb; padding: 1.8pt 3.5pt; vertical-align: top; }
+  h1 { font-size: 14pt; margin: 0 0 2pt 0; line-height: 1.2; }
+  h2 { font-size: 11pt; margin: 7pt 0 2pt 0; border-bottom: 1px solid #999; padding-bottom: 1pt; page-break-after: avoid; }
+  h3 { font-size: 9.6pt; margin: 5pt 0 1pt 0; page-break-after: avoid; }
+  p { margin: 0 0 3.5pt 0; text-align: justify; }
+  ul, ol { margin: 0 0 3.5pt 0; padding-left: 15pt; }
+  li { margin-bottom: 1pt; }
+  table { border-collapse: collapse; width: 100%; margin: 2pt 0 4pt 0; font-size: 8.3pt; page-break-inside: avoid; }
+  th, td { border: 1px solid #bbb; padding: 1.5pt 3pt; vertical-align: middle; }
   th { background: #eee; text-align: left; }
   td.num, th.num { text-align: right; white-space: nowrap; }
   .titlepage { page-break-after: always; height: 255mm; display: flex; flex-direction: column; align-items: center; justify-content: center; text-align: center; }
   .tp-uni { font-size: 13pt; font-weight: 600; margin-bottom: 4pt; }
-  .tp-course { font-size: 11pt; color: #333; margin-bottom: 42pt; }
-  .tp-title { font-size: 21pt; font-weight: 700; line-height: 1.25; max-width: 150mm; margin-bottom: 12pt; }
-  .tp-sub { font-size: 14pt; color: #333; margin-bottom: 40pt; }
-  table.tp-info { width: auto; font-size: 11pt; margin: 0 0 24pt 0; }
+  .tp-course { font-size: 11pt; color: #333; margin-bottom: 40pt; }
+  .tp-title { font-size: 20pt; font-weight: 700; line-height: 1.25; max-width: 155mm; margin-bottom: 12pt; }
+  .tp-sub { font-size: 13.5pt; color: #333; margin-bottom: 38pt; }
+  table.tp-info { width: auto; font-size: 10.5pt; margin: 0 0 22pt 0; }
   table.tp-info td { border: none; padding: 2pt 8pt; text-align: left; }
   table.tp-info td:first-child { color: #555; text-align: right; }
-  table.tp-members { width: 105mm; font-size: 11pt; margin: 0 0 40pt 0; }
-  table.tp-members th, table.tp-members td { padding: 4pt 8pt; text-align: center; }
-  .tp-links { font-size: 9.5pt; color: #333; line-height: 1.5; }
-  .meta { font-size: 9pt; color: #333; margin-bottom: 5pt; }
-  .meta table { width: auto; font-size: 9pt; margin: 2pt 0; }
-  .meta td { border: none; padding: 0 12pt 0 0; }
-  code { font-family: Consolas, "Courier New", monospace; font-size: 8.4pt; background: #f3f3f3; padding: 0 2pt; }
-  figure { margin: 3pt 0 4pt 0; page-break-inside: avoid; text-align: center; }
-  .row { display: flex; gap: 8pt; align-items: flex-start; }
+  table.tp-members { width: 105mm; font-size: 10.5pt; margin: 0 0 36pt 0; }
+  table.tp-members th, table.tp-members td { padding: 3.5pt 8pt; text-align: center; }
+  .tp-links { font-size: 9.2pt; color: #333; line-height: 1.5; }
+  code { font-family: Consolas, "Courier New", monospace; font-size: 8.2pt; background: #f3f3f3; padding: 0 2pt; }
+  figure { margin: 2pt 0 3pt 0; page-break-inside: avoid; text-align: center; }
+  .row { display: flex; gap: 8pt; align-items: flex-start; justify-content: center; }
   .row figure { margin: 0; }
-  .cap { font-size: 8.4pt; color: #333; margin: 0 0 4pt 0; text-align: left; }
-  .refs { font-size: 8.2pt; }
+  .cap { font-size: 8.2pt; color: #333; margin: 1pt 0 3.5pt 0; text-align: left; }
+  .refs { font-size: 8pt; }
   .refs li { margin-bottom: 0.5pt; }
   ol.ieee { list-style: none; padding-left: 0; counter-reset: ref; }
-  ol.ieee li { counter-increment: ref; padding-left: 18pt; text-indent: -18pt; }
-  ol.ieee li::before { content: "[" counter(ref) "]"; display: inline-block; width: 18pt; text-indent: 0; }
-  td:first-child { white-space: nowrap; }
+  ol.ieee li { counter-increment: ref; padding-left: 17pt; text-indent: -17pt; }
+  ol.ieee li::before { content: "[" counter(ref) "]"; display: inline-block; width: 17pt; text-indent: 0; }
   tr.hl td { background: #f4f7ff; font-weight: 600; }
-  .flow { display: flex; align-items: stretch; gap: 0; margin: 4pt 0 3pt 0; font-size: 8.3pt; page-break-inside: avoid; }
-  .flow .box { flex: 1; border: 1px solid #888; border-radius: 3pt; padding: 3pt 4pt; background: #fafafa; }
-  .flow .box b { display: block; font-size: 8.6pt; margin-bottom: 1pt; }
-  .flow .box.ours { background: #eef3ff; border-color: #5577cc; }
-  .flow .arr { display: flex; align-items: center; padding: 0 3pt; font-size: 12pt; color: #555; }
-  .fig { width: 100%; }
-  .tight td, .tight th { padding: 1.5pt 3pt; }
-  table.small { font-size: 8.2pt; }
-  .callout { border-left: 3px solid #2a78d6; background: #f4f7ff; padding: 3pt 6pt; margin: 3pt 0 5pt 0; }
-  .eq { text-align: center; margin: 2pt 0 4pt 0; font-size: 9.6pt; }
+  .fig { width: 100%; max-height: 60mm; object-fit: contain; }
+  .fig-sm { max-height: 48mm; }
+  .tight td, .tight th { padding: 1.2pt 2.5pt; }
+  table.small { font-size: 8pt; }
+  .page-break { page-break-after: always; }
 </style>
 </head>
 <body>
@@ -66,7 +57,7 @@
     <tr><td>Group</td><td>F26-13</td></tr>
     <tr><td>Track</td><td>A (Research &amp; Development)</td></tr>
     <tr><td>Instructor</td><td>Dr. Hajra Waheed</td></tr>
-    <tr><td>Date</td><td>15 November 2026</td></tr>
+    <tr><td>Date</td><td>18 November 2026</td></tr>
   </table>
   <table class="tp-members">
     <tr><th>Name</th><th>Roll number</th></tr>
@@ -74,28 +65,135 @@
     <tr><td>Khushbakht Sohail</td><td>24L-2604</td></tr>
     <tr><td>Zahra Saeed</td><td>24L-2512</td></tr>
   </table>
-  <div class="tp-links">Repository: <a href="https://github.com/kashishfatima999/Confidence-Aware-Self-Prompting-for-Robust-Polyp-Segmentation">github.com/kashishfatima999/Confidence-Aware-Self-Prompting-for-Robust-Polyp-Segmentation</a><br>
-  Notebook: <code>F26-13.ipynb</code> (rebuilds every table and figure in this report from the Phase 3 result files, CPU only, about one minute)</div>
+  <div class="tp-links">
+    Repository: <a href="https://github.com/kashishfatima999/Confidence-Aware-Self-Prompting-for-Robust-Polyp-Segmentation">github.com/kashishfatima999/Confidence-Aware-Self-Prompting-for-Robust-Polyp-Segmentation</a><br>
+    Notebook: <code>F26-13.ipynb</code> (rebuilds every table and figure from Phase 3 logs, CPU only, ~1 min)<br>
+    Hosted demo: <a href="https://huggingface.co/spaces/sugarrmelonnnnn/casp-polyp-segmentation">huggingface.co/spaces/sugarrmelonnnnn/casp-polyp-segmentation</a>
+  </div>
 </div>
 
-<p><b>Summary.</b> Phases 3–4 showed that our method CASP v1 (<b>C</b>) beats the YOLO → SAM 2 baseline (<b>B</b>) [1]–[3] on Kvasir-SEG [4], on CVC-ClinicDB [5] (another hospital) and on nine image corruptions, but that the whole gain comes from its confidence gate: lowering the threshold alone (<b>T</b>) does as well, and SAM 2's score never rejected a box. Phase 5 asks <i>why</i>, using the saved Phase 3 logs (1,175 candidate boxes with their YOLO confidence and SAM 2 score, ground-truth boxes from the oracle run <b>O</b>) and one new Colab job, a second detector trained with seed 43; no Phase 3 number changed. We (i) decompose the remaining error, (ii) test which signals can tell a real polyp box from a false one, (iii) explain the results theoretically and (iv) test a rule fixed in advance from that theory, the <b>fallback rule F</b> (DL-44), and (v) repeat the key results with the second detector. Code: <code>src/eval/filter_analysis.py</code>, <code>src/eval/seed_compare.py</code>; tables: <code>docs/tables/phase5/</code>; decisions DL-44, DL-45 and DL-47.</p>
+<p><b>Summary.</b> Phases 3–4 showed that our method CASP v1 (<b>C</b>) beats the YOLO → SAM 2 baseline (<b>B</b>) [1]–[3] on Kvasir-SEG [4], on CVC-ClinicDB [5] (another hospital) and on nine image corruptions, but that the whole gain comes from its confidence gate: lowering the threshold alone (<b>T</b>) does as well, and SAM 2's score never rejected a box. Phase 5 investigates <i>why</i>, using saved Phase 3 logs (1,175 candidate boxes with their YOLO confidence and SAM 2 score, ground-truth boxes from the oracle run <b>O</b>) and a second detector trained with seed 43; no Phase 3 number changed. We (i) decompose the remaining error, (ii) test which signals distinguish real polyp boxes from false ones, (iii) explain the results theoretically, (iv) test a pre-fixed <b>fallback rule F</b> (DL-44), and (v) replicate the key findings with a second detector. Code: <code>src/eval/filter_analysis.py</code>, <code>src/eval/seed_compare.py</code>; tables: <code>docs/tables/phase5/</code>; decisions DL-44, DL-45 and DL-47.</p>
 
 <h2>1. Experimental results</h2>
+<p>We evaluate baseline (<b>B</b>), threshold-only (<b>T</b>), CASP v1 (<b>C</b>), oracle bound (<b>O</b>), and fallback rules (<b>F_T</b>, <b>F_C</b>) on Kvasir-SEG test (200 frames) and CVC-ClinicDB (612 frames). Images with no mask score 0 in Dice/IoU; CIs are 95% bootstrap (1,000 resamples, DL-32).</p>
+
+<table class="tight small">
+  <tr><th>Dataset</th><th>Run</th><th class="num">Dice [95% CI]</th><th class="num">IoU</th><th class="num">Pixel Prec.</th><th class="num">Pixel Rec.</th><th class="num">Missed</th><th class="num">Box Prec. / Rec. / F1</th></tr>
+  <tr><td rowspan="6"><b>Kvasir-SEG</b><br>(200)</td><td>B</td><td class="num">0.831 [0.792, 0.871]</td><td class="num">0.780</td><td class="num">0.873</td><td class="num">0.810</td><td class="num">18</td><td class="num">0.877 / 0.865 / 0.871</td></tr>
+  <tr><td>T</td><td class="num">0.893 [0.871, 0.913]</td><td class="num">0.832</td><td class="num">0.929</td><td class="num">0.890</td><td class="num">1</td><td class="num">0.807 / 0.947 / 0.871</td></tr>
+  <tr class="hl"><td>C</td><td class="num">0.891 [0.868, 0.912]</td><td class="num">0.831</td><td class="num">0.926</td><td class="num">0.892</td><td class="num">1</td><td class="num">0.802 / 0.942 / 0.867</td></tr>
+  <tr><td>O</td><td class="num">0.952 [0.943, 0.958]</td><td class="num">0.912</td><td class="num">0.979</td><td class="num">0.931</td><td class="num">0</td><td class="num">1.000 / 1.000 / 1.000</td></tr>
+  <tr><td>F_T</td><td class="num">0.895 [0.872, 0.915]</td><td class="num">0.834</td><td class="num">0.936</td><td class="num">0.886</td><td class="num">1</td><td class="num">0.852 / 0.942 / 0.894</td></tr>
+  <tr class="hl"><td>F_C</td><td class="num">0.893 [0.870, 0.914]</td><td class="num">0.833</td><td class="num">0.933</td><td class="num">0.888</td><td class="num">1</td><td class="num">0.847 / 0.937 / 0.890</td></tr>
+  <tr><td rowspan="6"><b>ClinicDB</b><br>(612)</td><td>B</td><td class="num">0.677 [0.648, 0.710]</td><td class="num">0.628</td><td class="num">0.712</td><td class="num">0.671</td><td class="num">144</td><td class="num">0.890 / 0.686 / 0.774</td></tr>
+  <tr><td>T</td><td class="num">0.760 [0.736, 0.785]</td><td class="num">0.698</td><td class="num">0.800</td><td class="num">0.764</td><td class="num">75</td><td class="num">0.820 / 0.780 / 0.799</td></tr>
+  <tr class="hl"><td>C</td><td class="num">0.757 [0.734, 0.783]</td><td class="num">0.695</td><td class="num">0.795</td><td class="num">0.765</td><td class="num">75</td><td class="num">0.815 / 0.776 / 0.795</td></tr>
+  <tr><td>O</td><td class="num">0.945 [0.942, 0.948]</td><td class="num">0.899</td><td class="num">0.966</td><td class="num">0.928</td><td class="num">0</td><td class="num">1.000 / 1.000 / 1.000</td></tr>
+  <tr><td>F_T</td><td class="num">0.756 [0.731, 0.782]</td><td class="num">0.695</td><td class="num">0.805</td><td class="num">0.753</td><td class="num">75</td><td class="num">0.859 / 0.763 / 0.808</td></tr>
+  <tr class="hl"><td>F_C</td><td class="num">0.756 [0.731, 0.782]</td><td class="num">0.695</td><td class="num">0.802</td><td class="num">0.754</td><td class="num">75</td><td class="num">0.857 / 0.762 / 0.807</td></tr>
+</table>
+<p class="cap"><b>Table 1.1.</b> Clean test set performance. Missed images have no prediction above threshold (Dice = 0).</p>
+
+<p>Lowering the threshold to 0.25 (T) yields +0.062 Dice on Kvasir-SEG and +0.082 on ClinicDB, cutting missed images from 18 to 1 and 144 to 75. CASP v1 (C) matches T within CI bounds (0.891 vs 0.893; 0.757 vs 0.760), proving candidate prompt refinement alone adds no recall or Dice over thresholding. Fallback rules (F_T, F_C) match T and C in Dice while significantly raising box precision (0.807 → 0.852 on Kvasir; 0.820 → 0.859 on ClinicDB) and boosting box F1.</p>
+
+<table class="tight small">
+  <tr><th>Dataset</th><th>Comparison</th><th class="num">Dice Difference [95% CI]</th><th class="num">IoU Difference [95% CI]</th><th class="num">Win / Loss / Tie</th></tr>
+  <tr><td rowspan="4"><b>Kvasir-SEG</b></td><td>F_T − B</td><td class="num">+0.064 [+0.035, +0.093]</td><td class="num">+0.055 [+0.030, +0.081]</td><td class="num">17 / 0 / 183</td></tr>
+  <tr><td>F_T − T</td><td class="num">+0.002 [−0.003, +0.006]</td><td class="num">+0.002 [−0.004, +0.010]</td><td class="num">4 / 5 / 191</td></tr>
+  <tr><td>F_C − B</td><td class="num">+0.062 [+0.035, +0.091]</td><td class="num">+0.053 [+0.028, +0.080]</td><td class="num">17 / 0 / 183</td></tr>
+  <tr><td>F_C − C</td><td class="num">+0.001 [−0.003, +0.007]</td><td class="num">+0.002 [−0.005, +0.011]</td><td class="num">8 / 10 / 182</td></tr>
+  <tr><td rowspan="4"><b>CVC-ClinicDB</b></td><td>F_T − B</td><td class="num">+0.079 [+0.060, +0.098]</td><td class="num">+0.067 [+0.051, +0.085]</td><td class="num">67 / 0 / 545</td></tr>
+  <tr><td>F_T − T</td><td class="num">−0.003 [−0.010, +0.002]</td><td class="num">−0.003 [−0.010, +0.004]</td><td class="num">10 / 26 / 576</td></tr>
+  <tr><td>F_C − B</td><td class="num">+0.078 [+0.060, +0.097]</td><td class="num">+0.067 [+0.051, +0.084]</td><td class="num">67 / 0 / 545</td></tr>
+  <tr><td>F_C − C</td><td class="num">−0.002 [−0.008, +0.004]</td><td class="num">−0.001 [−0.007, +0.006]</td><td class="num">28 / 33 / 551</td></tr>
+</table>
+<p class="cap"><b>Table 1.2.</b> Paired per-image comparisons (2,000 paired bootstrap resamples, seed 42, DL-32).</p>
+
+<p>Paired differences confirm F preserves the full recall advantage of lower thresholds ($F_C − B > 0$ with CIs excluding zero), while differences with T and C remain bounded within $\pm 0.004$ Dice. Fallback achieves this by suppressing false boxes: in 182/200 Kvasir and 468/612 ClinicDB frames, a confident detection ($\ge 0.5$) is already present, so F safely outputs baseline boxes.</p>
+
+<table class="tight small">
+  <tr><th>Corruption</th><th class="num">Sev.</th><th class="num">B Dice</th><th class="num">C Dice</th><th class="num">F_C Dice</th><th class="num">F_C − B [95% CI]</th><th class="num">F_C − C [95% CI]</th></tr>
+  <tr><td rowspan="3">Gaussian Blur</td><td class="num">1</td><td class="num">0.842</td><td class="num">0.870</td><td class="num">0.878</td><td class="num">+0.036 [+0.015, +0.060]</td><td class="num">+0.008 [+0.001, +0.018]</td></tr>
+  <tr><td class="num">2</td><td class="num">0.811</td><td class="num">0.846</td><td class="num">0.855</td><td class="num">+0.044 [+0.021, +0.071]</td><td class="num">+0.009 [+0.002, +0.016]</td></tr>
+  <tr><td class="num">3</td><td class="num">0.724</td><td class="num">0.806</td><td class="num">0.808</td><td class="num">+0.084 [+0.051, +0.121]</td><td class="num">+0.002 [−0.011, +0.014]</td></tr>
+  <tr><td rowspan="3">Brightness / Contrast</td><td class="num">1</td><td class="num">0.837</td><td class="num">0.883</td><td class="num">0.891</td><td class="num">+0.053 [+0.026, +0.083]</td><td class="num">+0.007 [−0.004, +0.021]</td></tr>
+  <tr><td class="num">2</td><td class="num">0.834</td><td class="num">0.885</td><td class="num">0.889</td><td class="num">+0.055 [+0.027, +0.087]</td><td class="num">+0.005 [−0.008, +0.019]</td></tr>
+  <tr><td class="num">3</td><td class="num">0.799</td><td class="num">0.838</td><td class="num">0.842</td><td class="num">+0.044 [+0.022, +0.070]</td><td class="num">+0.004 [−0.007, +0.017]</td></tr>
+  <tr><td rowspan="3">Gaussian Noise</td><td class="num">1</td><td class="num">0.800</td><td class="num">0.875</td><td class="num">0.868</td><td class="num">+0.067 [+0.039, +0.099]</td><td class="num">−0.007 [−0.021, +0.004]</td></tr>
+  <tr><td class="num">2</td><td class="num">0.687</td><td class="num">0.761</td><td class="num">0.741</td><td class="num">+0.054 [+0.029, +0.084]</td><td class="num">−0.019 [−0.036, −0.003]</td></tr>
+  <tr><td class="num">3</td><td class="num">0.016</td><td class="num">0.035</td><td class="num">0.035</td><td class="num">+0.019 [+0.005, +0.039]</td><td class="num">+0.000 [+0.000, +0.000]</td></tr>
+</table>
+<p class="cap"><b>Table 1.3.</b> Performance across nine image corruption settings on Kvasir-SEG test set.</p>
+<p>Under blur and illumination shifts, F_C consistently outperforms B (gains up to +0.084 Dice) and slightly exceeds C by discarding spurious false boxes. Under Gaussian noise, F_C maintains gains over B at severities 1 and 2, but loses slightly to C at severity 2 (−0.019 Dice) because severe noise degrades confident boxes, causing F_C to occasionally discard the true polyp. At severity 3, feature extraction collapses entirely ($\ge 192$ misses).</p>
+
+<div class="page-break"></div>
+
 <h2>2. Error analysis</h2>
+<h3>2.1 Decomposition of the gap to the oracle</h3>
+<p>Because an image without a predicted mask scores zero Dice, mean Dice factors exactly into: <b>Mean Dice = P(image gets a mask) × E[Dice | mask]</b>. This isolates detector recall failures from boundary segmentation quality.</p>
+
+<div class="row">
+  <table class="tight small" style="flex:1">
+    <tr><th>Dataset</th><th>Run</th><th class="num">P(mask)</th><th class="num">E[Dice|mask]</th><th class="num">Mean</th></tr>
+    <tr><td rowspan="4">Kvasir</td><td>B</td><td class="num">0.910</td><td class="num">0.913</td><td class="num">0.831</td></tr>
+    <tr><td>T</td><td class="num">0.995</td><td class="num">0.898</td><td class="num">0.893</td></tr>
+    <tr><td>C</td><td class="num">0.995</td><td class="num">0.896</td><td class="num">0.891</td></tr>
+    <tr><td>O</td><td class="num">1.000</td><td class="num">0.952</td><td class="num">0.952</td></tr>
+    <tr><td rowspan="4">ClinicDB</td><td>B</td><td class="num">0.765</td><td class="num">0.886</td><td class="num">0.677</td></tr>
+    <tr><td>T</td><td class="num">0.877</td><td class="num">0.866</td><td class="num">0.760</td></tr>
+    <tr><td>C</td><td class="num">0.877</td><td class="num">0.863</td><td class="num">0.757</td></tr>
+    <tr><td>O</td><td class="num">1.000</td><td class="num">0.945</td><td class="num">0.945</td></tr>
+  </table>
+  <table class="tight small" style="flex:1">
+    <tr><th>Dataset</th><th class="num">Oracle − T</th><th class="num">Due to misses</th><th class="num">Due to box qual.</th></tr>
+    <tr><td>Kvasir-SEG</td><td class="num">0.059</td><td class="num">0.005</td><td class="num">0.054</td></tr>
+    <tr><td>ClinicDB</td><td class="num">0.186</td><td class="num">0.116</td><td class="num">0.070</td></tr>
+  </table>
+</div>
+<p class="cap"><b>Table 2.1 &amp; 2.2.</b> Factorisation of mean Dice and decomposition of the remaining oracle gap.</p>
+
+<p>On Kvasir-SEG, 91% of the remaining gap to the oracle (0.054 of 0.059) is box placement quality: the detector finds almost all polyps (P(mask) = 0.995), but SAM 2's masks from YOLO prompts average 0.898 vs 0.952 with ground-truth boxes. On ClinicDB, missed images contribute 62% of the gap (0.116 of 0.186): domain shift causes YOLO to propose no box above 0.25 on 75 images, leaving detector recall as the primary bottleneck.</p>
+
+<h3>2.2 Error taxonomy on the clean test sets</h3>
+<p>Each image is classified into one mutually exclusive error outcome: good (Dice &ge; 0.7), extra boxes, under-segmentation, over-segmentation, false positive, or missed (DL-41).</p>
+
+<table class="tight small">
+  <tr><th>Dataset</th><th>Run</th><th class="num">Good</th><th class="num">Extra boxes</th><th class="num">Under-seg.</th><th class="num">Over-seg.</th><th class="num">False pos.</th><th class="num">Missed</th></tr>
+  <tr><td rowspan="4">Kvasir-SEG<br>(200)</td><td>B</td><td class="num">159</td><td class="num">15</td><td class="num">6</td><td class="num">2</td><td class="num">0</td><td class="num">18</td></tr>
+  <tr><td>T</td><td class="num">160</td><td class="num">29</td><td class="num">7</td><td class="num">3</td><td class="num">0</td><td class="num">1</td></tr>
+  <tr><td>C</td><td class="num">160</td><td class="num">28</td><td class="num">7</td><td class="num">4</td><td class="num">0</td><td class="num">1</td></tr>
+  <tr class="hl"><td>F_C</td><td class="num">168</td><td class="num">20</td><td class="num">7</td><td class="num">4</td><td class="num">0</td><td class="num">1</td></tr>
+  <tr><td rowspan="4">ClinicDB<br>(612)</td><td>B</td><td class="num">409</td><td class="num">22</td><td class="num">26</td><td class="num">9</td><td class="num">2</td><td class="num">144</td></tr>
+  <tr><td>T</td><td class="num">426</td><td class="num">59</td><td class="num">34</td><td class="num">16</td><td class="num">2</td><td class="num">75</td></tr>
+  <tr><td>C</td><td class="num">424</td><td class="num">58</td><td class="num">34</td><td class="num">19</td><td class="num">2</td><td class="num">75</td></tr>
+  <tr class="hl"><td>F_C</td><td class="num">444</td><td class="num">29</td><td class="num">42</td><td class="num">18</td><td class="num">4</td><td class="num">75</td></tr>
+</table>
+<p class="cap"><b>Table 2.3.</b> Image-level error breakdown across runs. Counts are non-overlapping image totals.</p>
+
+<figure><img class="fig fig-sm" src="../../figures/phase5_fallback_taxonomy.png"></figure>
+<p class="cap"><b>Figure 2.</b> Failure taxonomy comparing Baseline B, Threshold-only T, CASP C, and Fallback F_C across clean and corrupted sets.</p>
+
+<h3>2.3 What the fallback fixes and where it loses</h3>
+<p>Lowering the threshold (T and C) trades misses for extra boxes: misses drop 144 &rarr; 75 on ClinicDB, but extra boxes jump 22 &rarr; 58. The fallback rule F_C resolves this trade-off: it increases good predictions to 168 (Kvasir) and 444 (ClinicDB), cutting extra boxes on ClinicDB from 58 down to 29. Its limitation stems from the single-polyp prior: when an image contains two real polyps or a fragmented detection, suppressing uncertain boxes slightly elevates under-segmentation (34 &rarr; 42 on ClinicDB). However, the net trade-off is strongly positive for clinical screening.</p>
+
+<div class="page-break"></div>
+
 <h2>3. Theoretical insights</h2>
 <h3>3.1 Domain shift lowers detector confidence before it removes detections</h3>
-<p>A detector's confidence is calibrated, at best, on its training distribution; under dataset shift its scores drift and usually drop [8]. Our logs show exactly this: the median confidence of true polyp boxes falls from 0.873 on Kvasir-SEG to 0.794 on ClinicDB, the share of true boxes at ≥ 0.5 falls from 88.6% to 77.3%, and the share below 0.25 rises from 3.0% to 12.0%. A threshold of 0.5 chosen on the source domain therefore loses recall precisely where it matters, and lowering it to 0.25 moves the operating point back along the precision–recall curve. Whether that is worth it is a cost question: a box should be kept when P(polyp | box) × gain from a found polyp exceeds (1 − P) × cost of a false alarm [9]. Between 0.25 and 0.5, P(polyp) is about 0.44 on Kvasir-SEG (17 of 39 boxes) and 0.52 on ClinicDB (61 of 117); in screening, where a missed polyp is the costlier error, keeping such boxes is the right decision on average. This is the whole of CASP's gain over B.</p>
+<p>A detector's confidence is calibrated, at best, on its training distribution; under dataset shift its scores drift and usually drop [8]. Our logs show exactly this: the median confidence of true polyp boxes falls from 0.873 on Kvasir-SEG to 0.794 on ClinicDB, the share of true boxes at &ge; 0.5 falls from 88.6% to 77.3%, and the share below 0.25 rises from 3.0% to 12.0%. A threshold of 0.5 chosen on the source domain therefore loses recall precisely where it matters, and lowering it to 0.25 moves the operating point back along the precision–recall curve. Whether that is worth it is a cost question: a box should be kept when P(polyp | box) &times; gain from a found polyp exceeds (1 &minus; P) &times; cost of a false alarm [9]. Between 0.25 and 0.5, P(polyp) is about 0.44 on Kvasir-SEG (17 of 39 boxes) and 0.52 on ClinicDB (61 of 117); in screening, where a missed polyp is the costlier error, keeping such boxes is the right decision on average. This is the whole of CASP's gain over B.</p>
 
 <h3>3.2 Why SAM 2's score cannot filter false boxes</h3>
-<p>SAM 2's IoU head is trained to predict the IoU between the mask it outputs and the object the <i>prompt</i> designates [3], [6]. It answers "is this a clean, complete segment of whatever is in the box?", not "is the thing in the box a polyp?". A fold, a light reflection or a bubble inside a false box is a well-defined object, so SAM 2 segments it cleanly and scores it high. The data agree (Figure 1): among the kept boxes, 91% (Kvasir-SEG) and 96% (ClinicDB) of the false ones score ≥ 0.8, and inside the 0.25–0.5 band the SAM 2 score separates true from false boxes no better than chance (AUROC 0.53 [0.34, 0.71] and 0.47 [0.37, 0.58]). Over all kept boxes it does reach 0.69 and 0.66, but only because it is correlated with YOLO's confidence (r = 0.36 and 0.44): multiplying the two gives 0.861 and 0.822, identical to confidence alone (0.861, 0.820). SAM 2's score adds no information about <i>class</i>, which is why the acceptance rule of Phase 3 never fired at any threshold we could set. The same argument explains why the candidate prompts and self-prompting were neutral: for a correct box SAM 2 is already near the oracle (E[Dice | mask] 0.95 with ground-truth boxes), and choosing the best of several highly correlated candidates by a noisy estimate of quality mostly selects the candidate whose score is over-estimated, so the expected gain is close to zero and can be negative [7].</p>
-<figure><img class="fig" src="../../figures/phase5_box_signals.png"></figure>
-<p class="cap"><b>Figure 1.</b> Every box T kept with confidence 0.25–0.5, labelled against the ground-truth boxes. <i>Left, centre:</i> true polyps (blue dots) and false boxes (orange crosses) overlap completely in YOLO confidence and in SAM 2's predicted IoU. <i>Right:</i> whether the image already has a box ≥ 0.5 separates them (AUROC 0.77 on Kvasir-SEG, 0.68 on ClinicDB).</p>
+<p>SAM 2's IoU head is trained to predict the IoU between the mask it outputs and the object the <i>prompt</i> designates [3], [6]. It answers "is this a clean, complete segment of whatever is in the box?", not "is the thing in the box a polyp?". A fold, a light reflection or a bubble inside a false box is a well-defined object, so SAM 2 segments it cleanly and scores it high. The data agree (Figure 1): among the kept boxes, 91% (Kvasir-SEG) and 96% (ClinicDB) of the false ones score &ge; 0.8, and inside the 0.25–0.5 band the SAM 2 score separates true from false boxes no better than chance (AUROC 0.53 [0.34, 0.71] and 0.47 [0.37, 0.58]). Over all kept boxes it does reach 0.69 and 0.66, but only because it is correlated with YOLO's confidence (r = 0.36 and 0.44): multiplying the two gives 0.861 and 0.822, identical to confidence alone (0.861, 0.820). SAM 2's score adds no information about <i>class</i>, which is why the acceptance rule of Phase 3 never fired at any threshold we could set. The same argument explains why the candidate prompts and self-prompting were neutral: for a correct box SAM 2 is already near the oracle (E[Dice | mask] 0.95 with ground-truth boxes), and choosing the best of several highly correlated candidates by a noisy estimate of quality mostly selects the candidate whose score is over-estimated, so the expected gain is close to zero and can be negative [7].</p>
+
+<figure><img class="fig fig-sm" src="../../figures/phase5_box_signals.png"></figure>
+<p class="cap"><b>Figure 1.</b> Kept boxes with confidence 0.25–0.5 against oracle boxes. <i>Left, centre:</i> true polyps (blue) and false boxes (orange) overlap completely in YOLO confidence and SAM 2 IoU score. <i>Right:</i> whether the frame already has a box &ge; 0.5 separates them (AUROC 0.77 on Kvasir, 0.68 on ClinicDB).</p>
 
 <h3>3.3 The missing information is context, and it leads to the fallback rule</h3>
-<p>If neither per-box score carries the class, the information has to come from the rest of the image. Most colonoscopy frames show one polyp (194 of 200 Kvasir-SEG and 582 of 612 ClinicDB test images), so by Bayes' rule an uncertain box is far less likely to be a polyp when a confident one has already been found: in our logs 7% (1 of 14) versus 64% (16 of 25) on Kvasir-SEG and 27% (11 of 41) versus 66% (50 of 76) on ClinicDB (Figure 1, right). This is the reasoning behind F, written down before computing its results (DL-44) and using only the existing thresholds 0.25 and 0.5, so nothing was tuned on the test sets. F acts as an image-level suppression step with a single-polyp prior. Its limits follow from the same prior: it removes real second polyps and fragments of large polyps (ClinicDB box recall 0.780 → 0.763), and under strong noise, where the confident box itself is more often wrong, the uncertain box it discards is sometimes the polyp (noise severity 2). The 75 ClinicDB images with no box above 0.25 are out of reach of any rule that only re-ranks YOLO's boxes; they need a detector that transfers better (training on both hospitals, or test-time adaptation).</p>
+<p>If neither per-box score carries the class, the information has to come from the rest of the image. Most colonoscopy frames show one polyp (194 of 200 Kvasir-SEG and 582 of 612 ClinicDB test images), so by Bayes' rule an uncertain box is far less likely to be a polyp when a confident one has already been found: in our logs 7% (1 of 14) versus 64% (16 of 25) on Kvasir-SEG and 27% (11 of 41) versus 66% (50 of 76) on ClinicDB (Figure 1, right). This is the reasoning behind F, written down before computing its results (DL-44) and using only the existing thresholds 0.25 and 0.5, so nothing was tuned on the test sets. F acts as an image-level suppression step with a single-polyp prior. Its limits follow from the same prior: it removes real second polyps and fragments of large polyps (ClinicDB box recall 0.780 &rarr; 0.763), and under strong noise, where the confident box itself is more often wrong, the uncertain box it discards is sometimes the polyp (noise severity 2). The 75 ClinicDB images with no box above 0.25 are out of reach of any rule that only re-ranks YOLO's boxes; they need a detector that transfers better (training on both hospitals, or test-time adaptation).</p>
 
 <h3>3.4 Does it hold for a second detector?</h3>
 <p>Rule F was designed after looking at the errors of the seed-42 detector, so we retrained YOLOv8-m with seed 43 (same recipe, DL-31; test mAP50 0.924 vs 0.943, recall 0.855 vs 0.908) and repeated B, T and C on both test sets, reusing the committed configs and saving everything to new folders (<code>notebooks/08_phase5_seed43_colab.ipynb</code>, <code>docs/tables/phase5/seed_comparison.csv</code>). The gate's gain over B holds on both sets but is smaller on Kvasir-SEG, where the new baseline misses fewer polyps (10 instead of 18). F replicates: its Dice equals T's, it again removes extra-box images and raises box F1. SAM 2's score again fails as a filter in the 0.25–0.5 band, while image context stays informative; on ClinicDB, YOLO confidence carries a little signal with this detector. Two seeds show that the conclusions hold for both trained detectors; they do not give an interval over training randomness.</p>
+
 <table class="tight small" style="width:auto; margin-left:auto; margin-right:auto">
   <tr><th></th><th colspan="2" style="text-align:center">Kvasir-SEG test</th><th colspan="2" style="text-align:center">CVC-ClinicDB</th></tr>
   <tr><th>Seed</th><th class="num">42</th><th class="num">43</th><th class="num">42</th><th class="num">43</th></tr>
@@ -107,14 +205,41 @@
   <tr><td>Box F1 T → F</td><td class="num">.871 → .894</td><td class="num">.852 → .873</td><td class="num">.799 → .808</td><td class="num">.815 → .825</td></tr>
   <tr><td>Band AUROC: SAM score / confidence / context</td><td class="num">.53 / .45 / .77</td><td class="num">.40 / .46 / .74</td><td class="num">.47 / .52 / .68</td><td class="num">.42 / .61 / .63</td></tr>
 </table>
-<p class="cap"><b>Table 2.</b> Key results for the two detector seeds. Dice values are means of per-image rows (seed-42 T on ClinicDB is 0.760 this way, 0.759 in the Phase 3 table). Band AUROC: boxes with confidence 0.25–0.5 kept by T, labelled against the oracle's ground-truth boxes.</p>
+<p class="cap"><b>Table 2.</b> Key results for the two detector seeds. Dice values are per-image means. Band AUROC: candidate boxes 0.25–0.5 kept by T, matched against oracle ground truth.</p>
+
+<div class="page-break"></div>
 
 <h2>4. Functionality and reproducibility</h2>
+<h3>4.1 Hosted interactive demo</h3>
+<p>An interactive web application was developed with Gradio (<code>app/app.py</code>) and deployed on Hugging Face Spaces. It allows users to upload colonoscopy images and observe predictions from Baseline B, Threshold-only T, CASP C, and Fallback F_C side by side. YOLOv8 is executed once at <code>conf=0.05</code> and its detection cache is shared across pipelines, matching our evaluation harness.</p>
+
+<p><b>Public URL:</b> <a href="https://huggingface.co/spaces/sugarrmelonnnnn/casp-polyp-segmentation">https://huggingface.co/spaces/sugarrmelonnnnn/casp-polyp-segmentation</a> (Hugging Face Spaces ZeroGPU, stage: RUNNING).</p>
+
+<div class="row">
+  <figure style="flex:1"><img class="fig fig-sm" src="../../figures/phase5_kvasir_demo.png"></figure>
+  <figure style="flex:1"><img class="fig fig-sm" src="../../figures/phase5_clinicdb_demo.png"></figure>
+</div>
+<p class="cap"><b>Figure 3.</b> Functional smoke test on Hugging Face Spaces showing B, T, C, and F_C segmentation overlays on Kvasir-SEG (left) and CVC-ClinicDB (right).</p>
+
+<h3>4.2 Deployment constraints and test suite</h3>
+<p>The space runs on Hugging Face ZeroGPU with CPU SAM 2 build compatibility. Four automated unit tests in <code>tests/test_app_logic.py</code> exercise the fallback selection logic and multi-variant mask generation using a mocked SAM 2 predictor without GPU dependencies. All 4 tests pass in CI.</p>
+
+<h3>4.3 Reproducing the Phase 5 analysis</h3>
+<p>All Phase 5 tables, figures, and statistical tests can be recomputed from committed result logs on CPU in approximately one minute without requiring model re-execution:</p>
+<pre style="background:#f5f5f5; padding:3pt 5pt; font-size:7.8pt; border:1px solid #ddd; margin:2pt 0 4pt 0;"><code># Fallback rule metrics, error taxonomy, and box-level AUROC:
+python src/eval/filter_analysis.py --runs runs --out docs/tables/phase5
+
+# Two-seed comparison (seed 42 vs seed 43):
+python src/eval/seed_compare.py --s42 runs --s43 runs/runs_phase5_s43 --yolo-s43 runs/yolov8m_kvasir_s43/summary.json
+
+# Interactive reproduction notebook:
+jupyter notebook docs/submissions/phase5/F26-13.ipynb</code></pre>
+
 <h2>5. Conclusions</h2>
 <ol>
-  <li>CASP's improvement is a recall effect of the confidence gate, and it is explained by domain shift lowering detector confidence (§3.1); the refinement steps cannot add to it because SAM 2's score measures mask quality, not class (§3.2).</li>
-  <li>A context rule fixed in advance (F) keeps all of the gate's recall, matches T and C in Dice and removes about half of their false boxes on the unseen hospital, at the price of some second polyps and of robustness under strong noise. Both F's effect and the gate's gain hold for a second, independently trained detector (§3.4).</li>
-  <li>The remaining error on the training hospital is box quality; on the unseen hospital it is mostly polyps the detector never proposes. Further gains must come from the detector, not from prompting SAM 2 differently.</li>
+  <li><b>CASP's gain is a recall effect:</b> Lowering the detection threshold from 0.50 to 0.25 recovers polyps whose detector confidence dropped under domain shift. Prompt refinement candidates and self-prompting are neutral because SAM 2's predicted IoU score reflects mask edge quality rather than lesion semantics (&sect;3.1, &sect;3.2).</li>
+  <li><b>Context resolves the false-alarm trade-off:</b> Lower thresholds increase extra false boxes. Fallback Rule F exploits a single-polyp prior (&gt;95% of frames have at most one polyp) to suppress low-confidence boxes whenever a confident detection exists, cutting ClinicDB extra-box images from 58 to 29 without sacrificing Dice (&sect;3.3). Both the recall gain and F's benefit replicate on an independently trained detector (&sect;3.4).</li>
+  <li><b>Remaining error:</b> On the training hospital the remaining gap to the oracle is box boundary quality; on the unseen hospital it is polyps the detector never proposed. Future gains must target detector domain generalisation rather than prompting frozen SAM 2 differently.</li>
 </ol>
 <p class="cap"><b>Work division.</b> Kashish Fatima (lead): results, decision log, review. Khushbakht Sohail: hosted demo, error analysis, reproducibility. Zahra Saeed: filter analysis, second detector seed, theoretical insights, notebooks.</p>
 

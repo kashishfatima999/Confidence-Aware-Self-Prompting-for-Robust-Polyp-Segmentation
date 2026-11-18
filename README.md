@@ -45,7 +45,8 @@ Both datasets are restricted to research and educational use and are **not** sto
 | The Phase 4 report and notebook for submission | `docs/submissions/phase4/F26-13.pdf` (source `report_source.html`), `F26-13.ipynb` |
 | The Phase 4 results and report | `docs/phase4_report.md`, `docs/tables/phase4/`, `notebooks/06_phase4_analysis.ipynb` (executed) |
 | The Phase 5 analysis and report | `docs/phase5_report.md`, `src/eval/filter_analysis.py`, `docs/tables/phase5/`, `app/`, `notebooks/07_phase5_analysis.ipynb` (executed) |
-| The Phase 5 submission package | `docs/submissions/phase5/` (`F26-13.ipynb`; final PDF pending compilation), `docs/requirements/phase5_requirements.md` |
+| The Phase 5 live interactive demo | [Hugging Face Spaces](https://huggingface.co/spaces/sugarrmelonnnnn/casp-polyp-segmentation) (ZeroGPU, Gradio side-by-side comparison) |
+| The Phase 5 submission package | `docs/submissions/phase5/` (`F26-13.pdf`, `F26-13.ipynb`, `report_source.html`), `docs/requirements/phase5_requirements.md` |
 | The Phase 3 results and report | `docs/phase3_report.md`, `docs/tables/phase3/`, `notebooks/04_phase3_colab.ipynb` (executed) |
 | The course requirements and a checklist of how each is met | `docs/requirements/` |
 | The approved proposal | `docs/proposal/F26-13_Project_Proposal.pdf` |
