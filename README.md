@@ -44,7 +44,8 @@ Both datasets are restricted to research and educational use and are **not** sto
 | The Phase 3 report and notebook for submission | `docs/submissions/phase3/F26-13.pdf` (source `report_source.html`), `F26-13.ipynb` |
 | The Phase 4 report and notebook for submission | `docs/submissions/phase4/F26-13.pdf` (source `report_source.html`), `F26-13.ipynb` |
 | The Phase 4 results and report | `docs/phase4_report.md`, `docs/tables/phase4/`, `notebooks/06_phase4_analysis.ipynb` (executed) |
-| The Phase 5 analysis | `docs/phase5_report.md`, `src/eval/filter_analysis.py`, `docs/tables/phase5/`, `notebooks/07_phase5_analysis.ipynb` (executed) |
+| The Phase 5 analysis and report | `docs/phase5_report.md`, `src/eval/filter_analysis.py`, `docs/tables/phase5/`, `app/`, `notebooks/07_phase5_analysis.ipynb` (executed) |
+| The Phase 5 submission package | `docs/submissions/phase5/` (`F26-13.ipynb`; final PDF pending compilation), `docs/requirements/phase5_requirements.md` |
 | The Phase 3 results and report | `docs/phase3_report.md`, `docs/tables/phase3/`, `notebooks/04_phase3_colab.ipynb` (executed) |
 | The course requirements and a checklist of how each is met | `docs/requirements/` |
 | The approved proposal | `docs/proposal/F26-13_Project_Proposal.pdf` |
@@ -151,7 +152,7 @@ python src/eval/summarize.py                                               # -> 
 | 2 | Data acquisition, cleaning, split, YOLO format, environment, tests, image-shift set | done; submitted (`docs/submissions/phase2/`) |
 | 3 | Baseline reproduction, YOLO training, confidence-aware prompt refinement (CASP v1) | done; submitted (`docs/submissions/phase3/`); record in `project-division/Project-Division-Phase-3.md` §7 |
 | 4 | Metrics, paired comparison, error taxonomy, bias check | done; submitted (`docs/submissions/phase4/`); record in `project-division/Project-Division-Phase-4.md` §7 |
-| 5 | Output analysis: gap to the oracle, box-level signals, why SAM 2's score cannot filter false boxes, fallback rule F, hosted demo | in progress (`docs/phase5_report.md`, `project-division/Project-Division-Phase-5.md`) |
+| 5 | Output analysis: gap to the oracle, box-level signals, why SAM 2's score cannot filter false boxes, fallback rule F, hosted demo | analysis and demo complete; report compilation and submission pending (`docs/phase5_report.md`, `project-division/Project-Division-Phase-5.md`) |
 | 6 | LaTeX report with methodology and architecture diagrams, challenges | not started |
 
 ## 9. References
